@@ -1,4 +1,5 @@
 import random
+import datetime
 from nicegui import ui
 
 table_container = None
@@ -7,6 +8,7 @@ chart_container = None
 # Create the UI
 with ui.splitter() as splitter:
     splitter.classes('w-full')
+
     with splitter.before:
         with ui.column() as column:
             ui.label('IoT Hub Data Simulator')
@@ -15,7 +17,10 @@ with ui.splitter() as splitter:
             device_id_input = ui.input(label='Geräte-ID', value='sim00001')
             base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
             ui.number(label='Variationsbereich', value=5.00, format='%.2f')
+            interval_input = ui.number(label='Interval [s]', value=10.00, format='%.2f')
+
             ui.button('Daten generieren', on_click=lambda: generate_handler())
+
     with splitter.after:
         with ui.tabs().classes('w-full') as tabs:
             one = ui.tab('Tabelle')
@@ -57,6 +62,13 @@ def generate_temperature(num_values):
 
     return temperatures
 
+def generate_timestamps(num_values, interval=10):
+    # creates a list of timestamp values every n (interval) seconds beginning now
+    now = datetime.datetime.now()
+    timestamps = [(now + datetime.timedelta(seconds=i*interval)).isoformat() for i in range(0, num_values)]
+
+    return timestamps
+
 def clear_output():
     global table_container
 
@@ -66,7 +78,7 @@ def clear_output():
     if chart_container is not None:
         chart_container.clear()
 
-def print_values(temperature_values):
+def print_values(temperature_values, timestamp_values):
     # Print the generated temperature values
     columns = [
         {
@@ -81,14 +93,21 @@ def print_values(temperature_values):
             'label': 'Temperatur',
             'field': 'temperature',
             'required': True,
+        },
+        {
+            'name': 'timestamp',
+            'label': 'Zeitstempel',
+            'field': 'timestamp',
+            'required': True,
         }
     ]
 
     # map the temperature values to the columns
     rows = [{
         'device_id': device_id_input.value,
-        'temperature': str(temperature) + ' °C',
-    } for temperature in temperature_values]
+        'temperature': str(temperature_values[i]) + ' °C',
+        'timestamp': timestamp_values[i],
+    } for i in range(0, len(temperature_values))]
 
     with table_container:
         ui.table(columns=columns, rows=rows).classes('w-full shadow-none')
@@ -104,4 +123,6 @@ def print_values(temperature_values):
 def generate_handler():
     clear_output()
     temperature_values = generate_temperature(10)  # Generate 10 temperature values
-    print_values(temperature_values)
+    timestamp_values = generate_timestamps(10, interval_input.value)  # Generate 10 timestamp values
+
+    print_values(temperature_values, timestamp_values)
