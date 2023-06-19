@@ -10,6 +10,9 @@ with ui.splitter() as splitter:
     with splitter.before:
         with ui.column() as column:
             ui.label('IoT Hub Data Simulator')
+            ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
+            
+            device_id_input = ui.input(label='Geräte-ID', value='sim00001')
             base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
             ui.number(label='Variationsbereich', value=5.00, format='%.2f')
             ui.button('Daten generieren', on_click=lambda: generate_handler())
@@ -65,15 +68,25 @@ def clear_output():
 
 def print_values(temperature_values):
     # Print the generated temperature values
-    columns = [{
-        'name': 'temperature',
-        'label': 'Temperatur',
-        'field': 'temperature',
-        'required': True,
-    }]
+    columns = [
+        {
+            'name': 'device_id',
+            'label': 'Geräte-ID',
+            'field': 'device_id',
+            'required': True,
+            'align': 'left',
+        },
+        {
+            'name': 'temperature',
+            'label': 'Temperatur',
+            'field': 'temperature',
+            'required': True,
+        }
+    ]
 
     # map the temperature values to the columns
     rows = [{
+        'device_id': device_id_input.value,
         'temperature': str(temperature) + ' °C',
     } for temperature in temperature_values]
 
