@@ -17,13 +17,16 @@ def tab_change_handler(value):
     if value == Tab.CHART.value:
         draw_chart()
 
+# Update root UI element
+ui.query('.nicegui-content').classes('p-0')
+
 # Create the UI
-with ui.splitter() as splitter:
+with ui.splitter().classes('h-screen') as splitter:
     splitter.classes('w-full')
 
     # Create the left column
     with splitter.before:
-        with ui.column() as column:
+        with ui.column().classes('p-4') as column:
             ui.label('ADX - Data Simulator').classes('text-2xl font-bold')
             ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
             
@@ -37,25 +40,27 @@ with ui.splitter() as splitter:
 
     # Create the right column
     with splitter.after:
-        with ui.tabs(on_change=lambda e: tab_change_handler(e.value)).classes('w-full') as tabs:
-            tabs = tabs
-            one = ui.tab(Tab.TABLE.value)
-            two = ui.tab(Tab.CHART.value)
-        with ui.tab_panels(tabs, value=one).classes('w-full') as panels:
-            with ui.tab_panel(one):
-                table_container = ui.row()
-            with ui.tab_panel(two):
-                chart_container = ui.row()
+        with ui.column().classes('relative pl-4 pt-16 pb-20 h-full'):
+            with ui.tabs(on_change=lambda e: tab_change_handler(e.value)).classes('absolute top-4 left-4 right-4') as tabs:
+                tabs = tabs
+                one = ui.tab(Tab.TABLE.value)
+                two = ui.tab(Tab.CHART.value)
+            with ui.tab_panels(tabs, value=one).classes('w-full') as panels:
+                with ui.tab_panel(one):
+                    table_container = ui.row()
+                with ui.tab_panel(two):
+                    chart_container = ui.row()
 
-        if len(values) == 0:
-            with ui.row() as row:
-                tab_note_container = row
-                with ui.row().classes('mx-auto h-64 flex items-center'):
-                    with ui.column().classes('gap-2'):
-                        ui.label('Keine Daten generiert').classes('text-lg font-bold text-center w-full')
-                        ui.label('Bitte generiere zuerst auf der linken Seite Daten.').classes('text-center w-full')
-                
-        ui.button('Zu Azure senden').classes('mt-4 mx-4')
+            if len(values) == 0:
+                with ui.row().classes('w-full justify-center') as row:
+                    tab_note_container = row
+                    with ui.row().classes('h-64 flex items-center self-center'):
+                        with ui.column().classes('gap-2'):
+                            ui.label('Keine Daten generiert').classes('text-lg font-bold text-center w-full')
+                            ui.label('Bitte generiere zuerst auf der linken Seite Daten.').classes('text-center w-full')
+            
+            with ui.row().classes('absolute left-0 bottom-0 px-4 w-full h-20 flex flex-col justify-center shadow-[0_35px_60px_-15px_rgba(0,0,0,1)]'):
+                ui.button('An Azure senden').classes('')
 
 ui.run()
 
