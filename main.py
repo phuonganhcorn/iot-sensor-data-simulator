@@ -2,8 +2,15 @@ import random
 import datetime
 from nicegui import ui
 
+values = []
+tabs = None
 table_container = None
 chart_container = None
+is_chart_drawn = False
+
+def tab_change_handler(value):
+    if value == "Diagramm": # mit ENUM ersetzen
+        draw_chart()
 
 # Create the UI
 with ui.splitter() as splitter:
@@ -22,10 +29,11 @@ with ui.splitter() as splitter:
             ui.button('Daten generieren', on_click=lambda: generate_handler())
 
     with splitter.after:
-        with ui.tabs().classes('w-full') as tabs:
+        with ui.tabs(on_change=lambda e: tab_change_handler(e.value)).classes('w-full') as tabs:
+            tabs = tabs
             one = ui.tab('Tabelle')
             two = ui.tab('Diagramm')
-        with ui.tab_panels(tabs, value=two).classes('w-full'):
+        with ui.tab_panels(tabs, value=one).classes('w-full') as panels:
             with ui.tab_panel(one):
                 table_container = ui.row()
             with ui.tab_panel(two):
@@ -36,6 +44,9 @@ with ui.splitter() as splitter:
 ui.run()
 
 def generate_temperature(num_values):
+    global values, is_chart_drawn
+
+    is_chart_drawn = False
     base_value = base_value_input.value
     variation_range = 5.0
     previous_temperature = base_value
@@ -60,6 +71,7 @@ def generate_temperature(num_values):
         temperature = round(temperature, 2)  # Round off the temperature value to 2 decimal places
         temperatures.append(temperature)
 
+    values = temperatures
     return temperatures
 
 def generate_timestamps(num_values, interval=10):
@@ -70,7 +82,9 @@ def generate_timestamps(num_values, interval=10):
     return timestamps
 
 def clear_output():
-    global table_container
+    global table_container, values
+
+    values = []
 
     if table_container is not None:
         table_container.clear()
@@ -79,6 +93,8 @@ def clear_output():
         chart_container.clear()
 
 def print_values(temperature_values, timestamp_values):
+    global table_container, tabs
+
     # Print the generated temperature values
     columns = [
         {
@@ -112,13 +128,24 @@ def print_values(temperature_values, timestamp_values):
     with table_container:
         ui.table(columns=columns, rows=rows).classes('w-full shadow-none')
 
+    if tabs.value == "Diagramm":
+        draw_chart()
+
+def draw_chart():
+    global values, is_chart_drawn, chart_container
+
+    if is_chart_drawn:
+        return
+
     with chart_container:
         ui.chart({
             'title': False,
             'series': [
-                {'name': 'Temperatur', 'data': temperature_values},
+                {'name': 'Temperatur', 'data': values},
             ],
         }).classes('w-full h-64')
+
+    is_chart_drawn = True
 
 def generate_handler():
     clear_output()
