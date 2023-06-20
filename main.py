@@ -39,7 +39,14 @@ with ui.splitter().classes('h-screen') as splitter:
                 base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
                 ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
                 interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
-
+            
+            with ui.column().classes('w-full mt-4 gap-0'):
+                ui.label('Anomalien').classes('font-bold')
+                with ui.grid(columns=3).classes('w-full'):
+                    anomaly_select = ui.select({1: "Keine Anomalien", 2: "Einmalig", 3: "Bleibend"}, value=1, on_change=lambda e: anomaly_max_count_input.set_visibility(e.value == 2))
+                    anomaly_max_count_input = ui.number(label='Maximale Anzahl', value=1, min=0, max=100)
+                    anomaly_max_count_input.set_visibility(False)
+            
             ui.button('Daten generieren', on_click=lambda: generate_handler()).classes('mt-8')
 
     # Create the right column
@@ -79,6 +86,9 @@ def generate_temperature(num_values):
     previous_temperature = base_value
     temperatures = []
 
+    iteration = 0 # Prevent first value from being an anomaly
+    anomaly_count = 0
+
     while len(temperatures) < num_values:
         temperature_change = random.uniform(-1.0, 1.0)  # Change within a smaller range
         temperature = previous_temperature + temperature_change
@@ -89,14 +99,30 @@ def generate_temperature(num_values):
         previous_temperature = temperature  # Update the previous temperature
         
         # Introduce anomalies
-        if random.random() < 0.05:  # Adjust the anomaly occurrence probability as needed
-            temperature += random.uniform(10, 20)  # Add a positive anomaly
-            
-        if random.random() < 0.02:  # Adjust the anomaly occurrence probability as needed
-            temperature -= random.uniform(5, 15)  # Add a negative anomaly
+        if iteration > 0 and ((anomaly_select.value == 2 and anomaly_count < anomaly_max_count_input.value) or (anomaly_select.value == 3 and anomaly_count == 0)):
+            anomaly_appeared = False
+
+            if random.random() < 0.05:  # Adjust the anomaly occurrence probability as needed
+                temperature += random.uniform(10, 20)  # Add a positive anomaly
+                anomaly_appeared = True
+                
+            if random.random() < 0.02:  # Adjust the anomaly occurrence probability as needed
+                temperature -= random.uniform(5, 15)  # Add a negative anomaly
+                anomaly_appeared = True
+
+            if anomaly_appeared:
+                print(f'Anomaly introduced at index {iteration}')
+
+                if anomaly_select.value == 3 and anomaly_count == 0:
+                    previous_temperature = temperature # Update the previous temperature
+                    base_value = temperature # Update the base value to the new temperature
+                
+                anomaly_count += 1
         
         temperature = round(temperature, 2)  # Round off the temperature value to 2 decimal places
         temperatures.append(temperature)
+
+        iteration += 1
 
     send_button.enable()
 
