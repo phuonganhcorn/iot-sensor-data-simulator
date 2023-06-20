@@ -161,8 +161,24 @@ def draw_chart():
         ui.chart({
             'title': False,
             'series': [
-                {'name': 'Temperatur', 'data': values},
+                {'name': device_id_input.value, 'data': values},
             ],
+            'yAxis': {
+                'title': {
+                    'text': 'Temperatur'
+                },
+                'labels': {
+                    'format': '{value} °C'
+                }
+            },
+            'xAxis': {
+                'title': {
+                    'text': 'Zeit'
+                },
+                'labels': {
+                    'format': '{value}s'
+                }
+            },
         }).classes('w-full h-64')
 
     is_chart_drawn = True
