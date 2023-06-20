@@ -7,6 +7,7 @@ values = []
 tabs = None
 table_container = None
 chart_container = None
+send_button = None
 is_chart_drawn = False
 
 class Tab(Enum):
@@ -60,7 +61,8 @@ with ui.splitter().classes('h-screen') as splitter:
                             ui.label('Bitte generiere zuerst auf der linken Seite Daten.').classes('text-center w-full')
             
             with ui.row().classes('absolute left-0 bottom-0 px-4 w-full h-20 flex flex-col justify-center shadow-[0_35px_60px_-15px_rgba(0,0,0,1)]'):
-                ui.button('An Azure senden').classes('')
+                send_button = ui.button('An Azure senden')
+                send_button.disable()
 
 ui.run()
 
@@ -92,6 +94,8 @@ def generate_temperature(num_values):
         
         temperature = round(temperature, 2)  # Round off the temperature value to 2 decimal places
         temperatures.append(temperature)
+
+    send_button.enable()
 
     values = temperatures
     return temperatures
