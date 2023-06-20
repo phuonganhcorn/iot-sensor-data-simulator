@@ -100,7 +100,7 @@ def generate_timestamps(num_values, interval=10):
 
 # clears the output
 def clear_output():
-    global table_container, values
+    global values
 
     values = []
 
@@ -112,8 +112,6 @@ def clear_output():
 
 # prints the passed values
 def print_values(temperature_values, timestamp_values):
-    global table_container, tabs
-
     tab_note_container.clear()
 
     # Print the generated temperature values
@@ -162,7 +160,7 @@ def print_values(temperature_values, timestamp_values):
 
 # draws the chart
 def draw_chart():
-    global values, is_chart_drawn, chart_container
+    global is_chart_drawn
 
     if is_chart_drawn or len(values) == 0:
         return
