@@ -1,5 +1,6 @@
 import random
 import datetime
+from enum import Enum
 from nicegui import ui
 
 values = []
@@ -8,8 +9,12 @@ table_container = None
 chart_container = None
 is_chart_drawn = False
 
+class Tab(Enum):
+    TABLE = "Tabelle"
+    CHART = "Diagramm"
+
 def tab_change_handler(value):
-    if value == "Diagramm": # mit ENUM ersetzen
+    if value == Tab.CHART.value:
         draw_chart()
 
 # Create the UI
@@ -33,8 +38,8 @@ with ui.splitter() as splitter:
     with splitter.after:
         with ui.tabs(on_change=lambda e: tab_change_handler(e.value)).classes('w-full') as tabs:
             tabs = tabs
-            one = ui.tab('Tabelle')
-            two = ui.tab('Diagramm')
+            one = ui.tab(Tab.TABLE.value)
+            two = ui.tab(Tab.CHART.value)
         with ui.tab_panels(tabs, value=one).classes('w-full') as panels:
             with ui.tab_panel(one):
                 table_container = ui.row()
@@ -133,14 +138,14 @@ def print_values(temperature_values, timestamp_values):
     with table_container:
         ui.table(columns=columns, rows=rows).classes('w-full shadow-none')
 
-    if tabs.value == "Diagramm":
+    if tabs.value == Tab.CHART.value:
         draw_chart()
 
 # draws the chart
 def draw_chart():
     global values, is_chart_drawn, chart_container
 
-    if is_chart_drawn:
+    if is_chart_drawn or len(values) == 0:
         return
 
     with chart_container:
