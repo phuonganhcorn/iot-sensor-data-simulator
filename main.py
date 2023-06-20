@@ -31,7 +31,7 @@ with ui.splitter() as splitter:
             device_id_input = ui.input(label='Geräte-ID', value='sim00001')
             base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
             ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
-            interval_input = ui.number(label='Interval [s]', value=10.00, min=0, max=3600, format='%.2f')
+            interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
 
             ui.button('Daten generieren', on_click=lambda: generate_handler())
 
@@ -156,12 +156,18 @@ def draw_chart():
 
     if is_chart_drawn or len(values) == 0:
         return
+    
+    # generate the data for the chart
+    data = [[
+        i * int(interval_input.value), # x-axis value
+        values[i], # y-axis value
+     ] for i in range(0, len(values))]
 
     with chart_container:
         ui.chart({
             'title': False,
             'series': [
-                {'name': device_id_input.value, 'data': values},
+                {'name': device_id_input.value, 'data': data},
             ],
             'yAxis': {
                 'title': {
