@@ -27,6 +27,7 @@ with ui.splitter() as splitter:
             ui.label('IoT Hub Data Simulator')
             ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
             
+            count_input = ui.number(label='Anzahl', value=10, min=1, max=100)
             device_id_input = ui.input(label='Geräte-ID', value='sim00001')
             base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
             ui.number(label='Variationsbereich', value=5.00, format='%.2f')
@@ -108,6 +109,13 @@ def print_values(temperature_values, timestamp_values):
     # Print the generated temperature values
     columns = [
         {
+            'name': 'id',
+            'label': 'ID',
+            'field': 'id',
+            'required': True,
+            'align': 'left',
+        },
+        {
             'name': 'device_id',
             'label': 'Geräte-ID',
             'field': 'device_id',
@@ -130,6 +138,7 @@ def print_values(temperature_values, timestamp_values):
 
     # map the temperature values to the columns
     rows = [{
+        'id': i + 1,
         'device_id': device_id_input.value,
         'temperature': str(temperature_values[i]) + ' °C',
         'timestamp': timestamp_values[i],
@@ -161,7 +170,9 @@ def draw_chart():
 # generates the values and prints them
 def generate_handler():
     clear_output()
-    temperature_values = generate_temperature(10)  # Generate 10 temperature values
-    timestamp_values = generate_timestamps(10, interval_input.value)  # Generate 10 timestamp values
+
+    values_count = int(count_input.value)  # Get the number of values to generate
+    temperature_values = generate_temperature(values_count)  # Generate 10 temperature values
+    timestamp_values = generate_timestamps(values_count, interval_input.value)  # Generate 10 timestamp values
 
     print_values(temperature_values, timestamp_values)
