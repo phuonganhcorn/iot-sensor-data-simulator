@@ -27,17 +27,20 @@ with ui.splitter().classes('h-screen') as splitter:
 
     # Create the left column
     with splitter.before:
-        with ui.column().classes('p-4') as column:
+        with ui.column().classes('p-4'):
             ui.label('ADX - Data Simulator').classes('text-2xl font-bold')
             ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
             
-            count_input = ui.number(label='Anzahl', value=10, min=1, max=100)
-            device_id_input = ui.input(label='Geräte-ID', value='sim00001')
-            base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
-            ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
-            interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
+            with ui.grid(columns=3).classes('w-full'):
+                count_input = ui.number(label='Anzahl an Datensätzen', value=10, min=1, max=100)
+                device_id_input = ui.input(label='Geräte-ID', value='sim00001')
+            
+            with ui.grid(columns=3).classes('w-full'):
+                base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
+                ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
+                interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
 
-            ui.button('Daten generieren', on_click=lambda: generate_handler())
+            ui.button('Daten generieren', on_click=lambda: generate_handler()).classes('mt-8')
 
     # Create the right column
     with splitter.after:
