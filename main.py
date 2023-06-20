@@ -24,7 +24,7 @@ with ui.splitter() as splitter:
     # Create the left column
     with splitter.before:
         with ui.column() as column:
-            ui.label('IoT Hub Data Simulator')
+            ui.label('ADX - Data Simulator').classes('text-2xl font-bold')
             ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
             
             count_input = ui.number(label='Anzahl', value=10, min=1, max=100)
@@ -46,8 +46,16 @@ with ui.splitter() as splitter:
                 table_container = ui.row()
             with ui.tab_panel(two):
                 chart_container = ui.row()
+
+        if len(values) == 0:
+            with ui.row() as row:
+                tab_note_container = row
+                with ui.row().classes('mx-auto h-64 flex items-center'):
+                    with ui.column().classes('gap-2'):
+                        ui.label('Keine Daten generiert').classes('text-lg font-bold text-center w-full')
+                        ui.label('Bitte generiere zuerst auf der linken Seite Daten.').classes('text-center w-full')
                 
-        ui.button('Zu Azure senden')
+        ui.button('Zu Azure senden').classes('mt-4 mx-4')
 
 ui.run()
 
@@ -105,6 +113,8 @@ def clear_output():
 # prints the passed values
 def print_values(temperature_values, timestamp_values):
     global table_container, tabs
+
+    tab_note_container.clear()
 
     # Print the generated temperature values
     columns = [
