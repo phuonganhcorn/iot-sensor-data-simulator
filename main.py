@@ -30,8 +30,8 @@ with ui.splitter() as splitter:
             count_input = ui.number(label='Anzahl', value=10, min=1, max=100)
             device_id_input = ui.input(label='Geräte-ID', value='sim00001')
             base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
-            ui.number(label='Variationsbereich', value=5.00, format='%.2f')
-            interval_input = ui.number(label='Interval [s]', value=10.00, format='%.2f')
+            ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
+            interval_input = ui.number(label='Interval [s]', value=10.00, min=0, max=3600, format='%.2f')
 
             ui.button('Daten generieren', on_click=lambda: generate_handler())
 
