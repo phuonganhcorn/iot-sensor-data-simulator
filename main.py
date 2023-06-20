@@ -16,6 +16,7 @@ def tab_change_handler(value):
 with ui.splitter() as splitter:
     splitter.classes('w-full')
 
+    # Create the left column
     with splitter.before:
         with ui.column() as column:
             ui.label('IoT Hub Data Simulator')
@@ -28,6 +29,7 @@ with ui.splitter() as splitter:
 
             ui.button('Daten generieren', on_click=lambda: generate_handler())
 
+    # Create the right column
     with splitter.after:
         with ui.tabs(on_change=lambda e: tab_change_handler(e.value)).classes('w-full') as tabs:
             tabs = tabs
@@ -43,6 +45,7 @@ with ui.splitter() as splitter:
 
 ui.run()
 
+# Generate the temperature values
 def generate_temperature(num_values):
     global values, is_chart_drawn
 
@@ -74,13 +77,14 @@ def generate_temperature(num_values):
     values = temperatures
     return temperatures
 
+# creates a list of timestamp values every n (interval) seconds beginning now
 def generate_timestamps(num_values, interval=10):
-    # creates a list of timestamp values every n (interval) seconds beginning now
     now = datetime.datetime.now()
     timestamps = [(now + datetime.timedelta(seconds=i*interval)).isoformat() for i in range(0, num_values)]
 
     return timestamps
 
+# clears the output
 def clear_output():
     global table_container, values
 
@@ -92,6 +96,7 @@ def clear_output():
     if chart_container is not None:
         chart_container.clear()
 
+# prints the passed values
 def print_values(temperature_values, timestamp_values):
     global table_container, tabs
 
@@ -131,6 +136,7 @@ def print_values(temperature_values, timestamp_values):
     if tabs.value == "Diagramm":
         draw_chart()
 
+# draws the chart
 def draw_chart():
     global values, is_chart_drawn, chart_container
 
@@ -147,6 +153,7 @@ def draw_chart():
 
     is_chart_drawn = True
 
+# generates the values and prints them
 def generate_handler():
     clear_output()
     temperature_values = generate_temperature(10)  # Generate 10 temperature values
