@@ -28,7 +28,7 @@ with ui.splitter().classes('h-screen') as splitter:
     # Create the left column
     with splitter.before:
         with ui.column().classes('p-4'):
-            ui.label('ADX - Data Simulator').classes('text-2xl font-bold')
+            ui.label('ADX - Datensimulator').classes('text-2xl font-bold')
             ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
             
             with ui.grid(columns=3).classes('w-full'):
@@ -86,7 +86,7 @@ with ui.splitter().classes('h-screen') as splitter:
                 send_button = ui.button('An Azure senden')
                 send_button.disable()
 
-ui.run()
+ui.run(title='ADX - Datensimulator')
 
 # Generate the temperature values
 def generate_temperature(num_values):
