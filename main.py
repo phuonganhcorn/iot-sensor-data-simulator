@@ -32,35 +32,27 @@ with ui.splitter().classes('h-screen') as splitter:
             ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
             
             with ui.grid(columns=3).classes('w-full'):
-                count_input = ui.number(label='Anzahl an Datensätzen', value=10, min=1, max=100)
+                count_input = ui.number(label='Anzahl an Werten', value=10, min=1, max=100)
                 device_id_input = ui.input(label='Geräte-ID', value='sim00001')
             
+            ui.label('Simulationswerte').classes('text-base font-bold')
             with ui.grid(columns=3).classes('w-full'):
                 base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
                 variation_range_input = ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
                 interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
-                probability_pos_anomaly_input = ui.number(label='Wahrscheinlichkeit für positive Anomalien', value=5, min=0, max=100, suffix='%')
-                probability_neg_anomaly_input = ui.number(label='Wahrscheinlichkeit für negative Anomalien', value=2, min=0, max=100, suffix='%')
+
             
             with ui.column().classes('w-full mt-4 gap-0'):
-                ui.label('Anomalien').classes('font-bold')
+                ui.label('Anomalien').classes('text-base font-bold')
                 with ui.grid(columns=3).classes('w-full'):
                     anomaly_select = ui.select({1: "Keine Anomalien", 2: "Einmalig", 3: "Bleibend"}, value=1, on_change=lambda e: anomaly_max_count_input.set_visibility(e.value == 2))
                     anomaly_max_count_input = ui.number(label='Maximale Anzahl', value=1, min=0, max=100)
                     anomaly_max_count_input.set_visibility(False)
 
-            # with ui.column().classes('w-full mt-4 gap-0'):
-            #     with ui.expansion('Erweiterte Optionen').classes('font-bold'):
-            #         ui.number(label='Maximale Anzahl', value=1, min=0, max=100)
-
-            # ausklappbare Optionen
-            # genaure einstellungen für die Anomalien (wahrscheinlichkeit, änderung, etc.)
-            # with ui.column().classes('mt-4 gap-0'):
-            #     ui.label('Erweiterte Optionen').classes('font-bold')
-            #     with ui.grid(columns=3).classes('w-full'):
-            #         # Wahrscheinlichkeit für negative und positive Anomalien
-            #         ui.number(label='', value=5.00, min=0, format='%.2f')
-            #         ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
+            with ui.expansion('Erweiterte Optionen').classes('w-full'):
+                with ui.grid(columns=3).classes('w-full'):
+                    probability_pos_anomaly_input = ui.number(label='Wkt. für pos. Anomalien', value=5, min=0, max=100, suffix='%')
+                    probability_neg_anomaly_input = ui.number(label='Wkt. für neg. Anomalien', value=2, min=0, max=100, suffix='%')
             
             ui.button('Daten generieren', on_click=lambda: generate_handler()).classes('mt-8')
 
