@@ -37,7 +37,7 @@ with ui.splitter().classes('h-screen') as splitter:
             
             with ui.grid(columns=3).classes('w-full'):
                 base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
-                ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
+                variation_range_input = ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
                 interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
                 probability_pos_anomaly_input = ui.number(label='Wahrscheinlichkeit für positive Anomalien', value=5, min=0, max=100, suffix='%')
                 probability_neg_anomaly_input = ui.number(label='Wahrscheinlichkeit für negative Anomalien', value=2, min=0, max=100, suffix='%')
@@ -48,6 +48,19 @@ with ui.splitter().classes('h-screen') as splitter:
                     anomaly_select = ui.select({1: "Keine Anomalien", 2: "Einmalig", 3: "Bleibend"}, value=1, on_change=lambda e: anomaly_max_count_input.set_visibility(e.value == 2))
                     anomaly_max_count_input = ui.number(label='Maximale Anzahl', value=1, min=0, max=100)
                     anomaly_max_count_input.set_visibility(False)
+
+            # with ui.column().classes('w-full mt-4 gap-0'):
+            #     with ui.expansion('Erweiterte Optionen').classes('font-bold'):
+            #         ui.number(label='Maximale Anzahl', value=1, min=0, max=100)
+
+            # ausklappbare Optionen
+            # genaure einstellungen für die Anomalien (wahrscheinlichkeit, änderung, etc.)
+            # with ui.column().classes('mt-4 gap-0'):
+            #     ui.label('Erweiterte Optionen').classes('font-bold')
+            #     with ui.grid(columns=3).classes('w-full'):
+            #         # Wahrscheinlichkeit für negative und positive Anomalien
+            #         ui.number(label='', value=5.00, min=0, format='%.2f')
+            #         ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
             
             ui.button('Daten generieren', on_click=lambda: generate_handler()).classes('mt-8')
 
@@ -84,7 +97,7 @@ def generate_temperature(num_values):
 
     is_chart_drawn = False
     base_value = base_value_input.value
-    variation_range = 5.0
+    variation_range = variation_range_input.value
     previous_temperature = base_value
     probability_pos_anomaly = probability_pos_anomaly_input.value / 100
     probability_neg_anomaly = probability_neg_anomaly_input.value / 100
