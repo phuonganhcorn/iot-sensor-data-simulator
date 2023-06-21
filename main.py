@@ -54,12 +54,29 @@ with ui.splitter().classes('h-screen') as splitter:
                     anomaly_max_count_input = ui.number(label='Maximale Anzahl', value=1, min=0, max=100)
                     anomaly_max_count_input.set_visibility(False)
 
-            with ui.expansion('Erweiterte Optionen').classes('w-full'):
-                with ui.grid(columns=3).classes('w-full'):
-                    probability_pos_anomaly_input = ui.number(label='Wkt. für pos. Anomalien', value=5, min=0, max=100, suffix='%')
-                    probability_neg_anomaly_input = ui.number(label='Wkt. für neg. Anomalien', value=2, min=0, max=100, suffix='%')
+            with ui.expansion('Erweiterte Optionen').classes('w-full bg-gray-100 rounded-sm'):
+                with ui.row().classes('px-4 gap-0'):
+                    ui.label('Wahrscheinlichkeiten').classes('mt-2 font-bold')
+                    ui.label('Definiere mit welcher Wahrscheinlichkeit Anomalien auftreten sollen.').classes('mt-1 text-[13px] opacity-80')
+                    with ui.grid(columns=3).classes('mt-3 mb-4 w-full'):
+                        probability_pos_anomaly_input = ui.number(label='Wkt. für pos. Anomalien', value=5, min=0, max=100, suffix='%')
+                        probability_neg_anomaly_input = ui.number(label='Wkt. für neg. Anomalien', value=2, min=0, max=100, suffix='%')
+
+                    ui.label('Abweichungsbereiche').classes('mt-4 font-bold')
+                    ui.label('Definiere den Wertebereich, in dem Anomalien entstehen können.').classes('mt-1 text-[13px] opacity-80')
+                    with ui.grid(columns=3).classes('mt-3 pb-4 w-full'):
+                        with ui.column().classes('gap-0'):
+                            ui.label('Positiv').classes('font-medium opacity-70')
+                            pos_anomaly_upper_range_input = ui.number(label='Maximal', value=20, min=0, max=100).classes('w-full')
+                            pos_anomaly_lower_range_input = ui.number(label='Minimal', value=10, min=0, max=100).classes('w-full')
+
+                        with ui.column().classes('gap-0'):
+                            ui.label('Negativ').classes('font-medium opacity-70')
+                            neg_anomaly_upper_range_input = ui.number(label='Maximal', value=15, min=0, max=100).classes('w-full')
+                            neg_anomaly_lower_range_input = ui.number(label='Minimal', value=5, min=0, max=100).classes('w-full')
             
             ui.button('Daten generieren', on_click=lambda: generate_handler()).classes('mt-8')
+            # TODO: Button für Standardwerte wiederherstellen
 
     # Create the right column
     with splitter.after:
@@ -91,18 +108,23 @@ ui.run(title='ADX - Datensimulator')
 # Generate the temperature values
 def generate_temperature(num_values):
     global values, is_chart_drawn
+    
+    temperatures = []
+    iteration = 0
+    anomaly_count = 0
+    is_chart_drawn = False # Reset flag
 
-    is_chart_drawn = False
+    # Get the input values
     base_value = base_value_input.value
     variation_range = variation_range_input.value
     change_rate = change_rate_input.value
     previous_temperature = base_value
     probability_pos_anomaly = probability_pos_anomaly_input.value / 100
     probability_neg_anomaly = probability_neg_anomaly_input.value / 100
-    temperatures = []
-
-    iteration = 0 # Prevent first value from being an anomaly
-    anomaly_count = 0
+    pos_anomaly_upper_range = pos_anomaly_upper_range_input.value
+    pos_anomaly_lower_range = pos_anomaly_lower_range_input.value
+    neg_anomaly_upper_range = neg_anomaly_upper_range_input.value
+    neg_anomaly_lower_range = neg_anomaly_lower_range_input.value
 
     while len(temperatures) < num_values:
         temperature_change = random.uniform(-change_rate, change_rate)  # Change within a smaller range
@@ -118,11 +140,11 @@ def generate_temperature(num_values):
             anomaly_appeared = False
 
             if random.random() < probability_pos_anomaly:  # Adjust the anomaly occurrence probability as needed
-                temperature += random.uniform(10, 20)  # Add a positive anomaly
+                temperature += random.uniform(pos_anomaly_lower_range, pos_anomaly_upper_range)  # Add a positive anomaly
                 anomaly_appeared = True
                 
             if random.random() < probability_neg_anomaly:  # Adjust the anomaly occurrence probability as needed
-                temperature -= random.uniform(5, 15)  # Add a negative anomaly
+                temperature -= random.uniform(neg_anomaly_lower_range, neg_anomaly_upper_range)  # Add a negative anomaly
                 anomaly_appeared = True
 
             if anomaly_appeared:
