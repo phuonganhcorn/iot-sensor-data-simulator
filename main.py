@@ -39,6 +39,8 @@ with ui.splitter().classes('h-screen') as splitter:
                 base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
                 ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
                 interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
+                probability_pos_anomaly_input = ui.number(label='Wahrscheinlichkeit für positive Anomalien', value=5, min=0, max=100, suffix='%')
+                probability_neg_anomaly_input = ui.number(label='Wahrscheinlichkeit für negative Anomalien', value=2, min=0, max=100, suffix='%')
             
             with ui.column().classes('w-full mt-4 gap-0'):
                 ui.label('Anomalien').classes('font-bold')
@@ -84,6 +86,8 @@ def generate_temperature(num_values):
     base_value = base_value_input.value
     variation_range = 5.0
     previous_temperature = base_value
+    probability_pos_anomaly = probability_pos_anomaly_input.value / 100
+    probability_neg_anomaly = probability_neg_anomaly_input.value / 100
     temperatures = []
 
     iteration = 0 # Prevent first value from being an anomaly
@@ -102,11 +106,11 @@ def generate_temperature(num_values):
         if iteration > 0 and ((anomaly_select.value == 2 and anomaly_count < anomaly_max_count_input.value) or (anomaly_select.value == 3 and anomaly_count == 0)):
             anomaly_appeared = False
 
-            if random.random() < 0.05:  # Adjust the anomaly occurrence probability as needed
+            if random.random() < probability_pos_anomaly:  # Adjust the anomaly occurrence probability as needed
                 temperature += random.uniform(10, 20)  # Add a positive anomaly
                 anomaly_appeared = True
                 
-            if random.random() < 0.02:  # Adjust the anomaly occurrence probability as needed
+            if random.random() < probability_neg_anomaly:  # Adjust the anomaly occurrence probability as needed
                 temperature -= random.uniform(5, 15)  # Add a negative anomaly
                 anomaly_appeared = True
 
