@@ -41,6 +41,11 @@ with ui.splitter().classes('h-screen') as splitter:
                 variation_range_input = ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
                 interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
 
+            with ui.expansion('Erweiterte Optionen').classes('w-full'):
+                with ui.grid(columns=3).classes('w-full'):
+                    with ui.number(label='Änderungsrate +/-', value=0.5, min=0, max=10) as input:
+                        change_rate_input = input
+                        ui.tooltip('Die Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
             
             with ui.column().classes('w-full mt-4 gap-0'):
                 ui.label('Anomalien').classes('text-base font-bold')
@@ -90,6 +95,7 @@ def generate_temperature(num_values):
     is_chart_drawn = False
     base_value = base_value_input.value
     variation_range = variation_range_input.value
+    change_rate = change_rate_input.value
     previous_temperature = base_value
     probability_pos_anomaly = probability_pos_anomaly_input.value / 100
     probability_neg_anomaly = probability_neg_anomaly_input.value / 100
@@ -99,7 +105,7 @@ def generate_temperature(num_values):
     anomaly_count = 0
 
     while len(temperatures) < num_values:
-        temperature_change = random.uniform(-1.0, 1.0)  # Change within a smaller range
+        temperature_change = random.uniform(-change_rate, change_rate)  # Change within a smaller range
         temperature = previous_temperature + temperature_change
         
         # Limit the temperature within the defined range
