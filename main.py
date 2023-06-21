@@ -35,14 +35,15 @@ with ui.splitter().classes('h-screen') as splitter:
                 count_input = ui.number(label='Anzahl an Werten', value=10, min=1, max=100)
                 device_id_input = ui.input(label='Geräte-ID', value='sim00001')
             
-            ui.label('Simulationswerte').classes('text-base font-bold')
-            with ui.grid(columns=3).classes('w-full'):
-                base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
-                variation_range_input = ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
-                interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
-
-            with ui.expansion('Erweiterte Optionen').classes('w-full'):
+            with ui.column().classes('w-full mt-4 gap-0'):
+                ui.label('Simulationswerte').classes('text-base font-bold')
                 with ui.grid(columns=3).classes('w-full'):
+                    base_value_input = ui.number(label='Basiswert', value=25.00, format='%.2f')
+                    variation_range_input = ui.number(label='Variationsbereich', value=5.00, min=0, format='%.2f')
+                    interval_input = ui.number(label='Interval [s]', value=10, min=0, max=3600)
+
+            with ui.expansion('Erweiterte Optionen').classes('w-full bg-gray-100 rounded-sm'):
+                with ui.grid(columns=3).classes('w-full px-4 pb-4'):
                     with ui.number(label='Änderungsrate +/-', value=0.5, min=0, max=10) as input:
                         change_rate_input = input
                         ui.tooltip('Die Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
@@ -56,14 +57,16 @@ with ui.splitter().classes('h-screen') as splitter:
 
             with ui.expansion('Erweiterte Optionen').classes('w-full bg-gray-100 rounded-sm'):
                 with ui.row().classes('px-4 gap-0'):
-                    ui.label('Wahrscheinlichkeiten').classes('mt-2 font-bold')
-                    ui.label('Definiere mit welcher Wahrscheinlichkeit Anomalien auftreten sollen.').classes('mt-1 text-[13px] opacity-80')
+                    with ui.column().classes('gap-1'):
+                        ui.label('Wahrscheinlichkeiten').classes('mt-2 font-bold')
+                        ui.label('Definiere mit welcher Wahrscheinlichkeit Anomalien auftreten sollen.').classes('text-[13px] opacity-80')
                     with ui.grid(columns=3).classes('mt-3 mb-4 w-full'):
                         probability_pos_anomaly_input = ui.number(label='Wkt. für pos. Anomalien', value=5, min=0, max=100, suffix='%')
                         probability_neg_anomaly_input = ui.number(label='Wkt. für neg. Anomalien', value=2, min=0, max=100, suffix='%')
 
-                    ui.label('Abweichungsbereiche').classes('mt-4 font-bold')
-                    ui.label('Definiere den Wertebereich, in dem Anomalien entstehen können.').classes('mt-1 text-[13px] opacity-80')
+                    with ui.column().classes('gap-1'):
+                        ui.label('Abweichungsbereiche').classes('mt-4 font-bold')
+                        ui.label('Definiere den Wertebereich, in dem Anomalien entstehen können.').classes('text-[13px] opacity-80')
                     with ui.grid(columns=3).classes('mt-3 pb-4 w-full'):
                         with ui.column().classes('gap-0'):
                             ui.label('Positiv').classes('font-medium opacity-70')
