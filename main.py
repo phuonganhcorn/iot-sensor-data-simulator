@@ -355,6 +355,10 @@ def generate_handler():
 async def send_handler():
     global is_data_sent
 
+    if iot_hub_helper is None or not iot_hub_helper.device_client.connected:
+        await handle_connection()
+        return
+
     if is_data_sent:
         with ui.dialog(value=True) as dialog, ui.card().classes('!max-w-sm flex items-center'):
             ui.label('Werte bereits gesendet').classes('text-lg font-bold')

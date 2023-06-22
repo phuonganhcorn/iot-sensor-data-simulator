@@ -4,15 +4,17 @@ from azure.iot.device import IoTHubDeviceClient, Message
 
 class IoTHubHelper:
     def __init__(self, connection_string):
-        self.connection_string = connection_string
+        self.__connection_string = connection_string
         self.device_client = None
         self.init_device_client()
 
     def init_device_client(self):
-        self.device_client = IoTHubDeviceClient.create_from_connection_string(self.connection_string)
+        self.device_client = IoTHubDeviceClient.create_from_connection_string(self.__connection_string)
+        self.device_client.connect()
 
     def close_connection(self):
-        self.device_client.disconnect()
+        self.__connection_string = None
+        self.device_client.shutdown()
 
     def send_telemetry_messages(self, telemetry_messages):
         try:
