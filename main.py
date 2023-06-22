@@ -34,7 +34,7 @@ async def logout_handler():
     await ui.run_javascript('localStorage.removeItem("connectionString");', respond=False)
     iot_hub_helper.close_connection()
     ui.notify('Verbindung getrennt')
-    await handle_connection()
+    await init_connection()
 
 # Create the UI
 with ui.splitter().classes('h-screen') as splitter:
@@ -158,7 +158,7 @@ async def store_connection_string(connection_string):
 async def retrieve_connection_string():
     return await ui.run_javascript('localStorage.getItem("connectionString");')
 
-async def handle_connection():
+async def init_connection():
     global iot_hub_helper, connection_note_container
     connection_string = await retrieve_connection_string()
     
@@ -172,7 +172,7 @@ async def handle_connection():
     else:
         iot_hub_helper = IoTHubHelper(connection_string)
 
-app.on_connect(handle_connection)
+app.on_connect(init_connection)
 
 # Generate the temperature values
 def generate_temperature(num_values):
@@ -356,7 +356,7 @@ async def send_handler():
     global is_data_sent
 
     if iot_hub_helper is None or not iot_hub_helper.device_client.connected:
-        await handle_connection()
+        await init_connection()
         return
 
     if is_data_sent:
