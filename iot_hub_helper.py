@@ -27,12 +27,12 @@ class IoTHubHelper:
                 # Send the message.
                 print("Sending message: {}".format(message))
                 self.device_client.send_message(message)
-            print("All messages sent successfully")
-            return Response(True, "Alle Daten erfolgreich gesendet")
+            print("All messages successfully sent")
+            return Response(True, "All messages successfully sent")
             
         except Exception as e:
             print(e)
-            return Response(False, "Fehler beim Senden: {}".format(e))
+            return Response(False, "Error sending telemetry messages: {}".format(e))
 
 class Response:
     def __init__(self, success, message):

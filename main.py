@@ -1,9 +1,10 @@
 import random
 import datetime
-import json
+from threading import Thread
 from iot_hub_helper import IoTHubHelper
 from enum import Enum
 from nicegui import ui
+import asyncio
 
 CONNECTION_STRING = "HostName=IoT-Hub-Tobias1.azure-devices.net;DeviceId=sim000001;SharedAccessKey=5y6hx8YYZC6oLEO2/Jbrd8UGLpf4dKA7gf2et1gxm6s="
 iot_hub_helper = IoTHubHelper(CONNECTION_STRING)
@@ -12,6 +13,7 @@ values = []
 tabs = None
 table_container = None
 chart_container = None
+spinner_container = None
 send_button = None
 is_chart_drawn = False
 
@@ -108,8 +110,13 @@ with ui.splitter().classes('h-screen') as splitter:
                             ui.label('Bitte generiere zuerst auf der linken Seite Daten.').classes('text-center w-full')
             
             with ui.row().classes('absolute left-0 bottom-0 px-4 w-full h-20 flex flex-col justify-center shadow-[0_35px_60px_-15px_rgba(0,0,0,1)]'):
-                send_button = ui.button('An Azure senden', on_click=lambda: send_handler())
+                send_button = ui.button('An Azure senden', on_click=lambda: send_button_handler())
                 send_button.disable()
+
+with ui.row().classes('fixed left-0 top-0 w-full h-full flex justify-center items-center bg-gray-300/60 z-50') as row:
+    spinner_container = row
+    spinner_container.set_visibility(False)
+    ui.spinner(size='lg')
 
 ui.run(title='ADX - Datensimulator')
 
@@ -290,7 +297,11 @@ def generate_handler():
 
     print_values(temperature_values, timestamp_values)
 
-def send_handler():
+async def send_button_handler():
+    print("Sending data to IoT Hub...")
+
+    show_spinner()
+
     temperature_values = values
     timestamp_values = generate_timestamps(len(values), interval_input.value)
 
@@ -301,5 +312,17 @@ def send_handler():
         'temperature': temperature_values[i],
     } for i in range(0, len(temperature_values))]
 
+    await asyncio.sleep(0.1) # Workaround to show the spinner
+
     response = iot_hub_helper.send_telemetry_messages(data)
     ui.notify(response.message, type='positive' if response.success else 'negative')
+
+    hide_spinner()
+
+def show_spinner():
+    spinner_container.set_visibility(True)
+    return
+
+def hide_spinner():
+    spinner_container.set_visibility(False)
+    
