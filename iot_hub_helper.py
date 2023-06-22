@@ -12,7 +12,7 @@ class IoTHubHelper:
         self.device_client = IoTHubDeviceClient.create_from_connection_string(self.connection_string)
 
     def close_connection(self):
-        self.device_client.shutdown()
+        self.device_client.disconnect()
 
     def send_telemetry_messages(self, telemetry_messages):
         try:
