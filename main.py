@@ -1,7 +1,12 @@
 import random
 import datetime
+import json
+from iot_hub_helper import IoTHubHelper
 from enum import Enum
 from nicegui import ui
+
+CONNECTION_STRING = "HostName=IoT-Hub-Tobias1.azure-devices.net;DeviceId=sim000001;SharedAccessKey=5y6hx8YYZC6oLEO2/Jbrd8UGLpf4dKA7gf2et1gxm6s="
+iot_hub_helper = IoTHubHelper(CONNECTION_STRING)
 
 values = []
 tabs = None
@@ -103,7 +108,7 @@ with ui.splitter().classes('h-screen') as splitter:
                             ui.label('Bitte generiere zuerst auf der linken Seite Daten.').classes('text-center w-full')
             
             with ui.row().classes('absolute left-0 bottom-0 px-4 w-full h-20 flex flex-col justify-center shadow-[0_35px_60px_-15px_rgba(0,0,0,1)]'):
-                send_button = ui.button('An Azure senden')
+                send_button = ui.button('An Azure senden', on_click=lambda: send_handler())
                 send_button.disable()
 
 ui.run(title='ADX - Datensimulator')
@@ -284,3 +289,17 @@ def generate_handler():
     timestamp_values = generate_timestamps(values_count, interval_input.value)  # Generate 10 timestamp values
 
     print_values(temperature_values, timestamp_values)
+
+def send_handler():
+    temperature_values = values
+    timestamp_values = generate_timestamps(len(values), interval_input.value)
+
+    # map values into a list of dictionaries
+    data = [{
+        'time': timestamp_values[i],
+        'deviceId': device_id_input.value,
+        'temperature': temperature_values[i],
+    } for i in range(0, len(temperature_values))]
+
+    response = iot_hub_helper.send_telemetry_messages(data)
+    ui.notify(response.message, type='positive' if response.success else 'negative')
