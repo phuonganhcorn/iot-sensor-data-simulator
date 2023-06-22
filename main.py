@@ -30,6 +30,11 @@ def tab_change_handler(value):
 # Update root UI element
 ui.query('.nicegui-content').classes('p-0')
 
+async def logout_handler():
+    await ui.run_javascript('localStorage.removeItem("connectionString");', respond=False)
+    iot_hub_helper.close_connection()
+    await handle_connection()
+
 # Create the UI
 with ui.splitter().classes('h-screen') as splitter:
     splitter.classes('w-full')
@@ -37,7 +42,10 @@ with ui.splitter().classes('h-screen') as splitter:
     # Create the left column
     with splitter.before:
         with ui.column().classes('p-4'):
-            ui.label('ADX - Datensimulator').classes('text-2xl font-bold')
+            with ui.row().classes('w-full flex justify-between'):
+                ui.label('ADX - Datensimulator').classes('text-2xl font-bold')
+                ui.button(icon='logout', on_click=lambda: logout_handler()).classes('bg-transparent text-black shadow-node hover:bg-transparent hover:text-black/80 before:content-none').tooltip('Verbindung trennen')
+
             ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
             
             with ui.grid(columns=3).classes('w-full'):
@@ -150,7 +158,7 @@ async def retrieve_connection_string():
     return await ui.run_javascript('localStorage.getItem("connectionString");')
 
 async def handle_connection():
-    global connection_note_container
+    global iot_hub_helper, connection_note_container
     connection_string = await retrieve_connection_string()
     
     if connection_string is None:
@@ -160,6 +168,8 @@ async def handle_connection():
             connection_string_input = ui.input(label='Verbindungszeichenfolge').classes('w-full')
             connection_note_container = ui.column()
             ui.button('Verbinden', on_click=lambda: connect_handler(connection_string_input.value, dialog))
+    else:
+        iot_hub_helper = IoTHubHelper(connection_string)
 
 app.on_connect(handle_connection)
 
