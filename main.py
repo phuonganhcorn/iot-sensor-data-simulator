@@ -1,14 +1,23 @@
 import random
 import datetime
+from threading import Thread
+from iot_hub_helper import IoTHubHelper
 from enum import Enum
-from nicegui import ui
+from nicegui import app, ui
+import asyncio
+
+# CONNECTION_STRING = "HostName=IoT-Hub-Tobias1.azure-devices.net;DeviceId=sim000001;SharedAccessKey=5y6hx8YYZC6oLEO2/Jbrd8UGLpf4dKA7gf2et1gxm6s="
+iot_hub_helper = None
 
 values = []
 tabs = None
 table_container = None
 chart_container = None
+spinner_container = None
+connection_note_container = None
 send_button = None
 is_chart_drawn = False
+is_data_sent = False
 
 class Tab(Enum):
     TABLE = "Tabelle"
@@ -21,6 +30,11 @@ def tab_change_handler(value):
 # Update root UI element
 ui.query('.nicegui-content').classes('p-0')
 
+async def logout_handler():
+    await ui.run_javascript('localStorage.removeItem("connectionString");', respond=False)
+    iot_hub_helper.close_connection()
+    await handle_connection()
+
 # Create the UI
 with ui.splitter().classes('h-screen') as splitter:
     splitter.classes('w-full')
@@ -28,7 +42,10 @@ with ui.splitter().classes('h-screen') as splitter:
     # Create the left column
     with splitter.before:
         with ui.column().classes('p-4'):
-            ui.label('ADX - Datensimulator').classes('text-2xl font-bold')
+            with ui.row().classes('w-full flex justify-between'):
+                ui.label('ADX - Datensimulator').classes('text-2xl font-bold')
+                ui.button(icon='logout', on_click=lambda: logout_handler()).classes('bg-transparent text-black shadow-node hover:bg-transparent hover:text-black/80 before:content-none').tooltip('Verbindung trennen')
+
             ui.label('Dieses Tool generiert zufällige Temperaturwerte und sendet diese an den Azure IoT Hub.')
             
             with ui.grid(columns=3).classes('w-full'):
@@ -103,19 +120,68 @@ with ui.splitter().classes('h-screen') as splitter:
                             ui.label('Bitte generiere zuerst auf der linken Seite Daten.').classes('text-center w-full')
             
             with ui.row().classes('absolute left-0 bottom-0 px-4 w-full h-20 flex flex-col justify-center shadow-[0_35px_60px_-15px_rgba(0,0,0,1)]'):
-                send_button = ui.button('An Azure senden')
+                send_button = ui.button('An Azure senden', on_click=lambda: send_handler())
                 send_button.disable()
 
-ui.run(title='ADX - Datensimulator')
+with ui.row().classes('fixed left-0 top-0 w-full h-full flex justify-center items-center bg-gray-300/60 z-50') as row:
+    spinner_container = row
+    spinner_container.set_visibility(False)
+    ui.spinner(size='lg')
+
+ui.run(title='ADX - Datensimulator', favicon='📈')
+
+async def connect_handler(connection_string, dialog=None):
+    global iot_hub_helper
+
+    try:
+        iot_hub_helper = IoTHubHelper(connection_string)
+    except Exception as e:
+        connection_note_container.clear()
+
+        with connection_note_container.classes('p-4 w-full gap-0 bg-red-100 !rounded-sm'):
+            ui.label('Verbindung fehlgeschlagen').classes('text-red-500 font-bold')
+            ui.label('Bitte überprüfe deine Verbindungszeichenfolge.').classes('text-red-500')
+            ui.html('Fehler: <i>{}</i>'.format(e)).classes('mt-2 text-xs text-red-500')
+        return
+    
+    if dialog:
+        dialog.close()
+
+    await store_connection_string(connection_string)
+
+    ui.notify('Verbindung erfolgreich hergestellt', type='positive')
+
+async def store_connection_string(connection_string):
+    await ui.run_javascript('localStorage.setItem("connectionString", "{}");'.format(connection_string), respond=False)
+
+async def retrieve_connection_string():
+    return await ui.run_javascript('localStorage.getItem("connectionString");')
+
+async def handle_connection():
+    global iot_hub_helper, connection_note_container
+    connection_string = await retrieve_connection_string()
+    
+    if connection_string is None:
+        with ui.dialog(value=True) as dialog, ui.card().classes('!max-w-md'):
+            ui.label('Verbindungszeichenfolge erforderlich').classes('text-lg font-bold')
+            ui.label('Bitte gib eine Verbindungszeichenfolge an, um eine Verbindung zu deinem Azure IoT Hub herzustellen zu können.').classes('w-full')
+            connection_string_input = ui.input(label='Verbindungszeichenfolge').classes('w-full')
+            connection_note_container = ui.column()
+            ui.button('Verbinden', on_click=lambda: connect_handler(connection_string_input.value, dialog))
+    else:
+        iot_hub_helper = IoTHubHelper(connection_string)
+
+app.on_connect(handle_connection)
 
 # Generate the temperature values
 def generate_temperature(num_values):
-    global values, is_chart_drawn
+    global values, is_chart_drawn, is_data_sent
     
     temperatures = []
     iteration = 0
     anomaly_count = 0
     is_chart_drawn = False # Reset flag
+    is_data_sent = False # Reset flag
 
     # Get the input values
     base_value = base_value_input.value
@@ -284,3 +350,46 @@ def generate_handler():
     timestamp_values = generate_timestamps(values_count, interval_input.value)  # Generate 10 timestamp values
 
     print_values(temperature_values, timestamp_values)
+
+async def send_handler():
+    global is_data_sent
+
+    if is_data_sent:
+        with ui.dialog(value=True) as dialog, ui.card().classes('!max-w-sm flex items-center'):
+            ui.label('Werte bereits gesendet').classes('text-lg font-bold')
+            ui.label('Du hast die bestehenden Daten bereits gesendet. Generiere neue Daten zum erneuten Senden.').classes('text-center')
+
+            with ui.row().classes('mt-2 w-full flex justify-center'):
+                ui.button('Schließen', on_click=dialog.close)
+        return
+
+    print("Sending data to IoT Hub...")
+
+    show_spinner()
+
+    temperature_values = values
+    timestamp_values = generate_timestamps(len(values), interval_input.value)
+
+    # map values into a list of dictionaries
+    data = [{
+        'time': timestamp_values[i],
+        'deviceId': device_id_input.value,
+        'temperature': temperature_values[i],
+    } for i in range(0, len(temperature_values))]
+
+    await asyncio.sleep(0.1) # Workaround to show the spinner
+
+    response = iot_hub_helper.send_telemetry_messages(data)
+    ui.notify(response.message, type='positive' if response.success else 'negative')
+
+    is_data_sent = response.success
+
+    hide_spinner()
+
+def show_spinner():
+    spinner_container.set_visibility(True)
+    return
+
+def hide_spinner():
+    spinner_container.set_visibility(False)
+    
