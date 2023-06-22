@@ -3,17 +3,18 @@ import datetime
 from threading import Thread
 from iot_hub_helper import IoTHubHelper
 from enum import Enum
-from nicegui import ui
+from nicegui import app, ui
 import asyncio
 
-CONNECTION_STRING = "HostName=IoT-Hub-Tobias1.azure-devices.net;DeviceId=sim000001;SharedAccessKey=5y6hx8YYZC6oLEO2/Jbrd8UGLpf4dKA7gf2et1gxm6s="
-iot_hub_helper = IoTHubHelper(CONNECTION_STRING)
+# CONNECTION_STRING = "HostName=IoT-Hub-Tobias1.azure-devices.net;DeviceId=sim000001;SharedAccessKey=5y6hx8YYZC6oLEO2/Jbrd8UGLpf4dKA7gf2et1gxm6s="
+iot_hub_helper = None
 
 values = []
 tabs = None
 table_container = None
 chart_container = None
 spinner_container = None
+connection_note_container = None
 send_button = None
 is_chart_drawn = False
 is_data_sent = False
@@ -119,7 +120,48 @@ with ui.row().classes('fixed left-0 top-0 w-full h-full flex justify-center item
     spinner_container.set_visibility(False)
     ui.spinner(size='lg')
 
-ui.run(title='ADX - Datensimulator')
+ui.run(title='ADX - Datensimulator', favicon='📈')
+
+async def connect_handler(connection_string, dialog=None):
+    global iot_hub_helper
+
+    try:
+        iot_hub_helper = IoTHubHelper(connection_string)
+    except Exception as e:
+        connection_note_container.clear()
+
+        with connection_note_container.classes('p-4 w-full gap-0 bg-red-100 !rounded-sm'):
+            ui.label('Verbindung fehlgeschlagen').classes('text-red-500 font-bold')
+            ui.label('Bitte überprüfe deine Verbindungszeichenfolge.').classes('text-red-500')
+            ui.html('Fehler: <i>{}</i>'.format(e)).classes('mt-2 text-xs text-red-500')
+        return
+    
+    if dialog:
+        dialog.close()
+
+    await store_connection_string(connection_string)
+
+    ui.notify('Verbindung erfolgreich hergestellt', type='positive')
+
+async def store_connection_string(connection_string):
+    await ui.run_javascript('localStorage.setItem("connectionString", "{}");'.format(connection_string), respond=False)
+
+async def retrieve_connection_string():
+    return await ui.run_javascript('localStorage.getItem("connectionString");')
+
+async def handle_connection():
+    global connection_note_container
+    connection_string = await retrieve_connection_string()
+    
+    if connection_string is None:
+        with ui.dialog(value=True) as dialog, ui.card().classes('!max-w-md'):
+            ui.label('Verbindungszeichenfolge erforderlich').classes('text-lg font-bold')
+            ui.label('Bitte gib eine Verbindungszeichenfolge an, um eine Verbindung zu deinem Azure IoT Hub herzustellen zu können.').classes('w-full')
+            connection_string_input = ui.input(label='Verbindungszeichenfolge').classes('w-full')
+            connection_note_container = ui.column()
+            ui.button('Verbinden', on_click=lambda: connect_handler(connection_string_input.value, dialog))
+
+app.on_connect(handle_connection)
 
 # Generate the temperature values
 def generate_temperature(num_values):
