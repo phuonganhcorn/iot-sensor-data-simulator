@@ -33,6 +33,7 @@ ui.query('.nicegui-content').classes('p-0')
 async def logout_handler():
     await ui.run_javascript('localStorage.removeItem("connectionString");', respond=False)
     iot_hub_helper.close_connection()
+    ui.notify('Verbindung getrennt')
     await handle_connection()
 
 # Create the UI
