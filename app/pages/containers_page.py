@@ -4,11 +4,17 @@ from components.navigation import setup as setup_navigation
 DUMMY_CONTAINERS = [
     {
         'name': 'Container 1',
-        'active': True
+        'active': True,
+        'start_time': '10:35',
+        'devices': 3,
+        'messages': 545
     },
     {
         'name': 'Container 2',
-        'active': False
+        'active': False,
+        'start_time': '08:11',
+        'devices': 2,
+        'messages': 1237
     }
 ]
 
@@ -29,12 +35,22 @@ def setup_page():
         for container in DUMMY_CONTAINERS:
             with ui.card().tight():
                 with ui.card_section().classes('min-h-[260px]'):
-                    with ui.row().classes('justify-between items-center'):
+                    with ui.row().classes('pb-2 w-full justify-between items-center border-b border-gray-200'):
                         ui.label(container['name']).classes('text-xl font-semibold')
                         ui.button(icon='more_vert').props('flat').classes('px-2 text-black')
+                    with ui.column().classes('py-4 gap-2'):
+                        with ui.row().classes('gap-1'):
+                            ui.label('Startzeit:').classes('text-sm font-medium')
+                            ui.label(container['start_time']).classes('text-sm')
+                        with ui.row().classes('gap-1'):
+                            ui.label('Geräte:').classes('text-sm font-medium')
+                            ui.label(container['devices']).classes('text-sm')
+                        with ui.row().classes('gap-1'):
+                            ui.label('Gesendete Nachrichten:').classes('text-sm font-medium')
+                            ui.label(container['messages']).classes('text-sm')
                 with ui.card_section().classes('bg-gray-100'):
                     with ui.row().classes('items-center justify-between'):
-                        with ui.row().classes('items-center'):
+                        with ui.row().classes('gap-3 items-center'):
                             ui.row().classes('h-4 w-4 rounded-full' + (' bg-green-500' if container['active'] else ' bg-red-500'))
                             ui.label('Aktiv' if container['active'] else 'Inaktiv')
                         with ui.row().classes('gap-2'):
