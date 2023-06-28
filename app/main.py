@@ -6,6 +6,10 @@ from enum import Enum
 from nicegui import app, ui
 import asyncio
 
+from pages.sessions_page import init_page as init_sessions_page
+from pages.sensors_page import init_page as init_sensors_page
+from pages.devices_page import init_page as init_devices_page
+
 # CONNECTION_STRING = "HostName=IoT-Hub-Tobias1.azure-devices.net;DeviceId=sim000001;SharedAccessKey=5y6hx8YYZC6oLEO2/Jbrd8UGLpf4dKA7gf2et1gxm6s="
 iot_hub_helper = None
 
@@ -35,6 +39,18 @@ async def logout_handler():
     iot_hub_helper.close_connection()
     ui.notify('Verbindung getrennt')
     await init_connection()
+
+@ui.page('/sessions')
+def sessions_page():
+    init_sessions_page()
+
+@ui.page('/sensoren')
+def sensors_page():
+    init_sensors_page()
+
+@ui.page('/geraete')
+def devices_page():
+    init_devices_page()
 
 # Create the UI
 with ui.splitter().classes('h-screen') as splitter:
