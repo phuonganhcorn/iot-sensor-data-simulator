@@ -4,7 +4,7 @@ from threading import Thread
 from iot_hub_helper import IoTHubHelper
 from enum import Enum
 from nicegui import app, ui
-import asyncio
+import asynciosetup_container_page
 
 # CONNECTION_STRING = "HostName=IoT-Hub-Tobias1.azure-devices.net;DeviceId=sim000001;SharedAccessKey=5y6hx8YYZC6oLEO2/Jbrd8UGLpf4dKA7gf2et1gxm6s="
 iot_hub_helper = None
