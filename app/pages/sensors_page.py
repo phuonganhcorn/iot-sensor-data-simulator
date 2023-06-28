@@ -1,4 +1,6 @@
 from nicegui import ui
+from components.navigation import setup as setup_navigation
 
-def init_page():
+def setup_page():
+    setup_navigation("Sensoren")
     ui.label('Sensoren')
