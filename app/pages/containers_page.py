@@ -37,7 +37,10 @@ def setup_page():
                 with ui.card_section().classes('min-h-[260px]'):
                     with ui.row().classes('pb-2 w-full justify-between items-center border-b border-gray-200'):
                         ui.label(container['name']).classes('text-xl font-semibold')
-                        ui.button(icon='more_vert').props('flat').classes('px-2 text-black')
+                        with ui.button(icon='more_vert').props('flat').classes('px-2 text-black'):
+                            with ui.menu().props(remove='no-parent-event') as menu:
+                                ui.menu_item('Log anzeigen').classes('flex items-center')
+                                ui.menu_item('Löschen').classes('text-red-500').classes('flex items-center')
                     with ui.column().classes('py-4 gap-2'):
                         with ui.row().classes('gap-1'):
                             ui.label('Startzeit:').classes('text-sm font-medium')
