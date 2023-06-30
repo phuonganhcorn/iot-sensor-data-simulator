@@ -1,82 +1,125 @@
 from nicegui import ui
 from components.navigation import setup as setup_navigation
+from components.container_card import ContainerCard
+from model.container import Container
 
-DUMMY_CONTAINERS = [
-    {
-        'name': 'Container 1',
-        'active': True,
-        'start_time': '10:35',
-        'devices': 3,
-        'messages': 545
-    },
-    {
-        'name': 'Container 2',
-        'active': False,
-        'start_time': '08:11',
-        'devices': 2,
-        'messages': 1237
-    }
-]
 
-def setup_page():
-    setup_navigation()
+class ContainersPage:
 
-    ui.query('main').classes('h-px')
-    
-    if len(DUMMY_CONTAINERS) == 0:
-        ui.query('.nicegui-content').classes('h-full items-center justify-center')
-        with ui.column() as container:
-            container.classes('shadow-lg rounded-lg bg-white p-4')
-            ui.label('Keine Container vorhanden.')
-            ui.button('Neuen Container erstellen')
-    else:
+    containers = [
+        # Container(id=1),
+        # Container(id=2)
+    ]
+
+    def __init__(self):
+        self.cards_container = None
+        self.cards_grid = None
+        self.cards = []
+        self.update_stats()
+        self.setup_page()
+
+    def setup_page(self):
+        setup_navigation()
+
+        ui.query('main').classes('h-px')
         ui.query('.nicegui-content').classes('p-8')
 
         ui.label("Container").classes('text-2xl font-bold')
 
+        self.setup_menu_bar()
+        self.setup_cards_container()
+
+    def setup_menu_bar(self):
         with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
-            ui.button('Neuen Container erstellen').classes('')
+            ui.button('Neuen Container erstellen',
+                      on_click=lambda: self.create_container()).classes('')
 
             with ui.row():
                 with ui.row().classes('ml-4 gap-1'):
                     ui.label('Gesamt:').classes('text-sm font-medium')
-                    ui.label(len(DUMMY_CONTAINERS)).classes('text-sm')
+                    ui.label().classes('text-sm').bind_text(self, 'containers_count')
                 with ui.row().classes('ml-4 gap-1'):
                     ui.label('Aktiv:').classes('text-sm font-medium')
-                    ui.label("1").classes('text-sm')
+                    ui.label().classes('text-sm').bind_text(self, 'active_containers_count')
                 with ui.row().classes('ml-4 gap-1'):
                     ui.label('Inaktiv:').classes('text-sm font-medium')
-                    ui.label("1").classes('text-sm')
+                    ui.label().classes('text-sm').bind_text(self, 'inactive_containers_count')
 
             with ui.row():
                 ui.input(placeholder='Filter').classes('w-44')
-                ui.select({ 1: "Alle", 2: "Aktiv", 3: "Inaktiv"}, value=1).classes('w-24')
+                ui.select({1: "Alle", 2: "Aktiv", 3: "Inaktiv"},
+                          value=1).classes('w-24')
 
-        with ui.grid().classes('mt-6 w-full grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'):
-            for container in DUMMY_CONTAINERS:
-                with ui.card().tight():
-                    with ui.card_section().classes('min-h-[260px]'):
-                        with ui.row().classes('pb-2 w-full justify-between items-center border-b border-gray-200'):
-                            ui.label(container['name']).classes('text-xl font-semibold')
-                            with ui.button(icon='more_vert').props('flat').classes('px-2 text-black'):
-                                with ui.menu().props(remove='no-parent-event') as menu:
-                                    ui.menu_item('Log anzeigen').classes('flex items-center')
-                                    ui.menu_item('Löschen').classes('text-red-500').classes('flex items-center')
-                        with ui.column().classes('py-4 gap-2'):
-                            with ui.row().classes('gap-1'):
-                                ui.label('Startzeit:').classes('text-sm font-medium')
-                                ui.label(container['start_time']).classes('text-sm')
-                            with ui.row().classes('gap-1'):
-                                ui.label('Geräte:').classes('text-sm font-medium')
-                                ui.label(container['devices']).classes('text-sm')
-                            with ui.row().classes('gap-1'):
-                                ui.label('Gesendete Nachrichten:').classes('text-sm font-medium')
-                                ui.label(container['messages']).classes('text-sm')
-                    with ui.card_section().classes('bg-gray-100'):
-                        with ui.row().classes('items-center justify-between'):
-                            with ui.row().classes('gap-3 items-center'):
-                                ui.row().classes('h-4 w-4 rounded-full' + (' bg-green-500' if container['active'] else ' bg-red-500'))
-                                ui.label('Aktiv' if container['active'] else 'Inaktiv')
-                            with ui.row().classes('gap-2'):
-                                ui.button(icon='play_arrow').props('flat').classes('px-2 text-black')
-                                ui.button(icon='pause').props('flat').classes('px-2 text-black')
+    def setup_cards_container(self):
+        self.cards_container = ui.row().classes('w-full')
+        self.cards_grid = ui.grid().classes(
+            'mt-6 w-full grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4')
+
+        with self.cards_container:
+            if len(self.containers) == 0:
+                self.print_no_containers()
+            else:
+                with self.cards_grid:
+                    for container in self.containers:
+                        new_container_card = ContainerCard(
+                            container=container, start_callback=self.start_container, stop_callback=self.stop_container, delete_callback=self.delete_container)
+                        self.cards.append(new_container_card)
+
+    def update_stats(self):
+        self.containers_count = len(self.containers)
+        self.active_containers_count = len(
+            list(filter(lambda c: c.is_active, self.containers)))
+        self.inactive_containers_count = self.containers_count - self.active_containers_count
+
+    def print_no_containers(self):
+        self.cards_container.classes('justify-center')
+        with self.cards_container:
+            with ui.column().classes('self-center mt-48'):
+                ui.label('Keine Container vorhanden')
+
+    def create_container(self):
+        if len(self.containers) == 0:
+            self.cards_container.clear()
+
+        new_container = Container(id=len(self.containers) + 1)
+        self.containers.append(new_container)
+        with self.cards_grid:
+            new_container_card = ContainerCard(container=new_container, start_callback=self.start_container,
+                                               stop_callback=self.stop_container, logs_callback=self.show_logs, delete_callback=self.delete_container)
+            self.cards.append(new_container_card)
+        self.update_stats()
+
+    def start_container(self, container):
+        if container.start():
+            index = self.containers.index(container)
+            self.cards[index].set_active()
+            self.update_stats()
+
+    def stop_container(self, container):
+        if container.stop():
+            index = self.containers.index(container)
+            self.cards[index].set_inactive()
+            self.update_stats()
+
+    def show_logs(self, container):
+        ui.notify('Logs anzeigen', type='info')
+
+    def delete_container(self, container):
+        if container.is_active:
+            ui.notify(
+                'Container ist aktiv und kann nicht gelöscht werden.', type='warning')
+            return
+
+        if not container.delete():
+            return
+
+        index = self.containers.index(container)
+
+        del self.containers[index]
+        del self.cards[index]
+        self.cards_grid.remove(index)
+
+        self.update_stats()
+
+        if len(self.containers) == 0:
+            self.print_no_containers()
