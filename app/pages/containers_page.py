@@ -19,7 +19,7 @@ DUMMY_CONTAINERS = [
 ]
 
 def setup_page():
-    setup_navigation('Container')
+    setup_navigation()
 
     ui.query('main').classes('h-px')
     
@@ -31,6 +31,8 @@ def setup_page():
             ui.button('Neuen Container erstellen')
     else:
         ui.query('.nicegui-content').classes('p-8')
+
+        ui.label("Container").classes('text-2xl font-bold')
 
         with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
             ui.button('Neuen Container erstellen').classes('')

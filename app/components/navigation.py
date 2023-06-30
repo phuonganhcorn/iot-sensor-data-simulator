@@ -1,8 +1,8 @@
 from nicegui import ui
 
-def setup(title):
+def setup():
     with ui.header(elevated=True).style('background-color: #3874c8').classes('items-center justify-between'):
-        ui.label(title).classes('text-md font-semibold uppercase')
+        ui.label("IoT Daten Simulator").classes('text-md font-semibold uppercase')
         with ui.row():
             ui.link('Container', '/').classes('text-white !no-underline')
             ui.link('Sensoren', '/sensoren').classes('text-white !no-underline')

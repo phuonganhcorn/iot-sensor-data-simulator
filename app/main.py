@@ -14,4 +14,4 @@ def sensors_page():
 def devices_page():
     setup_devices_page()
 
-ui.run()
+ui.run(title="IoT Daten Simulator")
