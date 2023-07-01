@@ -1,5 +1,5 @@
 from nicegui import ui
-from components.navigation import setup as setup_navigation
+from components.navigation import Navigation
 from components.container_card import ContainerCard
 from model.container import Container
 
@@ -19,7 +19,7 @@ class ContainersPage:
         self.setup_page()
 
     def setup_page(self):
-        setup_navigation()
+        Navigation()
 
         ui.query('main').classes('h-px')
         ui.query('.nicegui-content').classes('p-8')

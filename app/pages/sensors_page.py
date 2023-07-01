@@ -1,5 +1,5 @@
 from nicegui import ui
-from components.navigation import setup as setup_navigation
+from components.navigation import Navigation
 from model.sensor import Sensor
 from components.sensor_item import SensorItem
 
@@ -12,7 +12,7 @@ class SensorsPage():
         self.setup_page()
 
     def setup_page(self):
-        setup_navigation()
+        Navigation()
         ui.query('.nicegui-content').classes('p-8')
         ui.label("Sensoren").classes('text-2xl font-bold')
 
