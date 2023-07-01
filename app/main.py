@@ -1,7 +1,7 @@
 from nicegui import app, ui
 
 from pages.containers_page import ContainersPage
-from pages.sensors_page import setup_page as setup_sensors_page
+from pages.sensors_page import SensorsPage
 from pages.devices_page import setup_page as setup_devices_page
 
 ContainersPage()
@@ -9,7 +9,7 @@ ContainersPage()
 
 @ui.page('/sensoren')
 def sensors_page():
-    setup_sensors_page()
+    SensorsPage()
 
 
 @ui.page('/geraete')
