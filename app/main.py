@@ -2,7 +2,7 @@ from nicegui import app, ui
 
 from pages.containers_page import ContainersPage
 from pages.sensors_page import SensorsPage
-from pages.devices_page import setup_page as setup_devices_page
+from pages.machines_page import MachinesPage
 
 ContainersPage()
 
@@ -12,9 +12,9 @@ def sensors_page():
     SensorsPage()
 
 
-@ui.page('/geraete')
+@ui.page('/maschinen')
 def devices_page():
-    setup_devices_page()
+    MachinesPage()
 
 
 ui.run(title="IoT Telemetrie Simulator", host="127.0.0.1", port=8081)
