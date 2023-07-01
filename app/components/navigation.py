@@ -8,7 +8,7 @@ class Navigation():
 
     def setup(self):
         with ui.header(elevated=True).style('background-color: #3874c8').classes('items-center justify-between'):
-            ui.label("IoT Daten Simulator").classes(
+            ui.label("IoT Telemetrie Simulator").classes(
                 'text-md font-semibold uppercase')
             with ui.row():
                 ui.link('Container', '/').classes('text-white !no-underline')

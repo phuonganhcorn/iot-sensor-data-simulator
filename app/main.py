@@ -17,4 +17,4 @@ def devices_page():
     setup_devices_page()
 
 
-ui.run(title="IoT Daten Simulator", host="127.0.0.1", port=8081)
+ui.run(title="IoT Telemetrie Simulator", host="127.0.0.1", port=8081)
