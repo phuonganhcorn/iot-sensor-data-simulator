@@ -13,5 +13,5 @@ class Navigation():
             with ui.row().classes('gap-12'):
                 ui.link('Container', '/').classes('text-white !no-underline')
                 ui.link('Sensoren', '/sensoren').classes('text-white !no-underline')
-                ui.link('Geräte', '/geraete').classes('text-white !no-underline')
+                ui.link('Maschinen', '/maschinen').classes('text-white !no-underline')
             ui.row()
