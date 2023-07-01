@@ -4,9 +4,11 @@ from model.machine import Machine
 from components.machine_item import MachineItem
 
 
-class MachinesPage():
+class MachinesPage:
 
-    def __init__(self):
+    def __init__(self, iot_hub_helper):
+        self.iot_hub_helper = iot_hub_helper
+        self.iot_hub_devices = self.iot_hub_helper.get_devices()
         self.machines = []
         self.update_stats()
         self.setup_page()
