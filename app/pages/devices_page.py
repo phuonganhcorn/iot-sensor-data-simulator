@@ -1,35 +1,35 @@
 from nicegui import ui
 from components.navigation import Navigation
-from model.machine import Machine
-from components.machine_item import MachineItem
+from model.device import Device
+from components.device_item import DeviceItem
 
 
-class MachinesPage:
+class DevicesPage:
 
     def __init__(self, iot_hub_helper):
         self.iot_hub_helper = iot_hub_helper
         self.iot_hub_devices = self.iot_hub_helper.get_devices()
-        self.machines = []
+        self.devices = Device.get_all()
         self.update_stats()
         self.setup_page()
 
     def setup_page(self):
         Navigation()
         ui.query('.nicegui-content').classes('p-8')
-        ui.label("Maschinen").classes('text-2xl font-bold')
+        ui.label("Geräte").classes('text-2xl font-bold')
 
         self.setup_menu_bar()
         self.setup_list()
 
     def setup_menu_bar(self):
         with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
-            ui.button('Neue Maschine erstellen',
-                      on_click=lambda: self.create_machine()).classes('')
+            ui.button('Neues Gerät erstellen',
+                      on_click=lambda: self.create_device()).classes('')
 
             with ui.row():
                 with ui.row().classes('ml-4 gap-1'):
                     ui.label('Gesamt:').classes('text-sm font-medium')
-                    ui.label().classes('text-sm').bind_text(self, 'machines_count')
+                    ui.label().classes('text-sm').bind_text(self, 'devices_count')
 
             with ui.row():
                 ui.input(placeholder='Filter').classes('w-44')
@@ -40,57 +40,56 @@ class MachinesPage:
         self.list_container = ui.column().classes('w-full gap-0 divide-y')
 
         with self.list_container:
-            if len(self.machines) == 0:
-                self.print_no_machines()
+            if len(self.devices) == 0:
+                self.print_no_devices()
             else:
-                for machine in self.machines:
-                    MachineItem(machine=machine,
+                for device in self.devices:
+                    DeviceItem(device=device,
                                delete_callback=self.delete_button_handler)
 
-    def print_no_machines(self):
+    def print_no_devices(self):
         self.list_container.classes('justify-center')
         with self.list_container:
             with ui.column().classes('self-center mt-48'):
-                ui.label('Keine Maschinen vorhanden')
+                ui.label('Keine Geräte vorhanden')
 
     def update_stats(self):
-        self.machines_count = len(self.machines)
+        self.devices_count = len(self.devices)
 
-    def create_machine(self):
-        if len(self.machines) == 0:
+    def create_device(self):
+        if len(self.devices) == 0:
             self.list_container.clear()
 
-        new_machine = Machine(id=len(self.machines) + 1)
-        self.machines.append(new_machine)
+        new_device = Device.add(name="Mein Gerät", connection_string="hier.mein.string")
+        self.devices.append(new_device)
 
         with self.list_container:
-            MachineItem(machine=new_machine,
+            DeviceItem(device=new_device,
                        delete_callback=self.delete_button_handler)
 
         self.update_stats()
 
-    def delete_button_handler(self, machine):
+    def delete_button_handler(self, device):
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
             ui.label('Möchtest du die Maschine wirklich löschen?')
             with ui.row():
                 ui.button('Abbrechen', on_click=dialog.close).props('flat')
                 ui.button('Löschen', on_click=lambda d=dialog: self.delete_handler(
-                    d, machine)).classes('text-white bg-red')
+                    d, device)).classes('text-white bg-red')
 
-    def delete_handler(self, dialog, machine):
+    def delete_handler(self, dialog, device):
         dialog.close()
 
         # TODO: Check if container is running and stop it
 
-        if not machine.delete():
-            return
+        Device.delete(device)
 
-        index = self.machines.index(machine)
+        index = self.devices.index(device)
 
-        del self.machines[index]
+        del self.devices[index]
         self.list_container.remove(index)
 
         self.update_stats()
 
-        if len(self.machines) == 0:
-            self.print_no_machines()
+        if len(self.devices) == 0:
+            self.print_no_devices()

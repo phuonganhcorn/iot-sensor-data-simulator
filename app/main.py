@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from utils.iot_hub_helper import IoTHubHelper
 from pages.containers_page import ContainersPage
 from pages.sensors_page import SensorsPage
-from pages.machines_page import MachinesPage
+from pages.devices_page import DevicesPage
 
 load_dotenv()
 
@@ -18,9 +18,9 @@ def sensors_page():
     SensorsPage()
 
 
-@ui.page('/maschinen')
+@ui.page('/geraete')
 def devices_page():
-    MachinesPage(iot_hub_helper)
+    DevicesPage(iot_hub_helper)
 
 
 ui.run(title="IoT Telemetrie Simulator", host="127.0.0.1", port=8081)
