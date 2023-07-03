@@ -1,7 +1,7 @@
 from nicegui import ui
 from components.navigation import Navigation
 from components.sensor_item import SensorItem
-from model.database import Sensor
+from model.database import Sensor, Device
 from constants.units import *
 
 
@@ -56,6 +56,8 @@ class SensorsPage():
         self.sensors_count = len(self.sensors)
 
     def show_create_sensor_dialog(self):
+        device_select = None
+
         with ui.row().classes('fixed inset-0 bg-black/50 z-10') as container:
 
             with ui.stepper().props('vertical').classes('absolute left-1/2 top-[15vh] w-[70%] h-[70vh] bg-white -translate-x-1/2 z-50') as stepper:
@@ -88,6 +90,23 @@ class SensorsPage():
                         ui.button('Zurück', on_click=stepper.previous).props(
                             'flat')
                         ui.button('Weiter', on_click=stepper.next)
+                with ui.step('Gerätezuordnung'):
+                    devices = Device.get_all()
+                    devices_options = {
+                        device.id: device.name for device in devices}
+                    if len(devices) > 0:
+                        with ui.column():
+                            ui.label(
+                                'Wähle das Gerät aus zu dem der Sensor hinzugefügt werden soll.')
+                            device_select = ui.select(options=devices_options, with_input=True,
+                                                      on_change=lambda e: ui.notify(e.value)).classes('w-40')
+                    else:
+                        ui.label(
+                            'Es sind aktuell noch keine Geräte vorhanden. Du kannst danach zur Geräte-Seite wechseln, ein Gerät erstellen und diesen Sensor dann hinzufügen.')
+                    with ui.stepper_navigation():
+                        ui.button('Zurück', on_click=stepper.previous).props(
+                            'flat')
+                        ui.button('Weiter', on_click=stepper.next)
                 with ui.step('Abschließen'):
                     ui.label(
                         'Erstelle einen neuen Sensor mit den angegebenen Werten.')
@@ -95,9 +114,9 @@ class SensorsPage():
                         ui.button('Zurück', on_click=stepper.previous).props(
                             'flat')
                         ui.button('Sensor erstellen', on_click=lambda: self.create_sensor(
-                            container, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input))
+                            container, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select))
 
-    def create_sensor(self, dialog, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input):
+    def create_sensor(self, dialog, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select):
         if len(self.sensors) == 0:
             self.list_container.clear()
 
@@ -107,9 +126,10 @@ class SensorsPage():
         variation_range = variation_range_input.value
         change_rate = change_rate_input.value
         interval = interval_input.value
+        device_id = None if device_select is None else device_select.value
 
         new_sensor = Sensor.add(name=name, base_value=base_value,
-                                unit=unit, variation_range=variation_range, change_rate=change_rate, interval=interval)
+                                unit=unit, variation_range=variation_range, change_rate=change_rate, interval=interval, device_id=device_id)
         self.sensors.append(new_sensor)
 
         with self.list_container:

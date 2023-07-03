@@ -10,7 +10,7 @@ class Device(Base):
     session = None
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    device_id = Column(String(255))
+    name = Column(String(255))
     generation_id = Column(Integer)
     etag = Column(String(255))
     status = Column(String(255))
@@ -18,7 +18,7 @@ class Device(Base):
     sensors = relationship("Sensor", back_populates="device")
 
     def __repr__(self):
-        return f"<Device(id={self.id}, device_id={self.device_id}, generation_id={self.generation_id}, etag={self.etag}, status={self.status})>"
+        return f"<Device(id={self.id}, name={self.device_id}, generation_id={self.generation_id}, etag={self.etag}, status={self.status})>"
 
     @staticmethod
     def get_all():
@@ -26,7 +26,7 @@ class Device(Base):
 
     @staticmethod
     def add(device):
-        new_device = Device(device_id=device.device_id, generation_id=device.generation_id,
+        new_device = Device(name=device.name, generation_id=device.generation_id,
                             etag=device.etag, status=device.status)
 
         Device.session.add(new_device)
@@ -46,22 +46,22 @@ class Sensor(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
-    device_id = Column(Integer, ForeignKey(Device.id))
     base_value = Column(Float)
     unit = Column(String(20))
     variation_range = Column(Float)
     change_rate = Column(Float)
     interval = Column(Float)
+    device_id = Column(Integer, ForeignKey(Device.id))
 
     device = relationship(Device, back_populates='sensors')
 
     def __repr__(self):
-        return f"<Sensor(id={self.id}, name={self.name}, device_id={self.device_id}, base_value={self.base_value}, unit={self.unit}, variation_range={self.variation_range}, change_rate={self.change_rate}, interval={self.interval})>"
+        return f"<Sensor(id={self.id}, name={self.name}, base_value={self.base_value}, unit={self.unit}, variation_range={self.variation_range}, change_rate={self.change_rate}, interval={self.interval}, device_id={self.device_id})>"
 
     @staticmethod
-    def add(name, base_value, unit, variation_range, change_rate, interval):
+    def add(name, base_value, unit, variation_range, change_rate, interval, device_id):
         new_sensor = Sensor(name=name, base_value=base_value,
-                            unit=unit, variation_range=variation_range, change_rate=change_rate, interval=interval)
+                            unit=unit, variation_range=variation_range, change_rate=change_rate, interval=interval, device_id=device_id)
 
         Sensor.session.add(new_sensor)
         Sensor.session.commit()
