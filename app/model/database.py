@@ -75,6 +75,11 @@ class Sensor(Base):
     @staticmethod
     def get_all_by_ids(list_of_ids):
         return Sensor.session.query(Sensor).filter(Sensor.id.in_(list_of_ids)).all()
+    
+    # Returns all sensors that are not assigned to a device
+    @staticmethod
+    def get_all_unassigned():
+        return Sensor.session.query(Sensor).filter(Sensor.device_id == None).all()
 
     @staticmethod
     def delete(sensor):
