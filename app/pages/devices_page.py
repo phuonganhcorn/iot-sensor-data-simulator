@@ -92,6 +92,8 @@ class DevicesPage:
                                 'flat')
                             ui.button('Erstellen', on_click=lambda: self.complete_device_creation(
                                 dialog, name_input, sensors_input))
+                            
+                        # CONNECTION STRING ERSTELLEN und VERBINDUNG PRÜFEN
 
     def check_device_name_input(self, stepper, name_input):
         if name_input.value == '':

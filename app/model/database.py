@@ -4,6 +4,20 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+class Options(Base):
+    __tablename__ = 'options'
+    session = None
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255))
+    value = Column(String(255))
+
+    def __repr__(self):
+        return f"<Options(id={self.id}, name={self.name}, value={self.value})>"
+    
+    @staticmethod
+    def get_option(name):
+        return Options.session.query(Options).filter_by(name=name).first()
 
 class Device(Base):
     __tablename__ = 'device'
@@ -26,8 +40,12 @@ class Device(Base):
 
     @staticmethod
     def store(device):
+        primary_key = device.authentication.symmetric_key.primary_key
+        host_name = Options.get_option('host_name').value
+        connection_string = f"HostName={host_name};DeviceId={device.device_id};SharedAccessKey={primary_key}"
+        
         device_db = Device(name=device.device_id, generation_id=device.generation_id,
-                            etag=device.etag, status=device.status)
+                            etag=device.etag, status=device.status, connection_string=connection_string)
 
         Device.session.add(device_db)
         Device.session.commit()
@@ -38,6 +56,8 @@ class Device(Base):
     def delete(device):
         Device.session.delete(device)
         Device.session.commit()
+
+        # TODO: Delete device from IoT Hub, registry manager offers a delete_device method
 
 
 class Sensor(Base):
