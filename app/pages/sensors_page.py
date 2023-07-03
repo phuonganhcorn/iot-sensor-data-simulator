@@ -1,7 +1,7 @@
 from nicegui import ui
 from components.navigation import Navigation
 from components.sensor_item import SensorItem
-from model.sensor import Sensor
+from model.database import Sensor
 from constants.units import *
 
 
@@ -58,7 +58,7 @@ class SensorsPage():
     def show_create_sensor_dialog(self):
         with ui.row().classes('fixed inset-0 bg-black/50 z-10') as container:
 
-            with ui.stepper().props('vertical').classes('absolute left-1/2 top-[15vh] w-[80%] h-[70vh] bg-white -translate-x-1/2 z-50') as stepper:
+            with ui.stepper().props('vertical').classes('absolute left-1/2 top-[15vh] w-[70%] h-[70vh] bg-white -translate-x-1/2 z-50') as stepper:
                 with ui.step('Allgemein'):
                     with ui.grid(columns=3):
                         name_input = ui.input('Name')
