@@ -6,7 +6,7 @@ from pages.sensors_page import SensorsPage
 from pages.devices_page import DevicesPage
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from model.database import Device, Sensor, Base
+from model.database import Options, Device, Sensor, Base
 
 load_dotenv()
 
@@ -15,6 +15,7 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+Options.session = session
 Device.session = session
 Sensor.session = session
 
