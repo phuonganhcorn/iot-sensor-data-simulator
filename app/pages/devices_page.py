@@ -1,6 +1,6 @@
 from nicegui import ui
 from components.navigation import Navigation
-from model.device import Device
+from model.database import Device, Sensor
 from components.device_item import DeviceItem
 
 
@@ -24,7 +24,7 @@ class DevicesPage:
     def setup_menu_bar(self):
         with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
             ui.button('Neues Gerät erstellen',
-                      on_click=lambda: self.create_device()).classes('')
+                      on_click=lambda: self.show_create_device_dialog()).classes('')
 
             with ui.row():
                 with ui.row().classes('ml-4 gap-1'):
@@ -56,11 +56,53 @@ class DevicesPage:
     def update_stats(self):
         self.devices_count = len(self.devices)
 
+    def show_create_device_dialog(self):
+        # with ui.row().classes('fixed inset-0 bg-black/50 z-10') as container:
+        with ui.dialog(value=True) as dialog, ui.card().classes('w-full h-[70vh]'):
+            with ui.stepper().props('vertical').classes('w-full h-full') as stepper:
+                with ui.step('Allgemein'):
+                    with ui.column():
+                        ui.label(
+                            'Gibt den Namen des Geräts an. Das Gerät kann dann mit diesem Namen im IoT Hub gefunden werden.')
+                        name_input = ui.input('Name (Device ID)')
+                    with ui.stepper_navigation():
+                        ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
+                            'flat')
+                        ui.button('Weiter', on_click=stepper.next)
+                with ui.step('Simulationswerte'):
+                    sensors = Sensor.get_all()
+                    print(sensors)
+                    with ui.grid(columns=3).classes('w-full'):
+                        base_value_input = ui.number(
+                            label='Basiswert', value=25.00, format='%.2f')
+                        variation_range_input = ui.number(label='Variationsbereich',
+                                                          value=5.00, min=0, format='%.2f')
+                        with ui.number(label='Änderungsrate +/-', value=0.5, min=0, max=10) as input:
+                            change_rate_input = input
+                            ui.tooltip(
+                                'Die Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
+                        interval_input = ui.number(
+                            label='Interval [s]', value=10, min=0, max=3600)
+                    with ui.stepper_navigation():
+                        ui.button('Zurück', on_click=stepper.previous).props(
+                            'flat')
+                        ui.button('Weiter', on_click=stepper.next)
+
     def create_device(self):
         if len(self.devices) == 0:
             self.list_container.clear()
 
-        new_device = Device.add(name="Mein Gerät", connection_string="hier.mein.string")
+        name = "dev001234567"
+
+        response = self.iot_hub_helper.create_device(device_id=name)
+
+        if not response.success:
+            ui.notify(response.message, type='negative')
+            return
+
+        ui.notify(response.message, type='positive')
+
+        new_device = Device.add(response.object)
         self.devices.append(new_device)
 
         with self.list_container:
@@ -71,7 +113,7 @@ class DevicesPage:
 
     def delete_button_handler(self, device):
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
-            ui.label('Möchtest du die Maschine wirklich löschen?')
+            ui.label('Möchtest du das Gerät wirklich löschen?')
             with ui.row():
                 ui.button('Abbrechen', on_click=dialog.close).props('flat')
                 ui.button('Löschen', on_click=lambda d=dialog: self.delete_handler(
