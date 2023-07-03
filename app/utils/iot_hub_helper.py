@@ -25,11 +25,13 @@ class IoTHubHelper:
         primary_key = os.getenv("IOTHUB_PRIMARY_KEY")
         secondary_key = os.getenv("IOTHUB_SECONDARY_KEY")
         status = "enabled"
-        device = self.registry_manager.create_device_with_sas(device_id, primary_key, secondary_key, status)
-        device_connection_string = self.registry_manager.get_device_connection_string(device.device_id)
-        print("Device connection string: {}".format(device_connection_string))
-        return device_connection_string
-    
+        
+        try:
+            device = self.registry_manager.create_device_with_sas(device_id, primary_key, secondary_key, status)
+            return Response(True, "Device {} erfolgreich erstellt".format(device_id), device)
+        except Exception as e:
+            return Response(False, "Fehler beim Erstellen: {}".format(e))
+
     def delete_device(self, device_id):
         try:
             self.registry_manager.delete_device(device_id)
@@ -71,6 +73,7 @@ class IoTHubHelper:
     #         return Response(False, "Fehler beim Senden: {}".format(e))
 
 class Response:
-    def __init__(self, success, message):
+    def __init__(self, success, message="", object=None):
         self.success = success
         self.message = message
+        self.object = object
