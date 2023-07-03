@@ -70,19 +70,28 @@ class DevicesPage:
                         ui.button('Weiter', on_click=lambda: self.check_device_name_input(
                             stepper, name_input))
                 with ui.step('Sensoren'):
-                    sensors = Sensor.get_all()
-                    sensors_options = {
-                        sensor.id: sensor.name for sensor in sensors}
+                    sensors = Sensor.get_all_unassigned()
 
-                    ui.label(
-                        "Wähle die Sensoren aus, die dem Gerät zugeordnet werden sollen. Mehrfachauswahl möglich. Später können keine weiteren Sensoren hinzugefügt werden.")
-                    sensors_input = ui.select(sensors_options, multiple=True, label='Sensoren auswählen').props(
-                        'use-chips').classes('w-64')
-                    with ui.stepper_navigation():
-                        ui.button('Zurück', on_click=stepper.previous).props(
+                    if len(sensors) == 0:
+                        ui.label(
+                            "Es sind keine freien Sensoren verfügbar. Erstelle zuerst einen neuen Sensor.")
+
+                        ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
                             'flat')
-                        ui.button('Erstellen', on_click=lambda: self.complete_device_creation(
-                            dialog, name_input, sensors_input))
+                    else:
+                        sensors_options = {
+                            sensor.id: sensor.name for sensor in sensors}
+
+                        ui.label(
+                            "Wähle die Sensoren aus, die dem Gerät zugeordnet werden sollen. Mehrfachauswahl möglich. Später können keine weiteren Sensoren hinzugefügt werden.")
+                        sensors_input = ui.select(sensors_options, multiple=True, label='Sensoren auswählen').props(
+                            'use-chips').classes('w-64')
+
+                        with ui.stepper_navigation():
+                            ui.button('Zurück', on_click=stepper.previous).props(
+                                'flat')
+                            ui.button('Erstellen', on_click=lambda: self.complete_device_creation(
+                                dialog, name_input, sensors_input))
 
     def check_device_name_input(self, stepper, name_input):
         if name_input.value == '':
@@ -116,7 +125,8 @@ class DevicesPage:
         new_device = Device.store(response.object)
         self.devices.append(new_device)
 
-        self.create_relationship_to_sensors(device=new_device, sensor_ids=sensor_ids)
+        self.create_relationship_to_sensors(
+            device=new_device, sensor_ids=sensor_ids)
         self.add_device_to_list(device=new_device)
         self.update_stats()
 
