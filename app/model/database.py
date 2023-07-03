@@ -18,6 +18,17 @@ class Options(Base):
     @staticmethod
     def get_option(name):
         return Options.session.query(Options).filter_by(name=name).first()
+    
+    @staticmethod
+    def set_option(name, value):
+        option = Options.get_option(name)
+        if option is None:
+            option = Options(name=name, value=value)
+            Options.session.add(option)
+        else:
+            option.value = value
+        Options.session.commit()
+        return option
 
 class Device(Base):
     __tablename__ = 'device'
@@ -43,7 +54,7 @@ class Device(Base):
         primary_key = device.authentication.symmetric_key.primary_key
         host_name = Options.get_option('host_name').value
         connection_string = f"HostName={host_name};DeviceId={device.device_id};SharedAccessKey={primary_key}"
-        
+
         device_db = Device(name=device.device_id, generation_id=device.generation_id,
                             etag=device.etag, status=device.status, connection_string=connection_string)
 
