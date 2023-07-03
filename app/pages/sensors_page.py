@@ -73,7 +73,7 @@ class SensorsPage():
                     with ui.stepper_navigation():
                         ui.button('Abbrechen', on_click=lambda: container.set_visibility(False)).props(
                             'flat')
-                        ui.button('Weiter', on_click=stepper.next)
+                        ui.button('Weiter', on_click=lambda: self.check_general_step_input(stepper, name_input))
                 with ui.step('Simulationswerte'):
                     with ui.grid(columns=3).classes('w-full'):
                         base_value_input = ui.number(
@@ -97,7 +97,7 @@ class SensorsPage():
                     if len(devices) > 0:
                         with ui.column():
                             ui.label(
-                                'Wähle das Gerät aus zu dem der Sensor hinzugefügt werden soll.')
+                                'Wähle das Gerät aus zu dem der Sensor hinzugefügt werden soll (Optional).')
                             device_select = ui.select(options=devices_options, with_input=True,
                                                       on_change=lambda e: ui.notify(e.value)).classes('w-40')
                     else:
@@ -115,6 +115,14 @@ class SensorsPage():
                             'flat')
                         ui.button('Sensor erstellen', on_click=lambda: self.create_sensor(
                             container, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select))
+
+    def check_general_step_input(self, stepper, name_input):
+        if name_input.value == '':
+            ui.notify('Bitte gib einen Namen für den Sensor an.',
+                      type='warning')
+            return
+
+        stepper.next()
 
     def create_sensor(self, dialog, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select):
         if len(self.sensors) == 0:

@@ -106,7 +106,7 @@ class DevicesPage:
     def complete_device_creation(self, dialog, name_input, sensors_input):
         if len(sensors_input.value) == 0:
             ui.notify('Bitte wähle mindestens einen Sensor aus.',
-                      type='negative')
+                      type='warning')
             return
 
         self.create_device(name_input.value, sensors_input.value)
