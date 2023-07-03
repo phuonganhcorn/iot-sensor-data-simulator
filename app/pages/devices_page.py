@@ -57,8 +57,7 @@ class DevicesPage:
         self.devices_count = len(self.devices)
 
     def show_create_device_dialog(self):
-        # with ui.row().classes('fixed inset-0 bg-black/50 z-10') as container:
-        with ui.dialog(value=True) as dialog, ui.card().classes('w-full h-[70vh]'):
+        with ui.dialog(value=True) as dialog, ui.card().classes('w-full min-h-[500px]'):
             with ui.stepper().props('vertical').classes('w-full h-full') as stepper:
                 with ui.step('Allgemein'):
                     with ui.column():
@@ -68,31 +67,43 @@ class DevicesPage:
                     with ui.stepper_navigation():
                         ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
                             'flat')
-                        ui.button('Weiter', on_click=stepper.next)
-                with ui.step('Simulationswerte'):
+                        ui.button('Weiter', on_click=lambda: self.check_device_name_input(
+                            stepper, name_input))
+                with ui.step('Sensoren'):
                     sensors = Sensor.get_all()
-                    print(sensors)
-                    with ui.grid(columns=3).classes('w-full'):
-                        base_value_input = ui.number(
-                            label='Basiswert', value=25.00, format='%.2f')
-                        variation_range_input = ui.number(label='Variationsbereich',
-                                                          value=5.00, min=0, format='%.2f')
-                        with ui.number(label='Änderungsrate +/-', value=0.5, min=0, max=10) as input:
-                            change_rate_input = input
-                            ui.tooltip(
-                                'Die Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
-                        interval_input = ui.number(
-                            label='Interval [s]', value=10, min=0, max=3600)
+                    sensors_options = {
+                        sensor.id: sensor.name for sensor in sensors}
+
+                    ui.label(
+                        "Wähle die Sensoren aus, die dem Gerät zugeordnet werden sollen. Mehrfachauswahl möglich. Später können keine weiteren Sensoren hinzugefügt werden.")
+                    sensors_input = ui.select(sensors_options, multiple=True, label='Sensoren auswählen').props(
+                        'use-chips').classes('w-64')
                     with ui.stepper_navigation():
                         ui.button('Zurück', on_click=stepper.previous).props(
                             'flat')
-                        ui.button('Weiter', on_click=stepper.next)
+                        ui.button('Erstellen', on_click=lambda: self.complete_device_creation(
+                            dialog, name_input, sensors_input))
 
-    def create_device(self):
+    def check_device_name_input(self, stepper, name_input):
+        if name_input.value == '':
+            ui.notify('Bitte gib einen Namen für das Gerät an.',
+                      type='negative')
+            return
+
+        stepper.next()
+
+    def complete_device_creation(self, dialog, name_input, sensors_input):
+        if len(sensors_input.value) == 0:
+            ui.notify('Bitte wähle mindestens einen Sensor aus.',
+                      type='negative')
+            return
+
+        self.create_device(name_input.value, sensors_input.value)
+        dialog.close()
+
+    def create_device(self, name, sensor_ids):
         if len(self.devices) == 0:
             self.list_container.clear()
-
-        name = "dev001234567"
 
         response = self.iot_hub_helper.create_device(device_id=name)
 
@@ -102,14 +113,23 @@ class DevicesPage:
 
         ui.notify(response.message, type='positive')
 
-        new_device = Device.add(response.object)
+        new_device = Device.store(response.object)
         self.devices.append(new_device)
 
-        with self.list_container:
-            DeviceItem(device=new_device,
-                       delete_callback=self.delete_button_handler)
-
+        self.create_relationship_to_sensors(device=new_device, sensor_ids=sensor_ids)
+        self.add_device_to_list(device=new_device)
         self.update_stats()
+
+    def create_relationship_to_sensors(self, device, sensor_ids):
+        sensors = Sensor.get_all_by_ids(sensor_ids)
+        for sensor in sensors:
+            sensor.device_id = device.id
+        Sensor.session.commit()
+
+    def add_device_to_list(self, device):
+        with self.list_container:
+            DeviceItem(device=device,
+                       delete_callback=self.delete_button_handler)
 
     def delete_button_handler(self, device):
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):

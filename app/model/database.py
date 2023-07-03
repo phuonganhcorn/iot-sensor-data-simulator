@@ -25,14 +25,14 @@ class Device(Base):
         return Device.session.query(Device).all()
 
     @staticmethod
-    def add(device):
-        new_device = Device(name=device.name, generation_id=device.generation_id,
+    def store(device):
+        device_db = Device(name=device.device_id, generation_id=device.generation_id,
                             etag=device.etag, status=device.status)
 
-        Device.session.add(new_device)
+        Device.session.add(device_db)
         Device.session.commit()
 
-        return new_device
+        return device_db
 
     @staticmethod
     def delete(device):
@@ -71,6 +71,10 @@ class Sensor(Base):
     @staticmethod
     def get_all():
         return Sensor.session.query(Sensor).all()
+    
+    @staticmethod
+    def get_all_by_ids(list_of_ids):
+        return Sensor.session.query(Sensor).filter(Sensor.id.in_(list_of_ids)).all()
 
     @staticmethod
     def delete(sensor):
