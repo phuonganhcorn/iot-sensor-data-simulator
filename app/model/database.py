@@ -35,6 +35,8 @@ class Options(Base):
 class Container(Base):
     __tablename__ = 'container'
 
+    device_clients = []
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
     description = Column(String(255))
@@ -72,12 +74,24 @@ class Container(Base):
 
         Container.session.commit()
 
-    def start(self):
+    def start(self, iot_hub_helper):
+        # Connect all device clients
+        for device in self.devices:
+            device_client = iot_hub_helper.init_device_client(device.connection_string)
+            self.device_clients.append(device_client)
+
+        # Update container status
         self.is_active = True
         self.start_time = datetime.datetime.now()
         Container.session.commit()
 
     def stop(self):
+        # Disconnect all device clients
+        for device_client in self.device_clients:
+            device_client.disconnect()
+        self.device_clients = []
+
+        # Reset container status
         self.is_active = False
         self.start_time = None
         Container.session.commit()
@@ -121,7 +135,7 @@ class Device(Base):
     def store(device, sensor_ids):
         primary_key = device.authentication.symmetric_key.primary_key
         host_name = Options.get_option('host_name').value
-        connection_string = f"HostName={host_name};DeviceId={device.device_id};SharedAccessKey={primary_key}"
+        connection_string = f"HostName={host_name}.azure-devices.net;DeviceId={device.device_id};SharedAccessKey={primary_key}"
 
         device_db = Device(name=device.device_id, generation_id=device.generation_id,
                            etag=device.etag, status=device.status, connection_string=connection_string)

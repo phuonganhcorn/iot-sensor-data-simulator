@@ -6,7 +6,8 @@ from model.database import Container, Device
 
 class ContainersPage:
 
-    def __init__(self):
+    def __init__(self, iot_hub_helper):
+        self.iot_hub_helper = iot_hub_helper
         self.containers = Container.get_all()
         self.cards_container = None
         self.cards_grid = None
@@ -143,7 +144,7 @@ class ContainersPage:
         self.update_stats()
 
     def start_container(self, container):
-        container.start()
+        container.start(self.iot_hub_helper)
         index = self.containers.index(container)
         self.cards[index].set_active()
         self.update_stats()
