@@ -1,17 +1,13 @@
 from nicegui import ui
 from components.navigation import Navigation
 from components.container_card import ContainerCard
-from model.container import Container
+from model.database import Container, Device
 
 
 class ContainersPage:
 
-    containers = [
-        # Container(id=1),
-        # Container(id=2)
-    ]
-
     def __init__(self):
+        self.containers = Container.get_all()
         self.cards_container = None
         self.cards_grid = None
         self.cards = []
@@ -32,7 +28,7 @@ class ContainersPage:
     def setup_menu_bar(self):
         with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
             ui.button('Neuen Container erstellen',
-                      on_click=lambda: self.create_container()).classes('')
+                      on_click=lambda: self.open_create_container_dialog()).classes('')
 
             with ui.row():
                 with ui.row().classes('ml-4 gap-1'):
@@ -77,11 +73,68 @@ class ContainersPage:
             with ui.column().classes('self-center mt-48'):
                 ui.label('Keine Container vorhanden')
 
-    def create_container(self):
+    def open_create_container_dialog(self):
+        with ui.dialog(value=True) as dialog, ui.card().classes('w-full min-h-[500px]'):
+            with ui.stepper().props('vertical').classes('w-full h-full') as stepper:
+                with ui.step('Allgemein'):
+                    with ui.column():
+                        name_input = ui.input('Name*')
+                        description_input = ui.input(
+                            'Beschreibung (max. 255 Zeichen)').classes('w-full')
+                        location_input = ui.input('Standort').classes('w-full')
+                    with ui.stepper_navigation():
+                        ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
+                            'flat')
+                        ui.button('Weiter', on_click=lambda: self.check_container_name_input(
+                            stepper, name_input))
+                with ui.step('Geräte'):
+                    devices = Device.get_all_unassigned()
+
+                    if len(devices) == 0:
+                        ui.label(
+                            "Es sind keine freien Geräte verfügbar. Erstelle zuerst ein neues Gerät.")
+
+                        ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
+                            'flat')
+                    else:
+                        devices_options = {
+                            device.id: device.name for device in devices}
+
+                        ui.label(
+                            "Wähle die Geräte aus, die dem Container zugeordnet werden sollen. Mehrfachauswahl möglich. Später können keine weiteren Geräte hinzugefügt werden.")
+                        devices_input = ui.select(devices_options, multiple=True, label='Geräte auswählen').props(
+                            'use-chips').classes('w-64')
+
+                        with ui.stepper_navigation():
+                            ui.button('Zurück', on_click=stepper.previous).props(
+                                'flat')
+                            ui.button('Erstellen', on_click=lambda: self.complete_container_creation(
+                                dialog, name_input, description_input, location_input, devices_input))
+
+    def check_container_name_input(self, stepper, name_input):
+        if name_input.value == '':
+            ui.notify('Bitte gib einen Namen für den Container an.',
+                      type='warning')
+            return
+
+        stepper.next()
+
+    def complete_container_creation(self, dialog, name_input, description_input, location_input, devices_input):
+        if len(devices_input.value) == 0:
+            ui.notify('Bitte wähle mindestens ein Gerät aus.',
+                      type='warning')
+            return
+
+        self.create_container(name_input.value, description_input.value,
+                              location_input.value, devices_input.value)
+        dialog.close()
+
+    def create_container(self, name, description, location, device_ids):
         if len(self.containers) == 0:
             self.cards_container.clear()
 
-        new_container = Container(id=len(self.containers) + 1)
+        new_container = Container.add(
+            name, description, location, device_ids)
         self.containers.append(new_container)
         with self.cards_grid:
             new_container_card = ContainerCard(container=new_container, start_callback=self.start_container,
@@ -90,16 +143,16 @@ class ContainersPage:
         self.update_stats()
 
     def start_container(self, container):
-        if container.start():
-            index = self.containers.index(container)
-            self.cards[index].set_active()
-            self.update_stats()
+        container.start()
+        index = self.containers.index(container)
+        self.cards[index].set_active()
+        self.update_stats()
 
     def stop_container(self, container):
-        if container.stop():
-            index = self.containers.index(container)
-            self.cards[index].set_inactive()
-            self.update_stats()
+        container.stop()
+        index = self.containers.index(container)
+        self.cards[index].set_inactive()
+        self.update_stats()
 
     def show_logs(self, container):
         ui.notify('Logs anzeigen', type='info')

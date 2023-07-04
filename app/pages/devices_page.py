@@ -114,7 +114,8 @@ class DevicesPage:
         if len(self.devices) == 0:
             self.list_container.clear()
 
-        response = self.iot_hub_helper.create_device(device_id=name)
+        device_id = self.replace_special_characters(name)
+        response = self.iot_hub_helper.create_device(device_id=device_id)
 
         if not response.success:
             ui.notify(response.message, type='negative')
@@ -130,6 +131,7 @@ class DevicesPage:
         self.add_device_to_list(device=new_device)
         self.update_stats()
 
+    # TODO: In device model auslagern
     def create_relationship_to_sensors(self, device, sensor_ids):
         sensors = Sensor.get_all_by_ids(sensor_ids)
         for sensor in sensors:
@@ -167,3 +169,20 @@ class DevicesPage:
 
         if len(self.devices) == 0:
             self.print_no_devices()
+
+    def replace_special_characters(self, value):
+        replacements = {
+            ' ': '_',
+            'Ä': 'AE',
+            'Ö': 'OE',
+            'Ü': 'UE',
+            'ä': 'ae',
+            'ö': 'oe',
+            'ü': 'ue',
+            'ß': 'ss'
+        }
+
+        for old_char, new_char in replacements.items():
+            value = value.replace(old_char, new_char)
+
+        return value

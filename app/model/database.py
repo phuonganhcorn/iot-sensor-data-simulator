@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, TIMESTAMP, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+import datetime
 
 Base = declarative_base()
 
@@ -38,10 +39,55 @@ class Container(Base):
     name = Column(String(255))
     description = Column(String(255))
     location = Column(String(255))
-    is_active = Column(Integer)
-    start_time = Column(Integer)
+    is_active = Column(Boolean)
+    start_time = Column(TIMESTAMP)
     
     devices = relationship("Device", back_populates="container")
+
+    def __repr__(self):
+        return f"<Container(id={self.id}, name={self.name}, description={self.description}, location={self.location}, is_active={self.is_active}, start_time={self.start_time})>"
+
+    @staticmethod
+    def get_all():
+        return Container.session.query(Container).all()
+    
+    def get_device_count(self):
+        return len(self.devices)
+    
+    def get_devices(self):
+        return self.devices
+    
+    @staticmethod
+    def add(name, description, location, device_ids):
+        container_db = Container(name=name, description=description, location=location, is_active=False, start_time=None)
+        Container.session.add(container_db)
+        Container.session.commit()
+        container_db.create_relationship_to_devices(container_db, device_ids)
+        print(container_db)
+        return container_db
+
+    def create_relationship_to_devices(self, container, device_ids):
+        devices = Device.get_all_by_ids(device_ids)
+        for device in devices:
+            device.container_id = container.id
+        print(self.id, devices)
+
+        Container.session.commit()
+
+    def start(self):
+        self.is_active = True
+        self.start_time = datetime.datetime.now()
+        Container.session.commit()
+
+    def stop(self):
+        self.is_active = False
+        self.start_time = None
+        Container.session.commit()
+
+    @staticmethod
+    def delete(container):
+        Container.session.delete(container)
+        Container.session.commit()
 
 class Device(Base):
     __tablename__ = 'device'
@@ -59,11 +105,19 @@ class Device(Base):
     sensors = relationship("Sensor", back_populates="device")
 
     def __repr__(self):
-        return f"<Device(id={self.id}, name={self.device_id}, generation_id={self.generation_id}, etag={self.etag}, status={self.status})>"
+        return f"<Device(id={self.id}, name={self.name}, generation_id={self.generation_id}, etag={self.etag}, status={self.status}, connection_string={self.connection_string}, container_id={self.container_id})>"
 
     @staticmethod
     def get_all():
         return Device.session.query(Device).all()
+    
+    @staticmethod
+    def get_all_unassigned():
+        return Device.session.query(Device).filter_by(container_id=None).all()
+    
+    @staticmethod
+    def get_all_by_ids(ids):
+        return Device.session.query(Device).filter(Device.id.in_(ids)).all()
 
     @staticmethod
     def store(device):
