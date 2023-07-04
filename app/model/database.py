@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -31,6 +31,17 @@ class Options(Base):
         Options.session.commit()
         return option
 
+class Container(Base):
+    __tablename__ = 'container'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255))
+    description = Column(String(255))
+    location = Column(String(255))
+    is_active = Column(Integer)
+    start_time = Column(Integer)
+    
+    devices = relationship("Device", back_populates="container")
 
 class Device(Base):
     __tablename__ = 'device'
@@ -42,6 +53,9 @@ class Device(Base):
     etag = Column(String(255))
     status = Column(String(255))
     connection_string = Column(String(255))
+    container_id = Column(Integer, ForeignKey(Container.id))
+    
+    container = relationship("Container", back_populates="devices")
     sensors = relationship("Sensor", back_populates="device")
 
     def __repr__(self):
