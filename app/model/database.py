@@ -63,14 +63,12 @@ class Container(Base):
         Container.session.add(container_db)
         Container.session.commit()
         container_db.create_relationship_to_devices(container_db, device_ids)
-        print(container_db)
         return container_db
 
     def create_relationship_to_devices(self, container, device_ids):
         devices = Device.get_all_by_ids(device_ids)
         for device in devices:
             device.container_id = container.id
-        print(self.id, devices)
 
         Container.session.commit()
 
