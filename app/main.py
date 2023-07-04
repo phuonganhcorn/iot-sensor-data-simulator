@@ -23,7 +23,7 @@ Sensor.session = session
 
 iot_hub_helper = IoTHubHelper()
 
-ContainersPage()
+ContainersPage(iot_hub_helper)
 
 
 @ui.page('/sensoren')

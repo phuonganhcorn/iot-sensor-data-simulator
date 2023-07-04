@@ -7,8 +7,7 @@ import os
 
 class IoTHubHelper:
     # def __init__(self, connection_string):
-    #     self.__connection_string = connection_string
-    #     self.device_client = None
+    #     self.= None
     #     self.init_device_client()
 
     def __init__(self):
@@ -41,13 +40,11 @@ class IoTHubHelper:
         return Response(True, "Gerät {} erfolgreich gelöscht".format(device_id))
 
 
-    # def init_device_client(self):
-    #     self.device_client = IoTHubDeviceClient.create_from_connection_string(self.__connection_string)
-    #     self.device_client.connect()
+    def init_device_client(self, connection_string):
+        device_client = IoTHubDeviceClient.create_from_connection_string(connection_string)
+        device_client.connect()
+        return device_client
 
-    # def close_connection(self):
-    #     self.__connection_string = None
-    #     self.device_client.shutdown()
 
     # def send_telemetry_messages(self, telemetry_messages):
     #     try:
