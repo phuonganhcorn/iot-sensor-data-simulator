@@ -92,8 +92,6 @@ class DevicesPage:
                                 'flat')
                             ui.button('Erstellen', on_click=lambda: self.complete_device_creation(
                                 dialog, name_input, sensors_input))
-                            
-                        # CONNECTION STRING ERSTELLEN und VERBINDUNG PRÜFEN
 
     def check_device_name_input(self, stepper, name_input):
         if name_input.value == '':
@@ -156,6 +154,8 @@ class DevicesPage:
 
         # TODO: Check if container is running and stop it
 
+        self.iot_hub_helper.delete_device(
+            device_id=device.name, etag=device.etag)
         Device.delete(device)
 
         index = self.devices.index(device)
