@@ -46,28 +46,25 @@ class IoTHubHelper:
         return device_client
 
 
-    # def send_telemetry_messages(self, telemetry_messages):
-    #     try:
-    #         if not self.device_client:
-    #             self.init_device_client()
+    def send_telemetry_messages(self, device_client, telemetry_messages):
+        try:
+            print("Start sending telemetry messages")
+            for msg in telemetry_messages:
+                # Convert the dictionary to JSON string
+                json_data = json.dumps(msg)
 
-    #         print("Start sending telemetry messages")
-    #         for msg in telemetry_messages:
-    #             # Convert the dictionary to JSON string
-    #             json_data = json.dumps(msg)
+                # Build the message with JSON telemetry data
+                message = Message(json_data)
 
-    #             # Build the message with JSON telemetry data
-    #             message = Message(json_data)
-
-    #             # Send the message.
-    #             print("Sending message: {}".format(message))
-    #             self.device_client.send_message(message)
-    #         print("Alle Daten erfolgreich gesendet")
-    #         return Response(True, "Alle Daten erfolgreich gesendet")
+                # Send the message.
+                print("Sending message: {}".format(message))
+                device_client.send_message(message)
+            print("Alle Daten erfolgreich gesendet")
+            return Response(True, "Alle Daten erfolgreich gesendet")
             
-    #     except Exception as e:
-    #         print(e)
-    #         return Response(False, "Fehler beim Senden: {}".format(e))
+        except Exception as e:
+            print(e)
+            return Response(False, "Fehler beim Senden: {}".format(e))
 
 class Response:
     def __init__(self, success, message="", object=None):

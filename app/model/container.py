@@ -36,18 +36,22 @@ class Container(ContainerModel):
         for device in self.devices:
             device_client = iot_hub_helper.init_device_client(
                 device.connection_string)
-            self.device_clients.append(device_client)
+            device.client = device_client
 
         # Update container status
         self.is_active = True
         self.start_time = datetime.datetime.now()
         Container.session.commit()
 
+        for device in self.devices:
+            for sensor in device.sensors:
+                sensor.run_simulation(iot_hub_helper, device.client)
+
     def stop(self):
         # Disconnect all device clients
-        for device_client in self.device_clients:
-            device_client.disconnect()
-        self.device_clients = []
+        for device in self.devices:
+            device.client.disconnect()
+            device.client = None
 
         # Reset container status
         self.is_active = False

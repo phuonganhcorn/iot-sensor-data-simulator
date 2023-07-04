@@ -1,4 +1,6 @@
 from model.models import SensorModel
+from utils.simulator import Simulator
+from nicegui import ui
 
 
 class Sensor(SensorModel):
@@ -25,6 +27,25 @@ class Sensor(SensorModel):
     @staticmethod
     def get_all_unassigned():
         return Sensor.session.query(Sensor).filter(Sensor.device_id == None).all()
+
+    def run_simulation(self, iot_hub_helper, device_client):
+        simulator = Simulator()
+        values = simulator.generate_values(self.interval)
+
+
+
+        data = [{
+            'time': "",
+            'deviceId': self.device_id,
+            'temperature': value,
+        } for value in values]
+
+
+
+        response = iot_hub_helper.send_telemetry_messages(device_client, data)
+        print(response.message)
+
+
 
     @staticmethod
     def delete(sensor):
