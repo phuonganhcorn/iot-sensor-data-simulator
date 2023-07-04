@@ -1,7 +1,8 @@
 from nicegui import ui
 from components.navigation import Navigation
 from components.sensor_item import SensorItem
-from model.database import Sensor, Device
+from model.device import Device
+from model.sensor import Sensor
 from constants.units import *
 
 
