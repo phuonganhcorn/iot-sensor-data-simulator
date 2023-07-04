@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 class Options(Base):
     __tablename__ = 'options'
     session = None
@@ -14,11 +15,11 @@ class Options(Base):
 
     def __repr__(self):
         return f"<Options(id={self.id}, name={self.name}, value={self.value})>"
-    
+
     @staticmethod
     def get_option(name):
         return Options.session.query(Options).filter_by(name=name).first()
-    
+
     @staticmethod
     def set_option(name, value):
         option = Options.get_option(name)
@@ -29,6 +30,7 @@ class Options(Base):
             option.value = value
         Options.session.commit()
         return option
+
 
 class Device(Base):
     __tablename__ = 'device'
@@ -56,7 +58,7 @@ class Device(Base):
         connection_string = f"HostName={host_name};DeviceId={device.device_id};SharedAccessKey={primary_key}"
 
         device_db = Device(name=device.device_id, generation_id=device.generation_id,
-                            etag=device.etag, status=device.status, connection_string=connection_string)
+                           etag=device.etag, status=device.status, connection_string=connection_string)
 
         Device.session.add(device_db)
         Device.session.commit()
@@ -67,8 +69,6 @@ class Device(Base):
     def delete(device):
         Device.session.delete(device)
         Device.session.commit()
-
-        # TODO: Delete device from IoT Hub, registry manager offers a delete_device method
 
 
 class Sensor(Base):
@@ -102,11 +102,11 @@ class Sensor(Base):
     @staticmethod
     def get_all():
         return Sensor.session.query(Sensor).all()
-    
+
     @staticmethod
     def get_all_by_ids(list_of_ids):
         return Sensor.session.query(Sensor).filter(Sensor.id.in_(list_of_ids)).all()
-    
+
     # Returns all sensors that are not assigned to a device
     @staticmethod
     def get_all_unassigned():

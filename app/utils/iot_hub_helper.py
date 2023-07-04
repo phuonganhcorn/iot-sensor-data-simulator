@@ -32,13 +32,13 @@ class IoTHubHelper:
         except Exception as e:
             return Response(False, "Fehler beim Erstellen: {}".format(e))
 
-    def delete_device(self, device_id):
+    def delete_device(self, device_id, etag=None):
         try:
-            self.registry_manager.delete_device(device_id)
+            self.registry_manager.delete_device(device_id, etag=etag)
         except Exception as e:
             return Response(False, "Fehler beim Löschen: {}".format(e))
         
-        return Response(True, "Device {} erfolgreich gelöscht".format(device_id))
+        return Response(True, "Gerät {} erfolgreich gelöscht".format(device_id))
 
 
     # def init_device_client(self):
