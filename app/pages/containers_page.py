@@ -1,7 +1,8 @@
 from nicegui import ui
 from components.navigation import Navigation
 from components.container_card import ContainerCard
-from model.database import Container, Device
+from model.container import Container
+from model.device import Device
 
 
 class ContainersPage:

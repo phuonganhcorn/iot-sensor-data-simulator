@@ -1,5 +1,5 @@
 from nicegui import ui
-from model.database import Options
+from model.options import Options
 
 
 class Navigation():
@@ -26,7 +26,7 @@ class Navigation():
         if option is None:
             with ui.row().classes('fixed inset-0 flex justify-center items-center bg-black/50 z-[100]') as container:
                 with ui.column().classes('bg-white rounded-lg shadow-lg p-8'):
-                    ui.label('Willkommen beim IoT-Telemetrie-Simulator').classes('text-xl font-bold')
+                    ui.label('Willkommen zum IoT-Telemetrie-Simulator').classes('text-xl font-bold')
                     ui.label('Bitte gib den Hostnamen deines IoT Hubs ein, um loszulegen.')
                     host_name_input = ui.input('Hostname')
                     ui.button('Loslegen', on_click=lambda: self.save_host_name_string(container, host_name_input))

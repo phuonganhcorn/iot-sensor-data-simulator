@@ -6,7 +6,11 @@ from pages.sensors_page import SensorsPage
 from pages.devices_page import DevicesPage
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from model.database import Options, Container, Device, Sensor, Base
+from model.models import Base
+from model.options import Options
+from model.container import Container
+from model.device import Device
+from model.sensor import Sensor
 
 load_dotenv()
 
