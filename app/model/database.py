@@ -118,7 +118,7 @@ class Device(Base):
         return Device.session.query(Device).filter(Device.id.in_(ids)).all()
 
     @staticmethod
-    def store(device):
+    def store(device, sensor_ids):
         primary_key = device.authentication.symmetric_key.primary_key
         host_name = Options.get_option('host_name').value
         connection_string = f"HostName={host_name};DeviceId={device.device_id};SharedAccessKey={primary_key}"
@@ -129,7 +129,15 @@ class Device(Base):
         Device.session.add(device_db)
         Device.session.commit()
 
+        device_db.create_relationship_to_sensors(sensor_ids)
+
         return device_db
+    
+    def create_relationship_to_sensors(self, sensor_ids):
+        sensors = Sensor.get_all_by_ids(sensor_ids)
+        for sensor in sensors:
+            sensor.device_id = self.id
+        Sensor.session.commit()
 
     @staticmethod
     def delete(device):

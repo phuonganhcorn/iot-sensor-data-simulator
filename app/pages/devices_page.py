@@ -123,20 +123,11 @@ class DevicesPage:
 
         ui.notify(response.message, type='positive')
 
-        new_device = Device.store(response.object)
+        new_device = Device.store(response.object, sensor_ids=sensor_ids)
         self.devices.append(new_device)
 
-        self.create_relationship_to_sensors(
-            device=new_device, sensor_ids=sensor_ids)
         self.add_device_to_list(device=new_device)
         self.update_stats()
-
-    # TODO: In device model auslagern
-    def create_relationship_to_sensors(self, device, sensor_ids):
-        sensors = Sensor.get_all_by_ids(sensor_ids)
-        for sensor in sensors:
-            sensor.device_id = device.id
-        Sensor.session.commit()
 
     def add_device_to_list(self, device):
         with self.list_container:
