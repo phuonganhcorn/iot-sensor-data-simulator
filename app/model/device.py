@@ -4,6 +4,7 @@ from model.sensor import Sensor
 
 
 class Device(DeviceModel):
+    
     @staticmethod
     def get_all():
         return Device.session.query(Device).all()

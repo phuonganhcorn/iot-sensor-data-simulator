@@ -20,8 +20,6 @@ class OptionsModel(Base):
 class ContainerModel(Base):
     __tablename__ = 'container'
 
-    device_clients = []
-
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
     description = Column(String(255))
@@ -29,7 +27,7 @@ class ContainerModel(Base):
     is_active = Column(Boolean)
     start_time = Column(TIMESTAMP)
 
-    devices = relationship("DeviceModel", back_populates="container")
+    devices = relationship("Device", back_populates="container")
 
     def __repr__(self):
         return f"<Container(id={self.id}, name={self.name}, description={self.description}, location={self.location}, is_active={self.is_active}, start_time={self.start_time})>"
@@ -37,7 +35,9 @@ class ContainerModel(Base):
 
 class DeviceModel(Base):
     __tablename__ = 'device'
+
     session = None
+    client = None
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
@@ -48,7 +48,7 @@ class DeviceModel(Base):
     container_id = Column(Integer, ForeignKey(ContainerModel.id))
 
     container = relationship("ContainerModel", back_populates="devices")
-    sensors = relationship("SensorModel", back_populates="device")
+    sensors = relationship("Sensor", back_populates="device")
 
     def __repr__(self):
         return f"<Device(id={self.id}, name={self.name}, generation_id={self.generation_id}, etag={self.etag}, status={self.status}, connection_string={self.connection_string}, container_id={self.container_id})>"

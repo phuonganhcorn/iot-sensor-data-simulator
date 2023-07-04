@@ -3,6 +3,7 @@ from components.navigation import Navigation
 from components.container_card import ContainerCard
 from model.container import Container
 from model.device import Device
+from model.sensor import Sensor
 
 
 class ContainersPage:
