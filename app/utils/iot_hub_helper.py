@@ -44,12 +44,21 @@ class IoTHubHelper:
         device_client = IoTHubDeviceClient.create_from_connection_string(connection_string)
         device_client.connect()
         return device_client
+    
+    def send_message(self, device_client, data):
+        try:
+            json_data = json.dumps(data)
+            message = Message(json_data)
+            print("Sending message: {}".format(message))
+            device_client.send_message(message)
+            return Response(True, "Alle Daten erfolgreich gesendet")
+        except Exception as e:
+            return Response(False, "Fehler beim Senden: {}".format(e))
 
-
-    def send_telemetry_messages(self, device_client, telemetry_messages):
+    def send_messages(self, device_client, data):
         try:
             print("Start sending telemetry messages")
-            for msg in telemetry_messages:
+            for msg in data:
                 # Convert the dictionary to JSON string
                 json_data = json.dumps(msg)
 

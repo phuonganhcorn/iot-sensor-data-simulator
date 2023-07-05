@@ -27,38 +27,28 @@ class Sensor(SensorModel):
     @staticmethod
     def get_all_unassigned():
         return Sensor.session.query(Sensor).filter(Sensor.device_id == None).all()
-
-    def callback(self):
+    
+    def callback(self, device_callback):
         # Überprüfen, ob die Schleife unterbrochen werden soll
         if self.running:
-            print("Callback aufgerufen von: " + self.name)
+            value = self.simulator.generate_value()
+            print("Callback aufgerufen von: " + self.name + " mit Wert: " + str(value))
+            device_callback(value)
 
             # Wiederholung des Callbacks nach einer bestimmten Zeit
             timer = threading.Timer(
-                interval=self.interval, function=self.callback)
+                interval=self.interval, function=self.callback, args=[device_callback])
             timer.start()
 
-    def start_simulation(self):
-        self.simulator = Simulator()
+    def start_simulation(self, callback):
+        self.simulator = Simulator(sensor=self)
         self.running = True
 
-        timer = threading.Timer(interval=self.interval, function=self.callback)
+        timer = threading.Timer(interval=self.interval, function=self.callback, args=[callback])
         timer.start()
 
     def stop(self):
         self.running = False
-
-    def run_simulation(self, iot_hub_helper, device_client):
-        simulator = Simulator()
-        values = simulator.generate_values(self.interval)
-
-        data = [{
-            'time': "2023-06-01T12:00:00Z",
-            'deviceId': self.device_id,
-            'temperature': value,
-        } for value in values]
-
-        response = iot_hub_helper.send_telemetry_messages(device_client, data)
 
     @staticmethod
     def delete(sensor):

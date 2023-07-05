@@ -57,18 +57,13 @@ class Container(ContainerModel):
 
         # Init simulation for all sensors
 
-        sensors = self.get_all_sensors()
-
-        for sensor in sensors:
-            sensor.start_simulation()
+        for device in self.devices:
+            device.start_simulation(iot_hub_helper)
 
         # Run simulation for all sensors
 
         while not self.thread.stopped():
-            print("Sending telemetry from sensor")
-            if self.thread.stopped():
-                break
-            sleep(5)
+            pass
 
         # Stop Container
 
