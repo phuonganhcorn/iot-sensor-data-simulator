@@ -92,7 +92,6 @@ class Container(ContainerModel):
             sensors.extend(device.sensors)
         return sensors
 
-    @staticmethod
-    def delete(container):
-        Container.session.delete(container)
+    def delete(self):
+        Container.session.delete(self)
         Container.session.commit()

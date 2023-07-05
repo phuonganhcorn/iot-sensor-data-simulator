@@ -166,8 +166,7 @@ class ContainersPage:
                 'Container ist aktiv und kann nicht gelöscht werden.', type='warning')
             return
 
-        if not container.delete():
-            return
+        container.delete()
 
         index = self.containers.index(container)
 
