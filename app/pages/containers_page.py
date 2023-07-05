@@ -61,7 +61,7 @@ class ContainersPage:
                 with self.cards_grid:
                     for container in self.containers:
                         new_container_card = ContainerCard(
-                            container=container, start_callback=self.start_container, stop_callback=self.stop_container, delete_callback=self.delete_container)
+                            wrapper=self.cards_container, container=container, start_callback=self.start_container, stop_callback=self.stop_container, delete_callback=self.delete_container)
                         self.cards.append(new_container_card)
 
     def update_stats(self):
@@ -140,7 +140,7 @@ class ContainersPage:
             name, description, location, device_ids)
         self.containers.append(new_container)
         with self.cards_grid:
-            new_container_card = ContainerCard(container=new_container, start_callback=self.start_container,
+            new_container_card = ContainerCard(wrapper=self.cards_container, container=new_container, start_callback=self.start_container,
                                                stop_callback=self.stop_container, logs_callback=self.show_logs, delete_callback=self.delete_container)
             self.cards.append(new_container_card)
         self.update_stats()
@@ -160,7 +160,7 @@ class ContainersPage:
     def show_logs(self, container):
         ui.notify('Logs anzeigen', type='info')
 
-    def delete_container(self, container):
+    def delete_container(self, container, dialog):
         if container.is_active:
             ui.notify(
                 'Container ist aktiv und kann nicht gelöscht werden.', type='warning')
@@ -175,6 +175,7 @@ class ContainersPage:
         self.cards_grid.remove(index)
 
         self.update_stats()
+        dialog.close()
 
         if len(self.containers) == 0:
             self.print_no_containers()

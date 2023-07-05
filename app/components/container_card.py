@@ -2,24 +2,24 @@ from nicegui import ui
 
 
 class ContainerCard():
-    def __init__(self, container, start_callback=None, stop_callback=None, logs_callback=None, delete_callback=None):
+    def __init__(self, wrapper, container, start_callback=None, stop_callback=None, logs_callback=None, delete_callback=None):
         self.card = None
         self.active_dot = None
-        self.setup(container, start_callback=start_callback, stop_callback=stop_callback,
+        self.setup(wrapper, container, start_callback=start_callback, stop_callback=stop_callback,
                    logs_callback=logs_callback, delete_callback=delete_callback)
 
-    def setup(self, container, start_callback=None, stop_callback=None, logs_callback=None, delete_callback=None):
+    def setup(self, wrapper, container, start_callback=None, stop_callback=None, logs_callback=None, delete_callback=None):
         with ui.card().tight() as card:
             self.card = card
             with ui.card_section().classes('min-h-[260px]'):
                 with ui.row().classes('pb-2 w-full justify-between items-center border-b border-gray-200'):
                     ui.label(container.name).classes('text-xl font-semibold')
                     with ui.button(icon='more_vert').props('flat').classes('px-2 text-black'):
-                        with ui.menu().props(remove='no-parent-event') as menu:
+                        with ui.menu().props(remove='no-parent-event'):
                             ui.menu_item('Log anzeigen', lambda c=container: logs_callback(
                                 c)).classes('flex items-center')
-                            ui.menu_item('Löschen', lambda c=container: delete_callback(
-                                c)).classes('text-red-500').classes('flex items-center')
+                            ui.menu_item('Löschen', lambda w=wrapper, c=container, callback=delete_callback: self.show_delete_dialog(
+                                w, c, callback)).classes('text-red-500').classes('flex items-center')
                 with ui.column().classes('py-4 gap-2'):
                     with ui.row().classes('gap-1'):
                         ui.label('Geräte:').classes('text-sm font-medium')
@@ -51,3 +51,12 @@ class ContainerCard():
 
     def set_inactive(self):
         self.active_dot.classes('bg-red-500', remove='bg-green-500')
+
+    def show_delete_dialog(self, wrapper, container, delete_callback):
+        with wrapper:
+            with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
+                ui.label('Soll der Container wirklich gelöscht werden?')
+                with ui.row():
+                    ui.button('Abbrechen', on_click=dialog.close).props('flat')
+                    ui.button('Löschen', on_click=lambda: delete_callback(
+                        container, dialog)).classes('text-white bg-red')
