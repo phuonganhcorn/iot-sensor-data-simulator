@@ -41,16 +41,15 @@ class Device(DeviceModel):
 
     def start_simulation(self, iot_hub_helper, callback):
         self.iot_hub_helper = iot_hub_helper
-        self.sent_message_callback = callback
+        self.container_callback = callback
 
         for sensor in self.sensors:
-            sensor.start_simulation(callback=self.callback)
+            sensor.start_simulation(callback=self.send_simulator_data)
 
-    def callback(self, value):
-        print(f"Device callback: {value}")
-        data = {"time": "", "deviceId": self.name, "temperature": value}
+    def send_simulator_data(self, data):
+        data["deviceId"] = self.name
         self.iot_hub_helper.send_message(self.client, data)
-        self.sent_message_callback()
+        self.container_callback(data)
 
     def delete(self):
         Device.session.delete(self)

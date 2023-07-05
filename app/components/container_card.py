@@ -1,14 +1,17 @@
 from nicegui import ui
+from components.logs_dialog import LogsDialog
 
 
 class ContainerCard():
-    def __init__(self, wrapper, container, start_callback=None, stop_callback=None, logs_callback=None, delete_callback=None):
+    def __init__(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None):
         self.card = None
+        self.logs_dialog = LogsDialog(wrapper)
+        container.log = self.logs_dialog.log
         self.active_dot = None
-        self.setup(wrapper, container, start_callback=start_callback, stop_callback=stop_callback,
-                   logs_callback=logs_callback, delete_callback=delete_callback)
+        self.setup(wrapper, container, start_callback=start_callback,
+                   stop_callback=stop_callback, delete_callback=delete_callback)
 
-    def setup(self, wrapper, container, start_callback=None, stop_callback=None, logs_callback=None, delete_callback=None):
+    def setup(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None):
         with ui.card().tight() as card:
             self.card = card
             with ui.card_section().classes('min-h-[260px]'):
@@ -16,8 +19,10 @@ class ContainerCard():
                     ui.label(container.name).classes('text-xl font-semibold')
                     with ui.button(icon='more_vert').props('flat').classes('px-2 text-black'):
                         with ui.menu().props(remove='no-parent-event'):
-                            ui.menu_item('Log anzeigen', lambda c=container: logs_callback(
-                                c)).classes('flex items-center')
+                            ui.menu_item('Log anzeigen', lambda: self.show_logs_dialog(container)).classes(
+                                'flex items-center')
+                            # ui.menu_item('Log anzeigen', lambda c=container: logs_callback(
+                            #     c)).classes('flex items-center')
                             ui.menu_item('Löschen', lambda w=wrapper, c=container, callback=delete_callback: self.show_delete_dialog(
                                 w, c, callback)).classes('text-red-500').classes('flex items-center')
                 with ui.column().classes('py-4 gap-2'):
@@ -51,6 +56,13 @@ class ContainerCard():
 
     def set_inactive(self):
         self.active_dot.classes('bg-red-500', remove='bg-green-500')
+
+    def show_logs_dialog(self, container):
+        if not container.is_active:
+            ui.notify('Container ist nicht aktiv', type='warning')
+            return
+
+        self.logs_dialog.show()
 
     def show_delete_dialog(self, wrapper, container, delete_callback):
         with wrapper:

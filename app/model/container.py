@@ -1,7 +1,7 @@
 from model.models import ContainerModel
 from model.device import Device
 from utils.threads import ContainerThread
-from time import sleep
+from constants.units import *
 import datetime
 
 
@@ -81,8 +81,13 @@ class Container(ContainerModel):
         self.start_time = None
         Container.session.commit()
 
-    def message_callback(self):
+    def message_callback(self, data):
         self.message_count += 1
+        
+        timestamp = data["timestamp"].strftime("%H:%M:%S")
+        unit = UNITS[int(data['unit'])]
+        unit_abbrev = unit["unit_abbreviation"]
+        self.log.push(f"{timestamp}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
 
     def stop(self):
         print("Stopping simulation")

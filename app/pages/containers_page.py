@@ -3,7 +3,6 @@ from components.navigation import Navigation
 from components.container_card import ContainerCard
 from model.container import Container
 from model.device import Device
-from model.sensor import Sensor
 
 
 class ContainersPage:
@@ -141,7 +140,7 @@ class ContainersPage:
         self.containers.append(new_container)
         with self.cards_grid:
             new_container_card = ContainerCard(wrapper=self.cards_container, container=new_container, start_callback=self.start_container,
-                                               stop_callback=self.stop_container, logs_callback=self.show_logs, delete_callback=self.delete_container)
+                                               stop_callback=self.stop_container, delete_callback=self.delete_container)
             self.cards.append(new_container_card)
         self.update_stats()
 
@@ -156,9 +155,6 @@ class ContainersPage:
         index = self.containers.index(container)
         self.cards[index].set_inactive()
         self.update_stats()
-
-    def show_logs(self, container):
-        ui.notify('Logs anzeigen', type='info')
 
     def delete_container(self, container, dialog):
         if container.is_active:
