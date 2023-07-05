@@ -1,6 +1,5 @@
 from model.models import SensorModel
 from utils.simulator import Simulator
-from nicegui import ui
 
 
 class Sensor(SensorModel):
@@ -32,20 +31,13 @@ class Sensor(SensorModel):
         simulator = Simulator()
         values = simulator.generate_values(self.interval)
 
-
-
         data = [{
-            'time': "",
+            'time': "2023-06-01T12:00:00Z",
             'deviceId': self.device_id,
             'temperature': value,
         } for value in values]
 
-
-
         response = iot_hub_helper.send_telemetry_messages(device_client, data)
-        print(response.message)
-
-
 
     @staticmethod
     def delete(sensor):

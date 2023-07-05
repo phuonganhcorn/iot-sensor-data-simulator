@@ -1,5 +1,7 @@
 from model.models import ContainerModel
 from model.device import Device
+from utils.threads import ContainerThread
+from time import sleep
 import datetime
 
 
@@ -32,6 +34,16 @@ class Container(ContainerModel):
         Container.session.commit()
 
     def start(self, iot_hub_helper):
+        self.thread = ContainerThread(target=self._thread_function, kwargs={
+                                      "iot_hub_helper": iot_hub_helper})
+        self.thread.start()
+
+    def _thread_function(self, **kwargs):
+
+        iot_hub_helper = kwargs.get("iot_hub_helper")
+
+        # Start Container
+
         # Connect all device clients
         for device in self.devices:
             device_client = iot_hub_helper.init_device_client(
@@ -43,11 +55,25 @@ class Container(ContainerModel):
         self.start_time = datetime.datetime.now()
         Container.session.commit()
 
-        for device in self.devices:
-            for sensor in device.sensors:
-                sensor.run_simulation(iot_hub_helper, device.client)
+        # Init simulation for all sensors
 
-    def stop(self):
+        # get all sensors from devices
+        sensors = []
+        for device in self.devices:
+            sensors.extend(device.sensors)
+
+        print(sensors)
+
+        # Run simulation for all sensors
+
+        while not self.thread.stopped():
+            print("Sending telemetry from sensor")
+            if self.thread.stopped():
+                break
+            sleep(5)
+
+        # Stop Container
+
         # Disconnect all device clients
         for device in self.devices:
             device.client.disconnect()
@@ -57,6 +83,12 @@ class Container(ContainerModel):
         self.is_active = False
         self.start_time = None
         Container.session.commit()
+
+    def stop(self):
+        print("Stopping simulation")
+        self.thread.stop()
+        self.thread.join()
+        print("Simulation stopped")
 
     @staticmethod
     def delete(container):
