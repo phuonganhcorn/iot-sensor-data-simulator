@@ -74,7 +74,8 @@ class SensorsPage():
                     with ui.stepper_navigation():
                         ui.button('Abbrechen', on_click=lambda: container.set_visibility(False)).props(
                             'flat')
-                        ui.button('Weiter', on_click=lambda: self.check_general_step_input(stepper, name_input))
+                        ui.button('Weiter', on_click=lambda: self.check_general_step_input(
+                            stepper, name_input))
                 with ui.step('Simulationswerte'):
                     with ui.grid(columns=3).classes('w-full'):
                         base_value_input = ui.number(
@@ -163,7 +164,7 @@ class SensorsPage():
 
         # TODO: Check if container is running and stop it
 
-        Sensor.delete(sensor)
+        sensor.delete()
 
         index = self.sensors.index(sensor)
 
