@@ -56,7 +56,9 @@ class DeviceModel(Base):
 
 class SensorModel(Base):
     __tablename__ = 'sensor'
+
     session = None
+    thread = None
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
