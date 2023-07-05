@@ -7,6 +7,8 @@ import datetime
 
 class Container(ContainerModel):
 
+    message_count = None
+
     @staticmethod
     def get_all():
         return Container.session.query(Container).all()
@@ -55,10 +57,12 @@ class Container(ContainerModel):
         self.start_time = datetime.datetime.now()
         Container.session.commit()
 
-        # Init simulation for all sensors
+        # Init simulation for all devices
+
+        self.message_count = 0
 
         for device in self.devices:
-            device.start_simulation(iot_hub_helper)
+            device.start_simulation(iot_hub_helper, self.message_callback)
 
         # Run simulation for all sensors
 
@@ -77,6 +81,9 @@ class Container(ContainerModel):
         self.start_time = None
         Container.session.commit()
 
+    def message_callback(self):
+        self.message_count += 1
+
     def stop(self):
         print("Stopping simulation")
         for sensor in self.get_all_sensors():
@@ -85,6 +92,8 @@ class Container(ContainerModel):
         self.thread.stop()
         self.thread.join()
         print("Simulation stopped")
+
+        self.message_count = None
 
     def get_all_sensors(self):
         sensors = []
