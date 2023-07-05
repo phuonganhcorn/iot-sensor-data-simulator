@@ -4,7 +4,7 @@ from model.sensor import Sensor
 
 
 class Device(DeviceModel):
-    
+
     @staticmethod
     def get_all():
         return Device.session.query(Device).all()
@@ -38,6 +38,17 @@ class Device(DeviceModel):
         for sensor in sensors:
             sensor.device_id = self.id
         Sensor.session.commit()
+
+    def start_simulation(self, iot_hub_helper):
+        self.iot_hub_helper = iot_hub_helper
+
+        for sensor in self.sensors:
+            sensor.start_simulation(callback=self.callback)
+
+    def callback(self, value):
+        print(f"Device callback: {value}")
+        data = {"time": "", "deviceId": self.name, "temperature": value}
+        self.iot_hub_helper.send_message(self.client, data)
 
     @staticmethod
     def delete(device):
