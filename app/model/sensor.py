@@ -50,7 +50,6 @@ class Sensor(SensorModel):
     def stop(self):
         self.running = False
 
-    @staticmethod
-    def delete(sensor):
-        Sensor.session.delete(sensor)
+    def delete(self):
+        Sensor.session.delete(self)
         Sensor.session.commit()
