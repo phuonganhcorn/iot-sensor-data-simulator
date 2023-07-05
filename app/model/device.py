@@ -50,7 +50,6 @@ class Device(DeviceModel):
         data = {"time": "", "deviceId": self.name, "temperature": value}
         self.iot_hub_helper.send_message(self.client, data)
 
-    @staticmethod
-    def delete(device):
-        Device.session.delete(device)
+    def delete(self):
+        Device.session.delete(self)
         Device.session.commit()

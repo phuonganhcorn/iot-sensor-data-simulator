@@ -150,7 +150,7 @@ class DevicesPage:
 
         self.iot_hub_helper.delete_device(
             device_id=device.name, etag=device.etag)
-        Device.delete(device)
+        device.delete()
 
         index = self.devices.index(device)
 
