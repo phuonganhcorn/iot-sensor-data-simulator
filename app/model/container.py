@@ -57,12 +57,10 @@ class Container(ContainerModel):
 
         # Init simulation for all sensors
 
-        # get all sensors from devices
-        sensors = []
-        for device in self.devices:
-            sensors.extend(device.sensors)
+        sensors = self.get_all_sensors()
 
-        print(sensors)
+        for sensor in sensors:
+            sensor.start_simulation()
 
         # Run simulation for all sensors
 
@@ -86,9 +84,18 @@ class Container(ContainerModel):
 
     def stop(self):
         print("Stopping simulation")
+        for sensor in self.get_all_sensors():
+            sensor.stop()
+
         self.thread.stop()
         self.thread.join()
         print("Simulation stopped")
+
+    def get_all_sensors(self):
+        sensors = []
+        for device in self.devices:
+            sensors.extend(device.sensors)
+        return sensors
 
     @staticmethod
     def delete(container):

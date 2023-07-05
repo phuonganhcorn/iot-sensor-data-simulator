@@ -1,5 +1,6 @@
 from model.models import SensorModel
 from utils.simulator import Simulator
+import threading
 
 
 class Sensor(SensorModel):
@@ -26,6 +27,26 @@ class Sensor(SensorModel):
     @staticmethod
     def get_all_unassigned():
         return Sensor.session.query(Sensor).filter(Sensor.device_id == None).all()
+
+    def callback(self):
+        # Überprüfen, ob die Schleife unterbrochen werden soll
+        if self.running:
+            print("Callback aufgerufen von: " + self.name)
+
+            # Wiederholung des Callbacks nach einer bestimmten Zeit
+            timer = threading.Timer(
+                interval=self.interval, function=self.callback)
+            timer.start()
+
+    def start_simulation(self):
+        self.simulator = Simulator()
+        self.running = True
+
+        timer = threading.Timer(interval=self.interval, function=self.callback)
+        timer.start()
+
+    def stop(self):
+        self.running = False
 
     def run_simulation(self, iot_hub_helper, device_client):
         simulator = Simulator()
