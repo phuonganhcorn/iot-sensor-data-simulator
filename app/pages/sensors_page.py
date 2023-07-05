@@ -1,13 +1,15 @@
 from nicegui import ui
 from components.navigation import Navigation
-from model.sensor import Sensor
 from components.sensor_item import SensorItem
+from model.device import Device
+from model.sensor import Sensor
+from constants.units import *
 
 
 class SensorsPage():
 
     def __init__(self):
-        self.sensors = []
+        self.sensors = Sensor.get_all()
         self.update_stats()
         self.setup_page()
 
@@ -22,7 +24,7 @@ class SensorsPage():
     def setup_menu_bar(self):
         with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
             ui.button('Neuen Sensor erstellen',
-                      on_click=lambda: self.create_sensor()).classes('')
+                      on_click=lambda: self.show_create_sensor_dialog()).classes('')
 
             with ui.row():
                 with ui.row().classes('ml-4 gap-1'):
@@ -54,16 +56,98 @@ class SensorsPage():
     def update_stats(self):
         self.sensors_count = len(self.sensors)
 
-    def create_sensor(self):
+    def show_create_sensor_dialog(self):
+        device_select = None
+
+        with ui.row().classes('fixed inset-0 bg-black/50 z-10') as container:
+
+            with ui.stepper().props('vertical').classes('absolute left-1/2 top-[15vh] w-[70%] h-[70vh] bg-white -translate-x-1/2 z-50') as stepper:
+                with ui.step('Allgemein'):
+                    with ui.grid(columns=3):
+                        name_input = ui.input('Name')
+
+                        units = {}
+                        for index, unit in enumerate(UNITS):
+                            units[index] = f"{unit['name']} [{unit['unit_abbreviation']}]"
+
+                        unit_input = ui.select(units, value=0, label='Einheit')
+                    with ui.stepper_navigation():
+                        ui.button('Abbrechen', on_click=lambda: container.set_visibility(False)).props(
+                            'flat')
+                        ui.button('Weiter', on_click=lambda: self.check_general_step_input(
+                            stepper, name_input))
+                with ui.step('Simulationswerte'):
+                    with ui.grid(columns=3).classes('w-full'):
+                        base_value_input = ui.number(
+                            label='Basiswert', value=25.00, format='%.2f')
+                        variation_range_input = ui.number(label='Variationsbereich',
+                                                          value=5.00, min=0, format='%.2f')
+                        with ui.number(label='Änderungsrate +/-', value=0.5, min=0, max=10) as input:
+                            change_rate_input = input
+                            ui.tooltip(
+                                'Die Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
+                        interval_input = ui.number(
+                            label='Interval [s]', value=10, min=0, max=3600)
+                    with ui.stepper_navigation():
+                        ui.button('Zurück', on_click=stepper.previous).props(
+                            'flat')
+                        ui.button('Weiter', on_click=stepper.next)
+                with ui.step('Gerätezuordnung'):
+                    devices = Device.get_all()
+                    devices_options = {
+                        device.id: device.name for device in devices}
+                    if len(devices) > 0:
+                        with ui.column():
+                            ui.label(
+                                'Wähle das Gerät aus zu dem der Sensor hinzugefügt werden soll (Optional).')
+                            device_select = ui.select(options=devices_options, with_input=True,
+                                                      on_change=lambda e: ui.notify(e.value)).classes('w-40')
+                    else:
+                        ui.label(
+                            'Es sind aktuell noch keine Geräte vorhanden. Du kannst danach zur Geräte-Seite wechseln, ein Gerät erstellen und diesen Sensor dann hinzufügen.')
+                    with ui.stepper_navigation():
+                        ui.button('Zurück', on_click=stepper.previous).props(
+                            'flat')
+                        ui.button('Weiter', on_click=stepper.next)
+                with ui.step('Abschließen'):
+                    ui.label(
+                        'Erstelle einen neuen Sensor mit den angegebenen Werten.')
+                    with ui.stepper_navigation():
+                        ui.button('Zurück', on_click=stepper.previous).props(
+                            'flat')
+                        ui.button('Sensor erstellen', on_click=lambda: self.create_sensor(
+                            container, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select))
+
+    def check_general_step_input(self, stepper, name_input):
+        if name_input.value == '':
+            ui.notify('Bitte gib einen Namen für den Sensor an.',
+                      type='warning')
+            return
+
+        stepper.next()
+
+    def create_sensor(self, dialog, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select):
         if len(self.sensors) == 0:
             self.list_container.clear()
 
-        new_sensor = Sensor(id=len(self.sensors) + 1)
+        name = name_input.value
+        unit = unit_input.value
+        base_value = base_value_input.value
+        variation_range = variation_range_input.value
+        change_rate = change_rate_input.value
+        interval = interval_input.value
+        device_id = None if device_select is None else device_select.value
+
+        new_sensor = Sensor.add(name=name, base_value=base_value,
+                                unit=unit, variation_range=variation_range, change_rate=change_rate, interval=interval, device_id=device_id)
         self.sensors.append(new_sensor)
 
         with self.list_container:
             SensorItem(sensor=new_sensor,
                        delete_callback=self.delete_button_handler)
+
+        dialog.set_visibility(False)
+        ui.notify('Sensor wurde erstellt', type='positive')
 
         self.update_stats()
 
@@ -80,8 +164,7 @@ class SensorsPage():
 
         # TODO: Check if container is running and stop it
 
-        if not sensor.delete():
-            return
+        sensor.delete()
 
         index = self.sensors.index(sensor)
 
