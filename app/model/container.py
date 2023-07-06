@@ -8,6 +8,7 @@ import datetime
 class Container(ContainerModel):
 
     message_count = None
+    device_clients = {}
 
     @staticmethod
     def get_all():
@@ -44,15 +45,17 @@ class Container(ContainerModel):
 
         iot_hub_helper = kwargs.get("iot_hub_helper")
 
+        # separate list because Container.session.commit() sets some device.client to None for some inexplicable reason
+        device_clients = []
+
         # Start Container
 
         # Connect all device clients
         for device in self.devices:
-            print(f"Connecting device {device.name}")
             device_client = iot_hub_helper.init_device_client(
                 device.connection_string)
             device.client = device_client
-            print(f"Connected device {device.name}")
+            device_clients.append(device_client)
 
         # Update container status
         self.is_active = True
@@ -74,9 +77,10 @@ class Container(ContainerModel):
         # Stop Container
 
         # Disconnect all device clients
+        for client in device_clients:
+            client.disconnect()
+        device_clients = None
         for device in self.devices:
-            print(device.client)
-            device.client.disconnect()
             device.client = None
 
         # Reset container status
@@ -86,11 +90,12 @@ class Container(ContainerModel):
 
     def message_callback(self, sensor, data):
         self.message_count += 1
-        
+
         timestamp = data["timestamp"].strftime("%H:%M:%S")
         unit = UNITS[int(data['unit'])]
         unit_abbrev = unit["unit_abbreviation"]
-        self.log.push(f"{timestamp}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
+        self.log.push(
+            f"{timestamp}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
         self.live_view_dialog.append_value(sensor, data['value'])
 
     def stop(self):
