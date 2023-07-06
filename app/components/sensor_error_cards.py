@@ -1,12 +1,6 @@
 from nicegui import ui
+from constants.sensor_errors import *
 import json
-
-PROBABILITY_POS_ANOMALY = 'probability_pos_anomaly'
-PROBABILITY_NEG_ANOMALY = 'probability_neg_anomaly'
-POS_ANOMALY_UPPER_RANGE = 'pos_anomaly_upper_range'
-POS_ANOMALY_LOWER_RANGE = 'pos_anomaly_lower_range'
-NEG_ANOMALY_UPPER_RANGE = 'neg_anomaly_upper_range'
-NEG_ANOMALY_LOWER_RANGE = 'neg_anomaly_lower_range'
 
 
 class AnomalyCard:
@@ -45,8 +39,8 @@ class AnomalyCard:
     def get_values(self, json_dump=False):
         values = {
             "type": "anomaly",
-            PROBABILITY_POS_ANOMALY: self.probability_pos_anomaly_input.value,
-            PROBABILITY_NEG_ANOMALY: self.probability_neg_anomaly_input.value,
+            PROBABILITY_POS_ANOMALY: self.probability_pos_anomaly_input.value / 100,
+            PROBABILITY_NEG_ANOMALY: self.probability_neg_anomaly_input.value / 100,
             POS_ANOMALY_UPPER_RANGE: self.pos_anomaly_upper_range_input.value,
             POS_ANOMALY_LOWER_RANGE: self.pos_anomaly_lower_range_input.value,
             NEG_ANOMALY_UPPER_RANGE: self.neg_anomaly_upper_range_input.value,
