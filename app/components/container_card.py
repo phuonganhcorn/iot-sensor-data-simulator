@@ -1,17 +1,18 @@
 from nicegui import ui
+from components.live_view_dialog import LiveViewDialog
 from components.logs_dialog import LogsDialog
 
 
 class ContainerCard():
-    def __init__(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None):
+    def __init__(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None, live_view_callback=None):
         self.card = None
         self.logs_dialog = LogsDialog(wrapper)
         container.log = self.logs_dialog.log
         self.active_dot = None
         self.setup(wrapper, container, start_callback=start_callback,
-                   stop_callback=stop_callback, delete_callback=delete_callback)
+                   stop_callback=stop_callback, delete_callback=delete_callback, live_view_callback=live_view_callback)
 
-    def setup(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None):
+    def setup(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None, live_view_callback=None):
         sensor_count = 0
         for device in container.devices:
             sensor_count += len(device.sensors)
@@ -21,12 +22,14 @@ class ContainerCard():
             with ui.card_section().classes('min-h-[260px]'):
                 with ui.row().classes('pb-2 w-full justify-between items-center border-b border-gray-200'):
                     ui.label(container.name).classes('text-xl font-semibold')
-                    with ui.button(icon='more_vert').props('flat').classes('px-2 text-black'):
-                        with ui.menu().props(remove='no-parent-event'):
-                            ui.menu_item('Log anzeigen', lambda: self.show_logs_dialog(container)).classes(
-                                'flex items-center')
-                            ui.menu_item('Löschen', lambda w=wrapper, c=container, callback=delete_callback: self.show_delete_dialog(
-                                w, c, callback)).classes('text-red-500').classes('flex items-center')
+                    with ui.row().classes('gap-0.5'):
+                        ui.button(icon='insert_chart_outlined', on_click=lambda: live_view_callback(container)).props('flat').classes('px-2 text-black')
+                        with ui.button(icon='more_vert').props('flat').classes('px-2 text-black'):
+                            with ui.menu().props(remove='no-parent-event'):
+                                ui.menu_item('Log anzeigen', lambda: self.show_logs_dialog(container)).classes(
+                                    'flex items-center')
+                                ui.menu_item('Löschen', lambda w=wrapper, c=container, callback=delete_callback: self.show_delete_dialog(
+                                    w, c, callback)).classes('text-red-500').classes('flex items-center')
                 with ui.column().classes('py-4 gap-2'):
                     with ui.row().classes('gap-1'):
                         ui.label('Geräte:').classes('text-sm font-medium')
@@ -61,6 +64,9 @@ class ContainerCard():
 
     def set_inactive(self):
         self.active_dot.classes('bg-red-500', remove='bg-green-500')
+
+    def show_live_view_dialog(self, wrapper, container):
+        LiveViewDialog(wrapper, container)
 
     def show_logs_dialog(self, container):
         if not container.is_active:

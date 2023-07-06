@@ -16,6 +16,9 @@ class Device(DeviceModel):
     @staticmethod
     def get_all_by_ids(ids):
         return Device.session.query(Device).filter(Device.id.in_(ids)).all()
+    
+    def get_by_id(id):
+        return Device.session.query(Device).filter_by(id=id).first()
 
     @staticmethod
     def store(device, sensor_ids):
@@ -46,10 +49,10 @@ class Device(DeviceModel):
         for sensor in self.sensors:
             sensor.start_simulation(callback=self.send_simulator_data)
 
-    def send_simulator_data(self, data):
+    def send_simulator_data(self, sensor, data):
         data["deviceId"] = self.name
         self.iot_hub_helper.send_message(self.client, data)
-        self.container_callback(data)
+        self.container_callback(sensor, data)
 
     def delete(self):
         Device.session.delete(self)
