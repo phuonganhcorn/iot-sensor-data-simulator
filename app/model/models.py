@@ -63,7 +63,7 @@ class SensorModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
     base_value = Column(Float)
-    unit = Column(String(20))
+    unit = Column(Integer)
     variation_range = Column(Float)
     change_rate = Column(Float)
     interval = Column(Float)

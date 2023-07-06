@@ -40,10 +40,8 @@ class Simulator:
         
         if random.random() > 1 - self.error_definition[PROBABILITY_POS_ANOMALY]:
             value += random.uniform(self.error_definition[POS_ANOMALY_LOWER_RANGE], self.error_definition[POS_ANOMALY_UPPER_RANGE])
-            print(f"Positive Anomaly for {self.sensor.name}")
         
         if random.random() < self.error_definition[PROBABILITY_NEG_ANOMALY]:
             value -= random.uniform(self.error_definition[NEG_ANOMALY_LOWER_RANGE], self.error_definition[NEG_ANOMALY_UPPER_RANGE])
-            print(f"Negative Anomaly for {self.sensor.name}")
 
         return value
