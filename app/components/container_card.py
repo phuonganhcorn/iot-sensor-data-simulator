@@ -12,6 +12,10 @@ class ContainerCard():
                    stop_callback=stop_callback, delete_callback=delete_callback)
 
     def setup(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None):
+        sensor_count = 0
+        for device in container.devices:
+            sensor_count += len(device.sensors)
+
         with ui.card().tight() as card:
             self.card = card
             with ui.card_section().classes('min-h-[260px]'):
@@ -21,8 +25,6 @@ class ContainerCard():
                         with ui.menu().props(remove='no-parent-event'):
                             ui.menu_item('Log anzeigen', lambda: self.show_logs_dialog(container)).classes(
                                 'flex items-center')
-                            # ui.menu_item('Log anzeigen', lambda c=container: logs_callback(
-                            #     c)).classes('flex items-center')
                             ui.menu_item('Löschen', lambda w=wrapper, c=container, callback=delete_callback: self.show_delete_dialog(
                                 w, c, callback)).classes('text-red-500').classes('flex items-center')
                 with ui.column().classes('py-4 gap-2'):
@@ -30,6 +32,9 @@ class ContainerCard():
                         ui.label('Geräte:').classes('text-sm font-medium')
                         ui.label().classes('text-sm').bind_text_from(container,
                                                                      'devices', backward=lambda d: len(d))
+                    with ui.row().classes('gap-1'):
+                        ui.label('Sensoren:').classes('text-sm font-medium')
+                        ui.label(f"{sensor_count}").classes('text-sm')
                     with ui.row().classes('gap-1'):
                         ui.label('Gesendete Nachrichten:').classes(
                             'text-sm font-medium')
