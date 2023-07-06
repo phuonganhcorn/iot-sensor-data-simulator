@@ -52,13 +52,12 @@ class LiveViewDialog():
         self.title_label.set_text(f"Live View: {container.name}")
         self.selects_row.clear()
 
-        self.chart_wrapper.clear()
-        if self.chart is None:
-            with self.chart_wrapper:
-                text = "Warten auf Sensordaten..." if container.is_active else "Container ist nicht aktiv"
-                self.note_label = ui.label(text).classes("-translate-y-full")
-        
         self.chart = None
+        self.chart_wrapper.clear()
+        with self.chart_wrapper:
+            text = "Warten auf Sensordaten..." if container.is_active else "Container ist nicht aktiv"
+            self.note_label = ui.label(text).classes("-translate-y-full")
+        
 
         device_options = {
             device.id: device.name for device in container.devices}
