@@ -67,6 +67,7 @@ class SensorModel(Base):
     variation_range = Column(Float)
     change_rate = Column(Float)
     interval = Column(Float)
+    error_definition = Column(String(500))
     device_id = Column(Integer, ForeignKey(DeviceModel.id))
 
     device = relationship(DeviceModel, back_populates='sensors')

@@ -4,12 +4,14 @@ from components.sensor_item import SensorItem
 from model.device import Device
 from model.sensor import Sensor
 from constants.units import *
+from components.sensor_error_cards import AnomalyCard
 
 
 class SensorsPage():
 
     def __init__(self):
         self.sensors = Sensor.get_all()
+        self.sensor_error_card = None
         self.update_stats()
         self.setup_page()
 
@@ -57,14 +59,15 @@ class SensorsPage():
         self.sensors_count = len(self.sensors)
 
     def show_create_sensor_dialog(self):
+        self.sensor_error_card = None
         device_select = None
 
         with ui.row().classes('fixed inset-0 bg-black/50 z-10') as container:
 
-            with ui.stepper().props('vertical').classes('absolute left-1/2 top-[15vh] w-[70%] h-[70vh] bg-white -translate-x-1/2 z-50') as stepper:
+            with ui.stepper().props('vertical').classes('absolute left-1/2 top-[15vh] w-[70%] h-[70vh] bg-white -translate-x-1/2 overflow-auto z-50') as stepper:
                 with ui.step('Allgemein'):
                     with ui.grid(columns=3):
-                        name_input = ui.input('Name')
+                        name_input = ui.input('Name*')
 
                         units = {}
                         for index, unit in enumerate(UNITS):
@@ -92,6 +95,21 @@ class SensorsPage():
                         ui.button('Zurück', on_click=stepper.previous).props(
                             'flat')
                         ui.button('Weiter', on_click=stepper.next)
+                with ui.step('Fehlersimulation'):
+                    ui.label(
+                        'Simuliere Fehler, die bei einer Messung auftreten können.')
+
+                    error_types = {0: 'Kein Fehler',
+                                   1: 'Einmalige Anomalien', }
+
+                    error_type_input = ui.select(error_types, value=0, label='Fehlertyp',
+                                                 on_change=lambda e: self.error_type_input_handler(error_container, e.value))
+                    error_container = ui.row()
+
+                    with ui.stepper_navigation():
+                        ui.button('Zurück', on_click=stepper.previous).props(
+                            'flat')
+                        ui.button('Weiter', on_click=stepper.next)
                 with ui.step('Gerätezuordnung'):
                     devices = Device.get_all()
                     devices_options = {
@@ -100,8 +118,8 @@ class SensorsPage():
                         with ui.column():
                             ui.label(
                                 'Wähle das Gerät aus zu dem der Sensor hinzugefügt werden soll (Optional).')
-                            device_select = ui.select(options=devices_options, with_input=True,
-                                                      on_change=lambda e: ui.notify(e.value)).classes('w-40')
+                            device_select = ui.select(
+                                options=devices_options, with_input=True).classes('w-40')
                     else:
                         ui.label(
                             'Es sind aktuell noch keine Geräte vorhanden. Du kannst danach zur Geräte-Seite wechseln, ein Gerät erstellen und diesen Sensor dann hinzufügen.')
@@ -117,6 +135,15 @@ class SensorsPage():
                             'flat')
                         ui.button('Sensor erstellen', on_click=lambda: self.create_sensor(
                             container, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select))
+
+    def error_type_input_handler(self, container, value):
+        container.clear()
+
+        if value == 0:
+            self.sensor_error_card = None
+        elif value == 1:
+            with container:
+                self.sensor_error_card = AnomalyCard()
 
     def check_general_step_input(self, stepper, name_input):
         if name_input.value == '':
@@ -136,10 +163,11 @@ class SensorsPage():
         variation_range = variation_range_input.value
         change_rate = change_rate_input.value
         interval = interval_input.value
+        error_definition = None if self.sensor_error_card is None else self.sensor_error_card.get_values(json_dump=True)
         device_id = None if device_select is None else device_select.value
 
-        new_sensor = Sensor.add(name=name, base_value=base_value,
-                                unit=unit, variation_range=variation_range, change_rate=change_rate, interval=interval, device_id=device_id)
+        new_sensor = Sensor.add(name=name, base_value=base_value, unit=unit, variation_range=variation_range,
+                                change_rate=change_rate, interval=interval, error_definition=error_definition, device_id=device_id)
         self.sensors.append(new_sensor)
 
         with self.list_container:

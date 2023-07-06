@@ -6,9 +6,9 @@ import threading
 class Sensor(SensorModel):
 
     @staticmethod
-    def add(name, base_value, unit, variation_range, change_rate, interval, device_id):
+    def add(name, base_value, unit, variation_range, change_rate, interval, error_definition, device_id):
         new_sensor = Sensor(name=name, base_value=base_value,
-                            unit=unit, variation_range=variation_range, change_rate=change_rate, interval=interval, device_id=device_id)
+                            unit=unit, variation_range=variation_range, change_rate=change_rate, interval=interval, error_definition=error_definition, device_id=device_id)
 
         Sensor.session.add(new_sensor)
         Sensor.session.commit()
