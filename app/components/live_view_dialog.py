@@ -1,6 +1,7 @@
 from nicegui import ui
 from model.device import Device
-import random
+from model.sensor import Sensor
+from constants.units import *
 
 
 class LiveViewDialog():
@@ -23,19 +24,19 @@ class LiveViewDialog():
 
                 self.chart_wrapper = ui.row().classes('w-full h-64 justify-center items-center')
 
-    def setup_chart(self, init_data=[]):
+    def setup_chart(self, sensor, init_data=[]):
         with self.chart_wrapper:
             self.chart = ui.chart({
                 "title": False,
                 "series": [
-                    {"name": "-", "data": init_data},
+                    {"name": sensor.name, "data": init_data},
                 ],
                 "yAxis": {
                     "title": {
-                        "text": "Temperatur"
+                        "text": UNITS[sensor.unit]["name"]
                     },
                     "labels": {
-                        "format": "{value} °C"
+                        "format": "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
                     }
                 },
                 "xAxis": {
@@ -83,8 +84,13 @@ class LiveViewDialog():
 
     def sensor_select_change_handler(self):
         self.clear_chart()
+        sensor_id = self.sensor_select.value
         self.update_series_name(
-            self.sensor_select.options[self.sensor_select.value])
+            self.sensor_select.options[sensor_id])
+        
+        sensor = Sensor.get_by_id(sensor_id)
+        self.update_y_axis(sensor)
+        
 
     def clear_chart(self):
         self.chart.options["series"][0]["data"] = []
@@ -92,6 +98,11 @@ class LiveViewDialog():
 
     def update_series_name(self, name):
         self.chart.options["series"][0]["name"] = name
+        self.chart.update()
+
+    def update_y_axis(self, sensor):
+        self.chart.options["yAxis"]["title"]["text"] = UNITS[sensor.unit]["name"]
+        self.chart.options["yAxis"]["labels"]["format"] = "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
         self.chart.update()
 
     def update_sensor_select(self):
@@ -106,6 +117,8 @@ class LiveViewDialog():
             self.sensor_select.update()
             self.sensor_select.value = first_value
 
+            self.update_y_axis(device.sensors[0])
+
             return sensor_options[first_value]
 
     def append_value(self, sensor, value):
@@ -119,7 +132,7 @@ class LiveViewDialog():
         
         if self.chart is None:
             self.chart_wrapper.clear()
-            self.setup_chart([[0, value]])
+            self.setup_chart(sensor=sensor, init_data=[[0, value]])
             return
         
         data = self.chart.options["series"][0]["data"]

@@ -22,6 +22,10 @@ class Sensor(SensorModel):
     @staticmethod
     def get_all_by_ids(list_of_ids):
         return Sensor.session.query(Sensor).filter(Sensor.id.in_(list_of_ids)).all()
+    
+    @staticmethod
+    def get_by_id(id):
+        return Sensor.session.query(Sensor).filter(Sensor.id == id).first()
 
     # Returns all sensors that are not assigned to a device
     @staticmethod
