@@ -1,6 +1,7 @@
 from nicegui import ui
 from components.navigation import Navigation
 from components.container_card import ContainerCard
+from components.live_view_dialog import LiveViewDialog
 from model.container import Container
 from model.device import Device
 
@@ -26,6 +27,7 @@ class ContainersPage:
 
         self.setup_menu_bar()
         self.setup_cards_container()
+        self.setup_live_view_dialog()
 
     def setup_menu_bar(self):
         with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
@@ -59,9 +61,15 @@ class ContainersPage:
             else:
                 with self.cards_grid:
                     for container in self.containers:
-                        new_container_card = ContainerCard(
-                            wrapper=self.cards_container, container=container, start_callback=self.start_container, stop_callback=self.stop_container, delete_callback=self.delete_container)
+                        new_container_card = ContainerCard(wrapper=self.cards_container, container=container, start_callback=self.start_container,
+                                                           stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
                         self.cards.append(new_container_card)
+
+    def setup_live_view_dialog(self):
+        self.live_view_dialog = LiveViewDialog(self.cards_container)
+
+        for container in self.containers:
+            container.live_view_dialog = self.live_view_dialog
 
     def update_stats(self):
         self.containers_count = len(self.containers)
@@ -140,7 +148,7 @@ class ContainersPage:
         self.containers.append(new_container)
         with self.cards_grid:
             new_container_card = ContainerCard(wrapper=self.cards_container, container=new_container, start_callback=self.start_container,
-                                               stop_callback=self.stop_container, delete_callback=self.delete_container)
+                                               stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
             self.cards.append(new_container_card)
         self.update_stats()
 
@@ -175,3 +183,6 @@ class ContainersPage:
 
         if len(self.containers) == 0:
             self.print_no_containers()
+
+    def show_live_view_dialog(self, container):
+        self.live_view_dialog.show(container)

@@ -32,7 +32,7 @@ class Sensor(SensorModel):
         # Überprüfen, ob die Schleife unterbrochen werden soll
         if self.running:
             data = self.simulator.generate_data()
-            device_callback(data)
+            device_callback(self, data)
 
             # Wiederholung des Callbacks nach einer bestimmten Zeit
             timer = threading.Timer(
