@@ -10,6 +10,7 @@ class ContainerCard():
         self.container = container
         self.card = None
         self.visible = True
+        self.sensor_count = 0
         self.logs_dialog = LogsDialog(wrapper)
         container.log = self.logs_dialog.log
         self.active_dot = None
@@ -17,9 +18,7 @@ class ContainerCard():
                    stop_callback=stop_callback, delete_callback=delete_callback, live_view_callback=live_view_callback)
 
     def setup(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None, live_view_callback=None):
-        sensor_count = 0
-        for device in container.devices:
-            sensor_count += len(device.sensors)
+        self.update_sensor_count()
 
         with ui.card().tight().bind_visibility(self, 'visible') as card:
             self.card = card
@@ -44,7 +43,7 @@ class ContainerCard():
                                                                      'devices', backward=lambda d: len(d))
                     with ui.row().classes('gap-1'):
                         ui.label('Sensoren:').classes('text-sm font-medium')
-                        ui.label(f"{sensor_count}").classes('text-sm')
+                        ui.label().bind_text(self, 'sensor_count').classes('text-sm')
                     with ui.row().classes('gap-1'):
                         ui.label('Gesendete Nachrichten:').classes(
                             'text-sm font-medium')
@@ -71,6 +70,11 @@ class ContainerCard():
 
     def set_inactive(self):
         self.active_dot.classes('bg-red-500', remove='bg-green-500')
+
+    def update_sensor_count(self):
+        self.sensor_count = 0
+        for device in self.container.devices:
+            self.sensor_count += len(device.sensors)
 
     def show_live_view_dialog(self, wrapper, container):
         LiveViewDialog(wrapper, container)
@@ -174,6 +178,7 @@ class ContainerCard():
         Device.session.commit()
 
         ui.notify(f"Gerät erfolgreich hinzugefügt.", type="positive")
+        self.update_sensor_count()
 
         # Remove device from select
         del self.new_device_select.options[device_id]
