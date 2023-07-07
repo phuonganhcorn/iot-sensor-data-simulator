@@ -30,14 +30,14 @@ iot_hub_helper = IoTHubHelper()
 ContainersPage(iot_hub_helper)
 
 
-@ui.page('/sensoren')
-def sensors_page():
-    SensorsPage()
-
-
 @ui.page('/geraete')
 def devices_page():
     DevicesPage(iot_hub_helper)
+
+
+@ui.page('/sensoren')
+def sensors_page():
+    SensorsPage()
 
 
 ui.run(title="IoT Telemetrie Simulator", host="127.0.0.1", port=8081)
