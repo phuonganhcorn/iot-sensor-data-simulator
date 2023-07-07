@@ -19,6 +19,7 @@ class SensorItem:
                 ui.label(f'{sensor.id}').classes('w-[30px]')
                 ui.label(f'{sensor.name}').classes('w-[130px]')
                 ui.label(f'{UNITS[sensor.unit]["name"]}').classes('w-[130px]')
+                ui.label(f'{sensor.device.name}').classes('w-[130px]')
                 if error_type:
                     ui.label(f'{error_type.title()}').classes('w-[130px]')
             with ui.row():
