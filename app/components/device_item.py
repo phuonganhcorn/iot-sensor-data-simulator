@@ -11,7 +11,8 @@ class DeviceItem:
             with ui.row().classes('gap-6'):
                 ui.label(f'{device.id}').classes('w-[30px]')
                 ui.label(f'{device.name}').classes('w-[130px]')
-                ui.label(f'{device.container.name}').classes('w-[130px]')
+                if device.container:
+                    ui.label(f'{device.container.name}').classes('w-[130px]')
                 ui.label(f'{len(device.sensors)}').classes('w-[60px]')
             with ui.row().classes('gap-2'):
                 ui.button(icon='delete', on_click=lambda d=device: delete_callback(d)).props(
