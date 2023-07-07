@@ -11,6 +11,7 @@ class DevicesPage:
         self.iot_hub_helper = iot_hub_helper
         self.iot_hub_devices = self.iot_hub_helper.get_devices()
         self.devices = Device.get_all()
+        self.list_items = []
         self.update_stats()
         self.setup_page()
 
@@ -33,26 +34,50 @@ class DevicesPage:
                     ui.label().classes('text-sm').bind_text(self, 'devices_count')
 
             with ui.row():
-                ui.input(placeholder='Filter').classes('w-44')
-                ui.select({1: "Alle", 2: "Aktiv", 3: "Inaktiv"},
-                          value=1).classes('w-24')
+                self.filter_input = ui.input(placeholder='Filter', on_change=self.filter_handler).classes('w-44')
 
     def setup_list(self):
-        self.list_container = ui.column().classes('w-full gap-0 divide-y')
+        self.list_container = ui.column().classes('relative w-full gap-0 divide-y')
 
         with self.list_container:
             if len(self.devices) == 0:
-                self.print_no_devices()
+                self.show_note('Keine Geräte vorhanden')
             else:
                 for device in self.devices:
-                    DeviceItem(device=device,
+                    new_item = DeviceItem(device=device,
                                delete_callback=self.delete_button_handler)
+                    self.list_items.append(new_item)
+            
+            self.setup_note_label()
 
-    def print_no_devices(self):
-        self.list_container.classes('justify-center')
+    def setup_note_label(self):
         with self.list_container:
-            with ui.column().classes('self-center mt-48'):
-                ui.label('Keine Geräte vorhanden')
+            self.note_label = ui.label().classes('absolute left-1/2 top-48 self-center -translate-x-1/2 !border-t-0')
+            self.note_label.set_visibility(False)
+
+    def filter_handler(self):
+        search_text = self.filter_input.value
+        results = list(filter(lambda item: search_text.lower() in item.device.name.lower(), self.list_items))
+
+        for item in self.list_items:
+            item.visible = item in results
+
+        if len(results) == 0:
+            self.show_note('Keine Treffer')
+        else:
+            self.hide_note()
+
+        if len(results) == 1:
+            self.list_container.classes(add='divide-y-0', remove='divide-y')
+        else:
+            self.list_container.classes(add='divide-y', remove='divide-y-0')
+
+    def show_note(self, message):
+        self.note_label.text = message
+        self.note_label.set_visibility(True)
+
+    def hide_note(self):
+        self.note_label.set_visibility(False)
 
     def update_stats(self):
         self.devices_count = len(self.devices)
@@ -160,7 +185,7 @@ class DevicesPage:
         self.update_stats()
 
         if len(self.devices) == 0:
-            self.print_no_devices()
+            self.show_note('Keine Geräte vorhanden')
 
     def replace_special_characters(self, value):
         replacements = {
