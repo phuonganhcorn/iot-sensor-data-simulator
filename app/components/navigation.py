@@ -15,8 +15,8 @@ class Navigation():
                 'text-md font-semibold uppercase')
             with ui.row().classes('gap-12'):
                 ui.link('Container', '/').classes('text-white !no-underline')
-                ui.link('Sensoren', '/sensoren').classes('text-white !no-underline')
                 ui.link('Geräte', '/geraete').classes('text-white !no-underline')
+                ui.link('Sensoren', '/sensoren').classes('text-white !no-underline')
             with ui.row():
                 ui.label(f'Host: {self.host_name}').classes('text-white')
 
