@@ -137,7 +137,7 @@ class ContainerCard():
                             with ui.row() as row:
                                 self.tree_container = row
                                 ui.tree(
-                                    data, label_key="id", on_select=lambda e: self.tree_select_handler(e))
+                                    data, label_key="id")
 
                         unassigned_devices = Device.get_all_unassigned()
                         with ui.column().classes('gap-0'):
@@ -189,8 +189,7 @@ class ContainerCard():
         new_data = self.create_tree_data(self.container.devices)
         self.tree_container.clear()
         with self.tree_container:
-            ui.tree(new_data, label_key="id",
-                    on_select=lambda e: self.tree_select_handler(e))
+            ui.tree(new_data, label_key="id")
 
     def show_logs_dialog(self, container):
         if not container.is_active:
