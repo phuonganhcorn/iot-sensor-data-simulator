@@ -68,6 +68,8 @@ class DeviceItem:
                         "Wähle aus welche Sensoren zu diesem Gerät gehören sollen. Nur Sensoren erlaubt, die noch keinem Gerät zugewiesen wurden.")
                     sensors = Sensor.get_all_unassigned()
                     sensors.extend(self.device.sensors)
+                    sensors.sort(key=lambda x: x.id)
+
                     sensor_options = {
                         sensor.id: sensor.name for sensor in sensors}
                     preselected = [sensor.id for sensor in self.device.sensors]
