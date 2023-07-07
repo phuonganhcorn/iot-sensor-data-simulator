@@ -42,6 +42,11 @@ class Device(DeviceModel):
             sensor.device_id = self.id
         Sensor.session.commit()
 
+    def clear_relationship_to_sensors(self):
+        for sensor in self.sensors:
+            sensor.device_id = None
+        Sensor.session.commit()
+
     def start_simulation(self, iot_hub_helper, callback):
         self.iot_hub_helper = iot_hub_helper
         self.container_callback = callback

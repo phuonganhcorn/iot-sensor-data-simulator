@@ -43,17 +43,17 @@ class SensorItem:
                 ui.label("Allgemein").classes("text-lg font-semibold mt-2")
                 with ui.row().classes("gap-10"):
                     with ui.column().classes("gap-0"):
-                        ui.label("ID").classes("text-sm font-semibold text-gray-500")
-                        ui.label(f"{self.sensor.id}").classes("text-md")
+                        ui.label("ID").classes("text-sm text-gray-500")
+                        ui.label(f"{self.sensor.id}").classes("text-md font-medium")
                     with ui.column().classes("gap-0"):
-                        ui.label("Name").classes("text-sm font-semibold text-gray-500")
-                        ui.label(f"{self.sensor.name}").classes("text-md")
+                        ui.label("Name").classes("text-sm text-gray-500")
+                        ui.label(f"{self.sensor.name}").classes("text-md font-medium")
                     with ui.column().classes("gap-0"):
-                        ui.label("Typ").classes("text-sm font-semibold text-gray-500")
-                        ui.label(f"{UNITS[self.sensor.unit]['name']}").classes("text-md")
+                        ui.label("Typ").classes("text-sm text-gray-500")
+                        ui.label(f"{UNITS[self.sensor.unit]['name']}").classes("text-md font-medium")
                     with ui.column().classes("gap-0"):
-                        ui.label("Einheit").classes("text-sm font-semibold text-gray-500")
-                        ui.label(f"{UNITS[self.sensor.unit]['unit_abbreviation']}").classes("text-md")
+                        ui.label("Einheit").classes("text-sm text-gray-500")
+                        ui.label(f"{UNITS[self.sensor.unit]['unit_abbreviation']}").classes("text-md font-medium")
 
             ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
 
@@ -76,17 +76,17 @@ class SensorItem:
 
                 with ui.row().classes("gap-10"):
                     with ui.column().classes("gap-0"):
-                        ui.label("Basiswert").classes("text-sm font-semibold text-gray-500")
-                        ui.label(f"{self.sensor.base_value}").classes("text-md")
+                        ui.label("Basiswert").classes("text-sm text-gray-500")
+                        ui.label(f"{self.sensor.base_value}").classes("text-md font-medium")
                     with ui.column().classes("gap-0"):
-                        ui.label("Variationsbereich").classes("text-sm font-semibold text-gray-500")
-                        ui.label(f"{self.sensor.variation_range}").classes("text-md")
+                        ui.label("Variationsbereich").classes("text-sm text-gray-500")
+                        ui.label(f"{self.sensor.variation_range}").classes("text-md font-medium")
                     with ui.column().classes("gap-0"):
-                        ui.label("Änderungsrate +/-").classes("text-sm font-semibold text-gray-500")
-                        ui.label(f"{self.sensor.change_rate}").classes("text-md")
+                        ui.label("Änderungsrate +/-").classes("text-sm text-gray-500")
+                        ui.label(f"{self.sensor.change_rate}").classes("text-md font-medium")
                     with ui.column().classes("gap-0"):
-                        ui.label("Interval [s]").classes("text-sm font-semibold text-gray-500")
-                        ui.label(f"{self.sensor.change_rate}").classes("text-md")
+                        ui.label("Interval [s]").classes("text-sm text-gray-500")
+                        ui.label(f"{self.sensor.change_rate}").classes("text-md font-medium")
 
     
     def change_device(self):
@@ -107,7 +107,7 @@ class SensorItem:
     def _check_if_container_is_active(self, device):
         container = device.container
         if container is not None and container.is_active:
-            ui.notify(f"Änderung kann nicht gespeichert werden während Container '{container.name}' aktiv ist.", type="negative")
+            ui.notify(f"Änderung kann nicht übernommen werden während Container '{container.name}' aktiv ist.", type="negative")
             return True
         return False
         

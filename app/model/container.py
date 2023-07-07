@@ -13,6 +13,10 @@ class Container(ContainerModel):
     @staticmethod
     def get_all():
         return Container.session.query(Container).all()
+    
+    @staticmethod
+    def get_by_id(id):
+        return Container.session.query(Container).filter(Container.id == id).first()
 
     def get_device_count(self):
         return len(self.devices)
