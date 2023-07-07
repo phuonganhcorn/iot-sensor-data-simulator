@@ -4,7 +4,6 @@ from components.container_card import ContainerCard
 from components.live_view_dialog import LiveViewDialog
 from model.container import Container
 from model.device import Device
-import time
 
 
 class ContainersPage:
@@ -12,7 +11,6 @@ class ContainersPage:
     def __init__(self, iot_hub_helper):
         self.iot_hub_helper = iot_hub_helper
         self.containers = Container.get_all()
-        self.cards_container = None
         self.cards_grid = None
         self.cards = []
         self.update_stats()
@@ -27,7 +25,7 @@ class ContainersPage:
         ui.label("Container").classes('text-2xl font-bold')
 
         self.setup_menu_bar()
-        self.setup_cards_container()
+        self.setup_cards_grid()
         self.setup_live_view_dialog()
 
     def setup_menu_bar(self):
@@ -52,30 +50,28 @@ class ContainersPage:
                 ui.select({1: "Alle", 2: "Aktiv", 3: "Inaktiv"},
                           value=1).classes('w-24')
 
-    def setup_cards_container(self):
-        self.cards_container = ui.row().classes('w-full')
+    def setup_cards_grid(self):
         self.cards_grid = ui.grid().classes(
-            'mt-6 w-full grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4')
+            'relative mt-6 w-full grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4')
 
-        with self.cards_container:
-            if len(self.containers) == 0:
-                self.show_note("Keine Container vorhanden")
-            else:
-                with self.cards_grid:
-                    for container in self.containers:
-                        new_container_card = ContainerCard(wrapper=self.cards_container, container=container, start_callback=self.start_container,
-                                                           stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
-                        self.cards.append(new_container_card)
+        if len(self.containers) == 0:
+            self.show_note("Keine Container vorhanden")
+        else:
+            with self.cards_grid:
+                for container in self.containers:
+                    new_container_card = ContainerCard(wrapper=self.cards_grid, container=container, start_callback=self.start_container,
+                                                        stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
+                    self.cards.append(new_container_card)
 
         self.setup_note_label()
 
     def setup_note_label(self):
-        with self.cards_container:
-            self.note_label = ui.label().classes('self-center mt-48')
+        with self.cards_grid:
+            self.note_label = ui.label().classes('absolute left-1/2 top-48 self-center -translate-x-1/2')
             self.note_label.set_visibility(False)
 
     def setup_live_view_dialog(self):
-        self.live_view_dialog = LiveViewDialog(self.cards_container)
+        self.live_view_dialog = LiveViewDialog(self.cards_grid)
 
         for container in self.containers:
             container.live_view_dialog = self.live_view_dialog
@@ -100,12 +96,12 @@ class ContainersPage:
             self.hide_note()
 
     def show_note(self, message):
-        self.cards_container.classes('justify-center')
+        self.cards_grid.classes('justify-center')
         self.note_label.text = message
         self.note_label.set_visibility(True)
 
     def hide_note(self):
-        self.cards_container.classes('justify-start')
+        self.cards_grid.classes('justify-start')
         self.note_label.set_visibility(False)
 
     def open_create_container_dialog(self):
@@ -166,14 +162,14 @@ class ContainersPage:
 
     def create_container(self, name, description, location, device_ids):
         if len(self.containers) == 0:
-            self.cards_container.clear()
+            self.cards_grid.clear()
             self.note_label.set_visibility(False)
 
         new_container = Container.add(
             name, description, location, device_ids)
         self.containers.append(new_container)
         with self.cards_grid:
-            new_container_card = ContainerCard(wrapper=self.cards_container, container=new_container, start_callback=self.start_container,
+            new_container_card = ContainerCard(wrapper=self.cards_grid, container=new_container, start_callback=self.start_container,
                                                stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
             self.cards.append(new_container_card)
         self.update_stats()
