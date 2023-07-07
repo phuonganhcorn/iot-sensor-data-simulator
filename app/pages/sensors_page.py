@@ -35,30 +35,43 @@ class SensorsPage():
                     ui.label().classes('text-sm').bind_text(self, 'sensors_count')
 
             with ui.row():
-                self.filter_input = ui.input(placeholder='Filter', on_change=self.filter_handler).classes('w-44')
+                self.filter_input = ui.input(
+                    placeholder='Filter', on_change=self.filter_handler).classes('w-44')
 
     def setup_list(self):
-        self.list_container = ui.column().classes('relative w-full gap-0 divide-y')
+        self.list_container = ui.column().classes(
+            'relative grid w-full gap-0 divide-y')
 
         with self.list_container:
+            headings = [{'name': 'ID', 'width': 'w-[30px]'},
+                       {'name': 'Name', 'width': 'w-[130px]'},
+                       {'name': 'Typ', 'width': 'w-[130px]'},
+                       {'name': 'Fehlertyp', 'width': 'w-[130px]'}]
+
+            with ui.row().classes('px-3 py-6 flex gap-6 items-center w-full'):
+                for heading in headings:
+                    ui.label(heading['name']).classes(f'font-medium {heading["width"]}')
+
             if len(self.sensors) == 0:
                 self.show_note('Keine Sensoren vorhanden')
             else:
                 for sensor in self.sensors:
                     new_item = SensorItem(sensor=sensor,
-                               delete_callback=self.delete_button_handler)
+                                          delete_callback=self.delete_button_handler)
                     self.list_items.append(new_item)
 
             self.setup_note_label()
 
     def setup_note_label(self):
         with self.list_container:
-            self.note_label = ui.label().classes('absolute left-1/2 top-48 self-center -translate-x-1/2')
+            self.note_label = ui.label().classes(
+                'absolute left-1/2 top-48 self-center -translate-x-1/2')
             self.note_label.set_visibility(False)
 
     def filter_handler(self):
         search_text = self.filter_input.value
-        results = list(filter(lambda item: search_text.lower() in item.sensor.name.lower(), self.list_items))
+        results = list(filter(lambda item: search_text.lower()
+                       in item.sensor.name.lower(), self.list_items))
 
         for item in self.list_items:
             item.visible = item in results
@@ -190,7 +203,8 @@ class SensorsPage():
         variation_range = variation_range_input.value
         change_rate = change_rate_input.value
         interval = interval_input.value
-        error_definition = None if self.sensor_error_card is None else self.sensor_error_card.get_values(json_dump=True)
+        error_definition = None if self.sensor_error_card is None else self.sensor_error_card.get_values(
+            json_dump=True)
         device_id = None if device_select is None else device_select.value
 
         new_sensor = Sensor.add(name=name, base_value=base_value, unit=unit, variation_range=variation_range,
