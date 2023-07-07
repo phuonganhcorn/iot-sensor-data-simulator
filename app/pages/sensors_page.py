@@ -11,6 +11,7 @@ class SensorsPage():
 
     def __init__(self):
         self.sensors = Sensor.get_all()
+        self.list_items = []
         self.sensor_error_card = None
         self.update_stats()
         self.setup_page()
@@ -34,20 +35,52 @@ class SensorsPage():
                     ui.label().classes('text-sm').bind_text(self, 'sensors_count')
 
             with ui.row():
-                ui.input(placeholder='Filter').classes('w-44')
-                ui.select({1: "Alle", 2: "Aktiv", 3: "Inaktiv"},
-                          value=1).classes('w-24')
+                self.filter_input = ui.input(placeholder='Filter', on_change=self.filter_handler).classes('w-44')
 
     def setup_list(self):
-        self.list_container = ui.column().classes('w-full gap-0 divide-y')
+        self.list_container = ui.column().classes('relative w-full gap-0 divide-y')
 
         with self.list_container:
             if len(self.sensors) == 0:
                 self.print_no_sensors()
             else:
                 for sensor in self.sensors:
-                    SensorItem(sensor=sensor,
+                    new_item = SensorItem(sensor=sensor,
                                delete_callback=self.delete_button_handler)
+                    self.list_items.append(new_item)
+
+        self.setup_note_label()
+
+    def setup_note_label(self):
+        with self.list_container:
+            self.note_label = ui.label().classes('absolute left-1/2 top-48 self-center -translate-x-1/2')
+            self.note_label.set_visibility(False)
+
+    def filter_handler(self):
+        search_text = self.filter_input.value
+        results = list(filter(lambda item: search_text.lower() in item.sensor.name.lower(), self.list_items))
+
+        for item in self.list_items:
+            item.visible = item in results
+
+        if len(results) == 0:
+            self.show_note('Keine Treffer')
+        else:
+            self.hide_note()
+
+        if len(results) == 1:
+            self.list_container.classes(add='divide-y-0', remove='divide-y')
+        else:
+            self.list_container.classes(add='divide-y', remove='divide-y-0')
+
+    def show_note(self, message):
+        self.list_container.classes(add='divide-y-0')
+        self.note_label.text = message
+        self.note_label.set_visibility(True)
+
+    def hide_note(self):
+        self.list_container.classes(add='divide-y', remove='divide-y-0')
+        self.note_label.set_visibility(False)
 
     def print_no_sensors(self):
         self.list_container.classes('justify-center')
