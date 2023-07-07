@@ -49,7 +49,7 @@ class SensorsPage():
                                delete_callback=self.delete_button_handler)
                     self.list_items.append(new_item)
 
-        self.setup_note_label()
+            self.setup_note_label()
 
     def setup_note_label(self):
         with self.list_container:
@@ -74,7 +74,7 @@ class SensorsPage():
             self.list_container.classes(add='divide-y', remove='divide-y-0')
 
     def show_note(self, message):
-        self.list_container.classes(add='divide-y-0')
+        self.list_container.classes(add='divide-y-0', remove='divide-y')
         self.note_label.text = message
         self.note_label.set_visibility(True)
 

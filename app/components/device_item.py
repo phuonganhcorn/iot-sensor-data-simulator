@@ -4,7 +4,10 @@ from nicegui import ui
 class DeviceItem:
 
     def __init__(self, device, delete_callback):
-        with ui.row().classes('px-3 py-6 flex justify-between items-center w-full hover:bg-gray-50'):
+        self.device = device
+        self.visible = True
+
+        with ui.row().bind_visibility(self, 'visible').classes('px-3 py-6 flex justify-between items-center w-full hover:bg-gray-50'):
             with ui.row().classes('gap-12'):
                 ui.label(f'{device.name}')
             with ui.row().classes('gap-2'):
