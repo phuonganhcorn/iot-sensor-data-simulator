@@ -22,7 +22,7 @@ class SensorItem:
                 ui.label(f"{sensor.name}").classes("w-[130px]")
                 ui.label(f"{UNITS[sensor.unit]['name']}").classes("w-[130px]")
                 if sensor.device:
-                    ui.label(f"{sensor.device.name}").classes("w-[130px]")
+                    self.device_name_label = ui.label(sensor.device.name).classes("w-[130px]")
                 if error_type:
                     ui.label(f"{error_type.title()}").classes("w-[130px]")
             with ui.row():
@@ -102,6 +102,7 @@ class SensorItem:
         self.sensor.device_id = self.device_select.value
         Sensor.session.commit()
         
+        self.device_name_label.text = new_device.name
         ui.notify(f"Änderung erfolgreich gespeichert.", type="positive")
 
     def _check_if_container_is_active(self, device):
