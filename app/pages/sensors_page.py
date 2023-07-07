@@ -42,7 +42,7 @@ class SensorsPage():
 
         with self.list_container:
             if len(self.sensors) == 0:
-                self.print_no_sensors()
+                self.show_note('Keine Sensoren vorhanden')
             else:
                 for sensor in self.sensors:
                     new_item = SensorItem(sensor=sensor,
@@ -81,12 +81,6 @@ class SensorsPage():
     def hide_note(self):
         self.list_container.classes(add='divide-y', remove='divide-y-0')
         self.note_label.set_visibility(False)
-
-    def print_no_sensors(self):
-        self.list_container.classes('justify-center')
-        with self.list_container:
-            with ui.column().classes('self-center mt-48'):
-                ui.label('Keine Sensoren vorhanden')
 
     def update_stats(self):
         self.sensors_count = len(self.sensors)
@@ -235,4 +229,4 @@ class SensorsPage():
         self.update_stats()
 
         if len(self.sensors) == 0:
-            self.print_no_sensors()
+            self.show_note('Keine Sensoren vorhanden')
