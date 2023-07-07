@@ -4,6 +4,7 @@ from components.container_card import ContainerCard
 from components.live_view_dialog import LiveViewDialog
 from model.container import Container
 from model.device import Device
+import time
 
 
 class ContainersPage:
@@ -46,7 +47,8 @@ class ContainersPage:
                     ui.label().classes('text-sm').bind_text(self, 'inactive_containers_count')
 
             with ui.row():
-                ui.input(placeholder='Filter').classes('w-44')
+                self.filter_input = ui.input(
+                    placeholder='Filter', on_change=self.filter_handler).classes('w-44')
                 ui.select({1: "Alle", 2: "Aktiv", 3: "Inaktiv"},
                           value=1).classes('w-24')
 
@@ -57,13 +59,20 @@ class ContainersPage:
 
         with self.cards_container:
             if len(self.containers) == 0:
-                self.print_no_containers()
+                self.show_note("Keine Container vorhanden")
             else:
                 with self.cards_grid:
                     for container in self.containers:
                         new_container_card = ContainerCard(wrapper=self.cards_container, container=container, start_callback=self.start_container,
                                                            stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
                         self.cards.append(new_container_card)
+
+        self.setup_note_label()
+
+    def setup_note_label(self):
+        with self.cards_container:
+            self.note_label = ui.label().classes('self-center mt-48')
+            self.note_label.set_visibility(False)
 
     def setup_live_view_dialog(self):
         self.live_view_dialog = LiveViewDialog(self.cards_container)
@@ -77,11 +86,27 @@ class ContainersPage:
             list(filter(lambda c: c.is_active, self.containers)))
         self.inactive_containers_count = self.containers_count - self.active_containers_count
 
-    def print_no_containers(self):
+    def filter_handler(self):
+        search_text = self.filter_input.value
+        results = list(filter(lambda c: search_text.lower()
+                       in c.container.name.lower(), self.cards))
+
+        for card in self.cards:
+            card.visible = card in results
+
+        if len(results) == 0:
+            self.show_note("Kein Treffer")
+        else:
+            self.hide_note()
+
+    def show_note(self, message):
         self.cards_container.classes('justify-center')
-        with self.cards_container:
-            with ui.column().classes('self-center mt-48'):
-                ui.label('Keine Container vorhanden')
+        self.note_label.text = message
+        self.note_label.set_visibility(True)
+
+    def hide_note(self):
+        self.cards_container.classes('justify-start')
+        self.note_label.set_visibility(False)
 
     def open_create_container_dialog(self):
         with ui.dialog(value=True) as dialog, ui.card().classes('w-full min-h-[500px]'):
@@ -142,6 +167,7 @@ class ContainersPage:
     def create_container(self, name, description, location, device_ids):
         if len(self.containers) == 0:
             self.cards_container.clear()
+            self.note_label.set_visibility(False)
 
         new_container = Container.add(
             name, description, location, device_ids)
@@ -182,7 +208,7 @@ class ContainersPage:
         dialog.close()
 
         if len(self.containers) == 0:
-            self.print_no_containers()
+            self.show_note("Keine Container vorhanden")
 
     def show_live_view_dialog(self, container):
         self.live_view_dialog.show(container)

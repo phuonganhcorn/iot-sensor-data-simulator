@@ -5,7 +5,9 @@ from components.logs_dialog import LogsDialog
 
 class ContainerCard():
     def __init__(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None, live_view_callback=None):
+        self.container = container
         self.card = None
+        self.visible = True
         self.logs_dialog = LogsDialog(wrapper)
         container.log = self.logs_dialog.log
         self.active_dot = None
@@ -17,7 +19,7 @@ class ContainerCard():
         for device in container.devices:
             sensor_count += len(device.sensors)
 
-        with ui.card().tight() as card:
+        with ui.card().tight().bind_visibility(self, 'visible') as card:
             self.card = card
             with ui.card_section().classes('min-h-[260px]'):
                 with ui.row().classes('pb-2 w-full justify-between items-center border-b border-gray-200'):
