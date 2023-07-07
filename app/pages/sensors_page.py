@@ -43,15 +43,16 @@ class SensorsPage():
             'relative grid w-full gap-0 divide-y')
 
         with self.list_container:
-            headings = [{'name': 'ID', 'width': 'w-[30px]'},
-                       {'name': 'Name', 'width': 'w-[130px]'},
-                       {'name': 'Typ', 'width': 'w-[130px]'},
-                       {'name': 'Gerät', 'width': 'w-[130px]'},
-                       {'name': 'Fehlertyp', 'width': 'w-[130px]'}]
+            headings = [{'name': 'ID', 'classes': 'w-[30px]'},
+                        {'name': 'Name', 'classes': 'w-[130px]'},
+                        {'name': 'Typ', 'classes': 'w-[130px]'},
+                        {'name': 'Gerät', 'classes': 'w-[130px]'},
+                        {'name': 'Fehlertyp', 'classes': 'w-[130px]'}]
 
             with ui.row().classes('px-3 py-6 flex gap-6 items-center w-full'):
                 for heading in headings:
-                    ui.label(heading['name']).classes(f'font-medium {heading["width"]}')
+                    ui.label(heading['name']).classes(
+                        f'font-medium {heading["classes"]}')
 
             if len(self.sensors) == 0:
                 self.show_note('Keine Sensoren vorhanden')

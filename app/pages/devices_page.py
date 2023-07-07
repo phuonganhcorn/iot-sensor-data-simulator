@@ -40,6 +40,15 @@ class DevicesPage:
         self.list_container = ui.column().classes('relative w-full gap-0 divide-y')
 
         with self.list_container:
+            headings = [{'name': 'ID', 'classes': 'w-[30px]'},
+                       {'name': 'Name', 'classes': 'w-[130px]'},
+                       {'name': 'Container', 'classes': 'w-[130px]'},
+                       {'name': 'Sensoren', 'classes': 'w-[60px]'}]
+
+            with ui.row().classes('px-3 py-6 flex gap-6 items-center w-full'):
+                for heading in headings:
+                    ui.label(heading['name']).classes(f'font-medium {heading["classes"]}')
+
             if len(self.devices) == 0:
                 self.show_note('Keine Geräte vorhanden')
             else:
