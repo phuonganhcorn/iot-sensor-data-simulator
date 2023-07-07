@@ -19,6 +19,10 @@ class Device(DeviceModel):
     
     def get_by_id(id):
         return Device.session.query(Device).filter_by(id=id).first()
+    
+    @staticmethod
+    def get_all_unassigned():
+        return Device.session.query(Device).filter(Device.container_id == None).all()
 
     @staticmethod
     def store(device, sensor_ids):

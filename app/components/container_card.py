@@ -1,4 +1,5 @@
 from nicegui import ui
+from model.device import Device
 from components.live_view_dialog import LiveViewDialog
 from components.logs_dialog import LogsDialog
 
@@ -76,7 +77,7 @@ class ContainerCard():
 
     def show_details_dialog(self):
         with self.wrapper:
-            with ui.dialog(value=True) as dialog, ui.card().classes("w-[696px] !max-w-none px-6 pb-6"):
+            with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none overflow-auto"):
                 self.dialog = dialog
                 with ui.row().classes("w-full justify-between items-center"):
                     ui.label(
@@ -119,12 +120,37 @@ class ContainerCard():
                             ui.label().bind_text_from(self.container, 'is_active',
                                                       backward=lambda is_active: f'{"Aktiv" if is_active else "Inaktiv"}')
 
-                with ui.column().classes("gap-4"):
-                    ui.label("Struktur").classes("text-lg font-semibold mt-2")
+                with ui.column().classes("w-full gap-4"):
+                    ui.label("Geräte und Sensoren").classes(
+                        "text-lg font-semibold mt-2")
 
-                    data = self.create_tree_data(self.container.devices)
+                    with ui.row().classes("gap-x-28"):
+                        with ui.column().classes('gap-0'):
+                            ui.label("Ansicht").classes(
+                                "text-sm text-gray-500")
+                            data = self.create_tree_data(
+                                self.container.devices)
+                            with ui.row() as row:
+                                self.tree_container = row
+                                ui.tree(
+                                    data, label_key="id", on_select=lambda e: self.tree_select_handler(e))
 
-                    ui.tree(data, label_key='id')
+                        unassigned_devices = Device.get_all_unassigned()
+                        with ui.column().classes('gap-0'):
+                            device_options = {
+                                device.id: device.name for device in unassigned_devices}
+
+                            ui.label("Bearbeiten").classes(
+                                "text-sm text-gray-500")
+                            if len(unassigned_devices) > 0:
+                                with ui.row().classes("items-center"):
+                                    self.new_device_select = ui.select(
+                                        value=unassigned_devices[0].id, options=device_options).classes("min-w-[120px]")
+                                    ui.button("Hinzufügen", on_click=self.add_device_handler).props(
+                                        "flat")
+                            else:
+                                ui.label(
+                                    "Keine weiteren Geräte frei.").classes()
 
     def create_tree_data(self, devices):
         tree = []
@@ -135,6 +161,31 @@ class ContainerCard():
                 device_node['children'].append(sensor_node)
             tree.append(device_node)
         return tree
+
+    def add_device_handler(self):
+        if self.container.is_active:
+            ui.notify(
+                f"Hinzufügen nicht möglich während dieser Container aktiv ist.", type="negative")
+            return
+
+        device_id = self.new_device_select.value
+        device = Device.get_by_id(device_id)
+        device.container_id = self.container.id
+        Device.session.commit()
+
+        ui.notify(f"Gerät erfolgreich hinzugefügt.", type="positive")
+
+        # Remove device from select
+        del self.new_device_select.options[device_id]
+        self.new_device_select.update()
+        self.new_device_select.value = None
+
+        # Show device in tree
+        new_data = self.create_tree_data(self.container.devices)
+        self.tree_container.clear()
+        with self.tree_container:
+            ui.tree(new_data, label_key="id",
+                    on_select=lambda e: self.tree_select_handler(e))
 
     def show_logs_dialog(self, container):
         if not container.is_active:
