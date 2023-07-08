@@ -6,10 +6,12 @@ from model.sensor import Sensor
 class DeviceItem:
 
     def __init__(self, device, delete_callback):
+        self.item = None
         self.device = device
         self.visible = True
 
-        with ui.row().bind_visibility(self, 'visible').classes('px-3 py-6 flex justify-between items-center w-full hover:bg-gray-50'):
+        with ui.row().bind_visibility(self, 'visible').classes('px-3 py-6 flex justify-between items-center w-full hover:bg-gray-50') as row:
+            self.item = row
             with ui.row().classes('gap-6'):
                 ui.label(f'{device.id}').classes('w-[30px]')
                 ui.label(f'{device.name}').classes('w-[130px]')
@@ -52,10 +54,11 @@ class DeviceItem:
                         containers = Container.get_all()
                         container_options = {
                             container.id: container.name for container in containers}
+                        preselect_value = self.device.container.id if self.device.container else None
 
                         with ui.row().classes("items-center"):
                             self.container_select = ui.select(
-                                value=self.device.container.id, options=container_options, with_input=True).classes("min-w-[120px]")
+                                value=preselect_value, options=container_options, with_input=True).classes("min-w-[120px]")
                             ui.button("Speichern", on_click=self.change_container).props(
                                 "flat")
 

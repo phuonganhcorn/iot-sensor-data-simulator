@@ -8,6 +8,7 @@ import json
 class SensorItem:
 
     def __init__(self, sensor, delete_callback):
+        self.item = None
         self.sensor = sensor
         self.visible = True
 
@@ -16,7 +17,8 @@ class SensorItem:
             error_definition = json.loads(sensor.error_definition) if sensor.error_definition else None
             error_type = error_definition["type"]
         
-        with ui.row().bind_visibility(self, "visible").classes("px-3 py-4 flex justify-between items-center w-full hover:bg-gray-50"):
+        with ui.row().bind_visibility(self, "visible").classes("px-3 py-4 flex justify-between items-center w-full hover:bg-gray-50") as row:
+            self.item = row
             with ui.row().classes("gap-6"):
                 ui.label(f"{sensor.id}").classes("w-[30px]")
                 ui.label(f"{sensor.name}").classes("w-[130px]")
@@ -64,9 +66,10 @@ class SensorItem:
                     ui.label("Wähle aus zu welchem Gerät dieser Sensor gehören soll.")
                     devices = Device.get_all()
                     device_options = {device.id: device.name for device in devices}
+                    preselect_value = self.sensor.device.id if self.sensor.device else None
 
                     with ui.row().classes("items-center"):
-                        self.device_select = ui.select(value=self.sensor.device.id, options=device_options, with_input=True).classes("min-w-[120px]")
+                        self.device_select = ui.select(value=preselect_value, options=device_options, with_input=True).classes("min-w-[120px]")
                         ui.button("Speichern", on_click=self.change_device).props("flat")
 
             ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
