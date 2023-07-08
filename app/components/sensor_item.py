@@ -2,6 +2,7 @@ from nicegui import ui
 from model.sensor import Sensor
 from model.device import Device
 from constants.units import *
+from constants.sensor_errors import *
 import json
 
 
@@ -11,11 +12,12 @@ class SensorItem:
         self.item = None
         self.sensor = sensor
         self.visible = True
+        self.error_definition = None
 
         error_type = None
         if sensor.error_definition:
-            error_definition = json.loads(sensor.error_definition) if sensor.error_definition else None
-            error_type = error_definition["type"]
+            self.error_definition = json.loads(sensor.error_definition) if sensor.error_definition else None
+            error_type = self.error_definition["type"]
         
         with ui.row().bind_visibility(self, "visible").classes("px-3 py-4 flex justify-between items-center w-full hover:bg-gray-50") as row:
             self.item = row
@@ -37,60 +39,75 @@ class SensorItem:
     def show_details_dialog(self):
         with ui.dialog(value=True) as dialog, ui.card().classes("w-[696px] !max-w-none px-6 pb-6"):
             self.dialog = dialog
-            with ui.row().classes("w-full justify-between items-center"):
-                ui.label(f"Details - '{self.sensor.name}'").classes("text-xl font-semibold")
+            with ui.row().classes("mb-8 w-full justify-between items-center"):
+                ui.label(f"{self.sensor.name}").classes("text-lg font-medium")
+                with ui.tabs().classes('') as tabs:
+                    general_tab = ui.tab('Allgemein')
+                    simulation_tab = ui.tab('Simulation')
                 ui.button(icon="close", on_click=self.dialog.close).props("flat").classes("px-2 text-black")
 
-            with ui.column().classes("gap-4"):
-                ui.label("Allgemein").classes("text-lg font-semibold mt-2")
-                with ui.row().classes("gap-10"):
-                    with ui.column().classes("gap-0"):
-                        ui.label("ID").classes("text-sm text-gray-500")
-                        ui.label(f"{self.sensor.id}").classes("text-md font-medium")
-                    with ui.column().classes("gap-0"):
-                        ui.label("Name").classes("text-sm text-gray-500")
-                        ui.label(f"{self.sensor.name}").classes("text-md font-medium")
-                    with ui.column().classes("gap-0"):
-                        ui.label("Typ").classes("text-sm text-gray-500")
-                        ui.label(f"{UNITS[self.sensor.unit]['name']}").classes("text-md font-medium")
-                    with ui.column().classes("gap-0"):
-                        ui.label("Einheit").classes("text-sm text-gray-500")
-                        ui.label(f"{UNITS[self.sensor.unit]['unit_abbreviation']}").classes("text-md font-medium")
+            with ui.tab_panels(tabs, value=general_tab).classes('w-full'):
+                with ui.tab_panel(general_tab).classes("p-0"):
 
-            ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
+                    with ui.column().classes("gap-4"):
+                        with ui.row().classes("gap-10"):
+                            with ui.column().classes("gap-0"):
+                                ui.label("ID").classes("text-sm text-gray-500")
+                                ui.label(f"{self.sensor.id}").classes("text-md font-medium")
+                            with ui.column().classes("gap-0"):
+                                ui.label("Name").classes("text-sm text-gray-500")
+                                ui.label(f"{self.sensor.name}").classes("text-md font-medium")
+                            with ui.column().classes("gap-0"):
+                                ui.label("Typ").classes("text-sm text-gray-500")
+                                ui.label(f"{UNITS[self.sensor.unit]['name']}").classes("text-md font-medium")
+                            with ui.column().classes("gap-0"):
+                                ui.label("Einheit").classes("text-sm text-gray-500")
+                                ui.label(f"{UNITS[self.sensor.unit]['unit_abbreviation']}").classes("text-md font-medium")
 
-            with ui.column().classes("gap-1"):
-                ui.label("Gerät").classes("text-lg font-semibold mt-2")
+                    ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
 
-                with ui.column().classes("gap-2"):
-                    ui.label("Wähle aus zu welchem Gerät dieser Sensor gehören soll.")
-                    devices = Device.get_all()
-                    device_options = {device.id: device.name for device in devices}
-                    preselect_value = self.sensor.device.id if self.sensor.device else None
+                    with ui.column().classes("gap-1"):
+                        ui.label("Gerät").classes("text-lg font-semibold mt-2")
 
-                    with ui.row().classes("items-center"):
-                        self.device_select = ui.select(value=preselect_value, options=device_options, with_input=True).classes("min-w-[120px]")
-                        ui.button("Speichern", on_click=self.change_device).props("flat")
+                        with ui.column().classes("gap-2"):
+                            ui.label("Wähle aus zu welchem Gerät dieser Sensor gehören soll.")
+                            devices = Device.get_all()
+                            device_options = {device.id: device.name for device in devices}
+                            preselect_value = self.sensor.device.id if self.sensor.device else None
 
-            ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
+                            with ui.row().classes("items-center"):
+                                self.device_select = ui.select(value=preselect_value, options=device_options, with_input=True).classes("min-w-[120px]")
+                                ui.button("Speichern", on_click=self.change_device).props("flat")
 
-            with ui.column().classes("gap-4"):
-                ui.label("Simulation").classes("text-lg font-semibold mt-2")
+                with ui.tab_panel(simulation_tab).classes("p-0"):
+                    with ui.column().classes("gap-4"):
+                        with ui.row().classes("gap-10"):
+                            with ui.column().classes("gap-0"):
+                                ui.label("Basiswert").classes("text-sm text-gray-500")
+                                ui.label(f"{self.sensor.base_value}").classes("text-md font-medium")
+                            with ui.column().classes("gap-0"):
+                                ui.label("Variationsbereich").classes("text-sm text-gray-500")
+                                ui.label(f"{self.sensor.variation_range}").classes("text-md font-medium")
+                            with ui.column().classes("gap-0"):
+                                ui.label("Änderungsrate +/-").classes("text-sm text-gray-500")
+                                ui.label(f"{self.sensor.change_rate}").classes("text-md font-medium")
+                            with ui.column().classes("gap-0"):
+                                ui.label("Interval [s]").classes("text-sm text-gray-500")
+                                ui.label(f"{self.sensor.change_rate}").classes("text-md font-medium")
 
-                with ui.row().classes("gap-10"):
-                    with ui.column().classes("gap-0"):
-                        ui.label("Basiswert").classes("text-sm text-gray-500")
-                        ui.label(f"{self.sensor.base_value}").classes("text-md font-medium")
-                    with ui.column().classes("gap-0"):
-                        ui.label("Variationsbereich").classes("text-sm text-gray-500")
-                        ui.label(f"{self.sensor.variation_range}").classes("text-md font-medium")
-                    with ui.column().classes("gap-0"):
-                        ui.label("Änderungsrate +/-").classes("text-sm text-gray-500")
-                        ui.label(f"{self.sensor.change_rate}").classes("text-md font-medium")
-                    with ui.column().classes("gap-0"):
-                        ui.label("Interval [s]").classes("text-sm text-gray-500")
-                        ui.label(f"{self.sensor.change_rate}").classes("text-md font-medium")
+                    if self.error_definition:
+                        ui.label("Fehlersimulation").classes("text-[16px] font-medium mt-8 mb-4")
 
+                        with ui.grid().classes("grid grid-cols-2 gap-x-10"):
+                            for key, value in self.error_definition.items():
+                                with ui.column().classes("gap-0"):
+                                    ui.label(f"{SENSOR_ERRORS_UI_MAP[key]}").classes("text-sm text-gray-500")
+
+                                    if key == "type":
+                                        ui.label(f"{SENSOR_ERRORS_UI_MAP[value]}").classes("text-md font-medium")
+                                    else:
+                                        formatted_value = f"{float(value) * 100}%" if "probability" in key else f"{value}"
+                                        ui.label(formatted_value).classes("text-md font-medium")
     
     def change_device(self):
         # Check if container is active
