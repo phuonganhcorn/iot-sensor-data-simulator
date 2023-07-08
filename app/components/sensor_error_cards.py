@@ -38,7 +38,7 @@ class AnomalyCard:
 
     def get_values(self, json_dump=False):
         values = {
-            "type": "anomaly",
+            "type": ANOMALY,
             PROBABILITY_POS_ANOMALY: self.probability_pos_anomaly_input.value / 100,
             PROBABILITY_NEG_ANOMALY: self.probability_neg_anomaly_input.value / 100,
             POS_ANOMALY_UPPER_RANGE: self.pos_anomaly_upper_range_input.value,
