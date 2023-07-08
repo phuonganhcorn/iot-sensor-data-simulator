@@ -27,7 +27,10 @@ Sensor.session = session
 
 iot_hub_helper = IoTHubHelper()
 
-ContainersPage(iot_hub_helper)
+
+@ui.page('/')
+def containers_page():
+    ContainersPage(iot_hub_helper)
 
 
 @ui.page('/geraete')
