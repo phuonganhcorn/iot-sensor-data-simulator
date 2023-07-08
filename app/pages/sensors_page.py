@@ -234,9 +234,11 @@ class SensorsPage():
     def delete_handler(self, dialog, sensor):
         dialog.close()
 
-        # TODO: Check if container is running and stop it
+        # Check if container is active
+        if sensor.device is not None and sensor.device.container is not None and sensor.device.container.is_active:
+            ui.notify(f"Löschen nicht möglich während Container '{sensor.device.container.name}' aktiv ist", type="warning")
+            return
 
-        sensor_name = sensor.name
         sensor.delete()
 
         index = self.sensors.index(sensor)
@@ -245,7 +247,7 @@ class SensorsPage():
         del self.list_items[index]
 
         ui.notify(
-            f"Sensor {sensor_name} erfolgreich gelöscht", type="positive")
+            f"Sensor '{sensor.name}' erfolgreich gelöscht", type="positive")
         self.update_stats()
 
         if len(self.sensors) == 0:

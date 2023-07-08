@@ -186,7 +186,7 @@ class DevicesPage:
     def delete_handler(self, dialog, device):
         dialog.close()
 
-        # TODO: Check if container is running and stop it
+        # Check if container is active
         if device.container_id is not None and device.container.is_active:
             ui.notify(f"Löschen nicht möglich während Container '{device.container.name}' aktiv ist", type="warning")
             return
