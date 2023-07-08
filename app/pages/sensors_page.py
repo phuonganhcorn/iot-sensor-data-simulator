@@ -235,13 +235,14 @@ class SensorsPage():
 
         # TODO: Check if container is running and stop it
 
+        sensor_name = sensor.name
         sensor.delete()
 
         index = self.sensors.index(sensor)
-
         del self.sensors[index]
         self.list_container.remove(index)
 
+        ui.notify(f"Sensor {sensor_name} erfolgreich gelöscht", type="positive")
         self.update_stats()
 
         if len(self.sensors) == 0:
