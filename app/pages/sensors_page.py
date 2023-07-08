@@ -214,8 +214,9 @@ class SensorsPage():
         self.sensors.append(new_sensor)
 
         with self.list_container:
-            SensorItem(sensor=new_sensor,
+            new_item = SensorItem(sensor=new_sensor,
                        delete_callback=self.delete_button_handler)
+            self.list_items.append(new_item)
 
         dialog.set_visibility(False)
         ui.notify('Sensor wurde erstellt', type='positive')
@@ -239,8 +240,9 @@ class SensorsPage():
         sensor.delete()
 
         index = self.sensors.index(sensor)
+        self.list_container.remove(self.list_items[index].item) # Increment due to headings row
         del self.sensors[index]
-        self.list_container.remove(index + 1) # Increment due to headings row
+        del self.list_items[index]
 
         ui.notify(
             f"Sensor {sensor_name} erfolgreich gelöscht", type="positive")
