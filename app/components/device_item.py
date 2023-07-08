@@ -114,6 +114,6 @@ class DeviceItem:
     def _check_if_container_is_active(self, container):
         if container is not None and container.is_active:
             ui.notify(
-                f"Änderung kann nicht übernommen werden während Container '{container.name}' aktiv ist.", type="negative")
+                f"Änderung kann nicht übernommen werden während Container '{container.name}' aktiv ist.", type="warning")
             return True
         return False
