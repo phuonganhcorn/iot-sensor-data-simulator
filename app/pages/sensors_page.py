@@ -67,7 +67,7 @@ class SensorsPage():
     def setup_note_label(self):
         with self.list_container:
             self.note_label = ui.label().classes(
-                'absolute left-1/2 top-48 self-center -translate-x-1/2')
+                'absolute left-1/2 top-48 self-center -translate-x-1/2 !border-t-0')
             self.note_label.set_visibility(False)
 
     def filter_handler(self):
