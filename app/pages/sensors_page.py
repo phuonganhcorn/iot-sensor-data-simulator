@@ -219,13 +219,13 @@ class SensorsPage():
             self.list_items.append(new_item)
 
         dialog.set_visibility(False)
-        ui.notify('Sensor wurde erstellt', type='positive')
+        ui.notify(f"Sensor '{name}' erfolgreich erstellt", type="positive")
 
         self.update_stats()
 
     def delete_button_handler(self, sensor):
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
-            ui.label('Möchtest du den Sensor wirklich löschen?')
+            ui.label(f"Möchtest du den Sensor '{sensor.name}' wirklich löschen?")
             with ui.row():
                 ui.button('Abbrechen', on_click=dialog.close).props('flat')
                 ui.button('Löschen', on_click=lambda d=dialog: self.delete_handler(
