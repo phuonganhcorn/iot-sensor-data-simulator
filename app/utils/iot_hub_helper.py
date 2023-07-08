@@ -27,7 +27,7 @@ class IoTHubHelper:
         
         try:
             device = self.registry_manager.create_device_with_sas(device_id, primary_key, secondary_key, status)
-            return Response(True, "Device {} erfolgreich erstellt".format(device_id), device)
+            return Response(True, "Gerät '{}' erfolgreich erstellt".format(device_id), device)
         except Exception as e:
             return Response(False, "Fehler beim Erstellen: {}".format(e))
 
@@ -37,7 +37,7 @@ class IoTHubHelper:
         except Exception as e:
             return Response(False, "Fehler beim Löschen: {}".format(e))
         
-        return Response(True, "Gerät {} erfolgreich gelöscht".format(device_id))
+        return Response(True, f"Gerät '{device_id}' erfolgreich gelöscht")
 
 
     def init_device_client(self, connection_string):

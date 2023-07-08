@@ -34,39 +34,43 @@ class DevicesPage:
                     ui.label().classes('text-sm').bind_text(self, 'devices_count')
 
             with ui.row():
-                self.filter_input = ui.input(placeholder='Filter', on_change=self.filter_handler).classes('w-44')
+                self.filter_input = ui.input(
+                    placeholder='Filter', on_change=self.filter_handler).classes('w-44')
 
     def setup_list(self):
         self.list_container = ui.column().classes('relative w-full gap-0 divide-y')
 
         with self.list_container:
             headings = [{'name': 'ID', 'classes': 'w-[30px]'},
-                       {'name': 'Name', 'classes': 'w-[130px]'},
-                       {'name': 'Container', 'classes': 'w-[130px]'},
-                       {'name': 'Sensoren', 'classes': 'w-[60px]'}]
+                        {'name': 'Name', 'classes': 'w-[130px]'},
+                        {'name': 'Container', 'classes': 'w-[130px]'},
+                        {'name': 'Sensoren', 'classes': 'w-[60px]'}]
 
             with ui.row().classes('px-3 py-6 flex gap-6 items-center w-full'):
                 for heading in headings:
-                    ui.label(heading['name']).classes(f'font-medium {heading["classes"]}')
+                    ui.label(heading['name']).classes(
+                        f'font-medium {heading["classes"]}')
 
             if len(self.devices) == 0:
                 self.show_note('Keine Geräte vorhanden')
             else:
                 for device in self.devices:
                     new_item = DeviceItem(device=device,
-                               delete_callback=self.delete_button_handler)
+                                          delete_callback=self.delete_button_handler)
                     self.list_items.append(new_item)
-            
+
             self.setup_note_label()
 
     def setup_note_label(self):
         with self.list_container:
-            self.note_label = ui.label().classes('absolute left-1/2 top-48 self-center -translate-x-1/2 !border-t-0')
+            self.note_label = ui.label().classes(
+                'absolute left-1/2 top-48 self-center -translate-x-1/2 !border-t-0')
             self.note_label.set_visibility(False)
 
     def filter_handler(self):
         search_text = self.filter_input.value
-        results = list(filter(lambda item: search_text.lower() in item.device.name.lower(), self.list_items))
+        results = list(filter(lambda item: search_text.lower()
+                       in item.device.name.lower(), self.list_items))
 
         for item in self.list_items:
             item.visible = item in results
@@ -167,12 +171,13 @@ class DevicesPage:
     def add_device_to_list(self, device):
         with self.list_container:
             new_item = DeviceItem(device=device,
-                       delete_callback=self.delete_button_handler)
+                                  delete_callback=self.delete_button_handler)
             self.list_items.append(new_item)
 
     def delete_button_handler(self, device):
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
-            ui.label('Möchtest du das Gerät wirklich löschen?')
+            ui.label(
+                f"Möchtest du das Gerät '{device.name}' wirklich löschen?")
             with ui.row():
                 ui.button('Abbrechen', on_click=dialog.close).props('flat')
                 ui.button('Löschen', on_click=lambda d=dialog: self.delete_handler(
@@ -188,12 +193,13 @@ class DevicesPage:
         device.delete()
 
         index = self.devices.index(device)
-        self.list_container.remove(self.list_items[index].item) # Increment due to headings row
+        # Increment due to headings row
+        self.list_container.remove(self.list_items[index].item)
         del self.devices[index]
         del self.list_items[index]
 
         ui.notify(
-            f"Gerät {device.name} erfolgreich gelöscht", type="positive")
+            f"Gerät '{device.name}' erfolgreich gelöscht", type="positive")
         self.update_stats()
 
         if len(self.devices) == 0:
