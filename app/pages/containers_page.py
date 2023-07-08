@@ -50,6 +50,7 @@ class ContainersPage:
     def setup_cards_grid(self):
         self.cards_grid = ui.grid().classes(
             'relative mt-6 w-full grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4')
+        self.setup_note_label()
 
         if len(self.containers) == 0:
             self.show_note("Keine Container vorhanden")
@@ -59,8 +60,6 @@ class ContainersPage:
                     new_container_card = ContainerCard(wrapper=self.cards_grid, container=container, start_callback=self.start_container,
                                                         stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
                     self.cards.append(new_container_card)
-
-        self.setup_note_label()
 
     def setup_note_label(self):
         with self.cards_grid:
@@ -192,11 +191,12 @@ class ContainersPage:
         container.delete()
 
         index = self.containers.index(container)
-
+        self.cards_grid.remove(self.cards[index].card)
         del self.containers[index]
         del self.cards[index]
-        self.cards_grid.remove(index)
 
+        ui.notify(
+            f"Container {container.name} erfolgreich gelöscht", type="positive")
         self.update_stats()
         dialog.close()
 
