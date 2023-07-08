@@ -189,7 +189,7 @@ class DevicesPage:
         index = self.devices.index(device)
 
         del self.devices[index]
-        self.list_container.remove(index)
+        self.list_container.remove(index + 1) # Increment due to headings row
 
         self.update_stats()
 

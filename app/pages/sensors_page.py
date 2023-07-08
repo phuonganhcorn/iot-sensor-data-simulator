@@ -240,9 +240,10 @@ class SensorsPage():
 
         index = self.sensors.index(sensor)
         del self.sensors[index]
-        self.list_container.remove(index)
+        self.list_container.remove(index + 1) # Increment due to headings row
 
-        ui.notify(f"Sensor {sensor_name} erfolgreich gelöscht", type="positive")
+        ui.notify(
+            f"Sensor {sensor_name} erfolgreich gelöscht", type="positive")
         self.update_stats()
 
         if len(self.sensors) == 0:
