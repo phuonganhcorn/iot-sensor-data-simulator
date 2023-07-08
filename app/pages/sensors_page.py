@@ -4,7 +4,7 @@ from components.sensor_item import SensorItem
 from model.device import Device
 from model.sensor import Sensor
 from constants.units import *
-from components.sensor_error_cards import AnomalyCard
+from components.sensor_error_cards import AnomalyCard, MCARCard
 
 
 class SensorsPage():
@@ -142,7 +142,8 @@ class SensorsPage():
                         'Simuliere Fehler, die bei einer Messung auftreten können.')
 
                     error_types = {0: 'Kein Fehler',
-                                   1: 'Einmalige Anomalien', }
+                                   1: 'Einmalige Anomalien', 
+                                   3: 'Zufällig fehlend (MCAR)'}
 
                     error_type_input = ui.select(error_types, value=0, label='Fehlertyp',
                                                  on_change=lambda e: self.error_type_input_handler(error_container, e.value))
@@ -186,6 +187,9 @@ class SensorsPage():
         elif value == 1:
             with container:
                 self.sensor_error_card = AnomalyCard()
+        elif value == 3:
+            with container:
+                self.sensor_error_card = MCARCard()
 
     def check_general_step_input(self, stepper, name_input):
         if name_input.value == '':
