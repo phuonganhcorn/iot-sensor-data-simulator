@@ -187,6 +187,9 @@ class DevicesPage:
         dialog.close()
 
         # TODO: Check if container is running and stop it
+        if device.container_id is not None and device.container.is_active:
+            ui.notify(f"Löschen nicht möglich während Container '{device.container.name}' aktiv ist", type="warning")
+            return
 
         self.iot_hub_helper.delete_device(
             device_id=device.name, etag=device.etag)
