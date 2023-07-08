@@ -27,21 +27,26 @@ class Simulator:
             value = self._handle_error_definition(value)
         self.iteration += 1
 
-        value = round(value, 2)
         return {"value": value, "timestamp": datetime.datetime.now(), "sensorName": self.sensor.name, "unit": self.sensor.unit}
 
-    def _handle_error_definition(self, value):        
-        if self.error_definition["type"] == "anomaly":
-            return self._handle_anomaly_error(value)
+    def _handle_error_definition(self, value):
+        error_type = self.error_definition["type"]
 
-    def _handle_anomaly_error(self, value):
-        if self.iteration == 0:
-            return value
-        
+        if error_type == ANOMALY:
+            return self._handle_anomaly_error(value)
+        elif error_type == MCAR:
+            return self._handle_mcar_error(value)
+
+    def _handle_anomaly_error(self, value):        
         if random.random() > 1 - self.error_definition[PROBABILITY_POS_ANOMALY]:
             value += random.uniform(self.error_definition[POS_ANOMALY_LOWER_RANGE], self.error_definition[POS_ANOMALY_UPPER_RANGE])
         
         if random.random() < self.error_definition[PROBABILITY_NEG_ANOMALY]:
             value -= random.uniform(self.error_definition[NEG_ANOMALY_LOWER_RANGE], self.error_definition[NEG_ANOMALY_UPPER_RANGE])
 
+        return round(value, 2)
+    
+    def _handle_mcar_error(self, value):
+        if random.random() < self.error_definition[PROBABILITY]:
+            return None
         return value

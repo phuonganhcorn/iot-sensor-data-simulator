@@ -28,7 +28,7 @@ class SensorItem:
                 if sensor.device:
                     self.device_name_label = ui.label(sensor.device.name).classes("w-[130px]")
                 if error_type:
-                    ui.label(f"{error_type.title()}").classes("w-[130px]")
+                    ui.label(f"{SENSOR_ERRORS_UI_MAP[error_type]}").classes("w-[130px]")
             with ui.row():
                 with ui.row().classes("gap-2"):
                     ui.button(icon="info_outline", on_click=self.show_details_dialog).props(

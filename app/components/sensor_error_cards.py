@@ -51,3 +51,27 @@ class AnomalyCard:
             return json.dumps(values)
 
         return values
+
+
+class MCARCard:
+
+    def __init__(self):
+        with ui.row().classes('mt-4 p-4 gap-0 w-full bg-gray-100 rounded-md'):
+            with ui.column().classes('gap-1'):
+                ui.label('Wahrscheinlichkeit').classes('mt-2 font-bold')
+                ui.label('Definiere mit welcher Wahrscheinlichkeit Werte komplett zufällig fehlen sollen.').classes(
+                    'text-[13px] opacity-80')
+            with ui.grid(columns=3).classes('mt-3 mb-4 w-full'):
+                self.probability_input = ui.number(
+                    label='Wahrscheinlichkeit', value=5, min=0, max=100, suffix='%')
+
+    def get_values(self, json_dump=False):
+        values = {
+            "type": MCAR,
+            PROBABILITY: self.probability_input.value / 100
+        }
+
+        if json_dump:
+            return json.dumps(values)
+
+        return values
