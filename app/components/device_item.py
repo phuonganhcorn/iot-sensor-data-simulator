@@ -76,7 +76,7 @@ class DeviceItem:
 
                     with ui.row().classes("items-center"):
                         self.sensor_select = ui.select(
-                            options=sensor_options, multiple=True, value=preselected).props('use-chips').classes("max-w-[350px]")
+                            options=sensor_options, multiple=True, value=preselected).props('use-chips').classes("w-[130px] max-w-[350px]")
                         ui.button("Speichern", on_click=self.change_sensors).props(
                             "flat")
 

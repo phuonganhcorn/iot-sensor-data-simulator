@@ -14,19 +14,16 @@ class ContainersPage:
         self.cards_grid = None
         self.cards = []
         self.update_stats()
-        self.setup_page()
-
-    def setup_page(self):
-        Navigation()
-
-        ui.query('main').classes('h-px')
-        ui.query('.nicegui-content').classes('p-8')
-
-        ui.label("Container").classes('text-2xl font-bold')
-
+        self.setup_layout()
         self.setup_menu_bar()
         self.setup_cards_grid()
         self.setup_live_view_dialog()
+
+    def setup_layout(self):
+        Navigation()
+        ui.query('main').classes('h-px')
+        ui.query('.nicegui-content').classes('p-8')
+        ui.label("Container").classes('text-2xl font-bold')
 
     def setup_menu_bar(self):
         with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
