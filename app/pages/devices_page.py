@@ -166,8 +166,9 @@ class DevicesPage:
 
     def add_device_to_list(self, device):
         with self.list_container:
-            DeviceItem(device=device,
+            new_item = DeviceItem(device=device,
                        delete_callback=self.delete_button_handler)
+            self.list_items.append(new_item)
 
     def delete_button_handler(self, device):
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
@@ -187,10 +188,12 @@ class DevicesPage:
         device.delete()
 
         index = self.devices.index(device)
-
+        self.list_container.remove(self.list_items[index].item) # Increment due to headings row
         del self.devices[index]
-        self.list_container.remove(index + 1) # Increment due to headings row
+        del self.list_items[index]
 
+        ui.notify(
+            f"Gerät {device.name} erfolgreich gelöscht", type="positive")
         self.update_stats()
 
         if len(self.devices) == 0:
