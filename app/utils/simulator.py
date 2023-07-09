@@ -13,8 +13,10 @@ class Simulator:
         self.variation_range = sensor.variation_range
         self.change_rate = sensor.change_rate
         self.previous_value = sensor.base_value
-        self.last_duplicate = -1 # Used to prevent more than one duplicate in a row
-        self.error_definition = json.loads(sensor.error_definition) if sensor.error_definition else None
+        self.last_duplicate = -1  # Used to prevent more than one duplicate in a row
+        self.drifting = False
+        self.error_definition = json.loads(
+            sensor.error_definition) if sensor.error_definition else None
 
     def generate_data(self):
         value_change = random.uniform(-self.change_rate, self.change_rate)
@@ -47,23 +49,44 @@ class Simulator:
             return self._handle_mcar_error(value)
         elif error_type == DUPLICATE_DATA:
             return self.handle_duplicate_data_error(value)
-
-    def _handle_anomaly_error(self, value):        
-        if random.random() > 1 - self.error_definition[PROBABILITY_POS_ANOMALY]:
-            value += random.uniform(self.error_definition[POS_ANOMALY_LOWER_RANGE], self.error_definition[POS_ANOMALY_UPPER_RANGE])
-        
-        if random.random() < self.error_definition[PROBABILITY_NEG_ANOMALY]:
-            value -= random.uniform(self.error_definition[NEG_ANOMALY_LOWER_RANGE], self.error_definition[NEG_ANOMALY_UPPER_RANGE])
+        elif error_type == DRIFT:
+            return self.handle_drift_error(value)
 
         return {"value": value}
-    
+
+    def _handle_anomaly_error(self, value):
+        if random.random() > 1 - self.error_definition[PROBABILITY_POS_ANOMALY]:
+            value += random.uniform(self.error_definition[POS_ANOMALY_LOWER_RANGE],
+                                    self.error_definition[POS_ANOMALY_UPPER_RANGE])
+
+        if random.random() < self.error_definition[PROBABILITY_NEG_ANOMALY]:
+            value -= random.uniform(self.error_definition[NEG_ANOMALY_LOWER_RANGE],
+                                    self.error_definition[NEG_ANOMALY_UPPER_RANGE])
+
+        return {"value": value}
+
     def _handle_mcar_error(self, value):
         if random.random() < self.error_definition[PROBABILITY]:
             return None
         return {"value": value}
-    
+
     def handle_duplicate_data_error(self, value):
         if self.iteration - self.last_duplicate > 2 and random.random() < self.error_definition[PROBABILITY]:
             self.last_duplicate = self.iteration
             return {"value": value, "duplicate": True}
+        return {"value": value}
+
+    def handle_drift_error(self, value):
+        after_n_iterations = self.error_definition[AFTER_N_ITERATIONS]
+        if self.drifting or after_n_iterations > self.iteration:
+            self.drifting = True
+            if self.iteration % 10 != 0:
+                return {"value": value}
+
+            average_drift_rate = self.error_definition[AVERAGE_DRIFT_RATE]
+            variation_range = self.error_definition[VARIATION_RANGE]
+            deviation = random.uniform(-variation_range, variation_range)
+            drift_change = average_drift_rate + deviation
+
+            self.base_value += drift_change
         return {"value": value}
