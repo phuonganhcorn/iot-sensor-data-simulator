@@ -96,7 +96,10 @@ class DevicesPage:
         self.devices_count = len(self.devices)
 
     def show_create_device_dialog(self):
-        with ui.dialog(value=True) as dialog, ui.card().classes('w-full min-h-[500px]'):
+        with ui.dialog(value=True) as dialog, ui.card().classes('relative w-[696px] min-h-[500px]'):
+            ui.button(icon="close", on_click=dialog.close).props(
+                    "flat").classes("absolute top-6 right-6 px-2 text-black")
+
             with ui.stepper().props('vertical').classes('w-full h-full') as stepper:
                 with ui.step('Allgemein'):
                     with ui.column():
