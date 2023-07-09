@@ -98,9 +98,9 @@ class DevicesPage:
     def show_create_device_dialog(self):
         with ui.dialog(value=True) as dialog, ui.card().classes('relative w-[696px] min-h-[500px]'):
             ui.button(icon="close", on_click=dialog.close).props(
-                    "flat").classes("absolute top-6 right-6 px-2 text-black")
+                    "flat").classes("absolute top-6 right-6 px-2 text-black z-10")
 
-            with ui.stepper().props('vertical').classes('w-full h-full') as stepper:
+            with ui.stepper().props('vertical') as stepper:
                 with ui.step('Allgemein'):
                     with ui.column():
                         ui.label(

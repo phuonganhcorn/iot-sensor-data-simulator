@@ -107,7 +107,7 @@ class SensorsPage():
 
         with ui.dialog(value=True) as dialog, ui.card().classes("relative w-[696px] !max-w-none"):
                 ui.button(icon="close", on_click=dialog.close).props(
-                    "flat").classes("absolute top-6 right-6 px-2 text-black")
+                    "flat").classes("absolute top-6 right-6 px-2 text-black z-10")
 
                 with ui.stepper().props('vertical').classes('') as stepper:
                     with ui.step('Allgemein'):
