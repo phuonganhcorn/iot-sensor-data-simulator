@@ -4,6 +4,7 @@ from components.sensor_item import SensorItem
 from model.device import Device
 from model.sensor import Sensor
 from constants.units import *
+from constants.sensor_errors import *
 from components.sensor_error_cards import AnomalyCard, MCARCard, DuplicateDataCard, DriftCard
 
 
@@ -142,11 +143,11 @@ class SensorsPage():
                         'Simuliere Fehler, die bei einer Messung auftreten können.')
 
                     error_types = {
-                        0: 'Kein Fehler',
-                        1: 'Einmalige Anomalien',
-                        3: 'Zufällig fehlend (MCAR)',
-                        4: 'Doppelte Daten',
-                        5: 'Drift',
+                        NO_ERROR: 'Kein Fehler',
+                        ANOMALY: 'Einmalige Anomalien',
+                        MCAR: 'Zufällig fehlend (MCAR)',
+                        DUPLICATE_DATA: 'Doppelte Daten',
+                        DRIFT: 'Drift',
                     }
 
                     error_type_input = ui.select(error_types, value=0, label='Fehlertyp',
@@ -186,19 +187,18 @@ class SensorsPage():
     def error_type_input_handler(self, container, value):
         container.clear()
 
-        if value == 0:
+        if value == NO_ERROR:
             self.sensor_error_card = None
-        elif value == 1:
-            with container:
+            return
+        
+        with container:
+            if value == ANOMALY:
                 self.sensor_error_card = AnomalyCard()
-        elif value == 3:
-            with container:
+            elif value == MCAR:
                 self.sensor_error_card = MCARCard()
-        elif value == 4:
-            with container:
+            elif value == DUPLICATE_DATA:
                 self.sensor_error_card = DuplicateDataCard()
-        elif value == 5:
-            with container:
+            elif value == DRIFT:
                 self.sensor_error_card = DriftCard()
 
     def check_general_step_input(self, stepper, name_input):
