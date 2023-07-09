@@ -98,9 +98,13 @@ class Container(ContainerModel):
         timestamp = data["timestamp"].strftime("%H:%M:%S")
         unit = UNITS[int(data['unit'])]
         unit_abbrev = unit["unit_abbreviation"]
-        self.log.push(
-            f"{timestamp}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
-        self.live_view_dialog.append_value(sensor, data['value'])
+
+        send_duplicate = data.get("send_duplicate", False)
+
+        for _ in range (2 if send_duplicate else 1):
+            self.log.push(
+                f"{timestamp}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
+            self.live_view_dialog.append_value(sensor, data['value'])
 
     def stop(self):
         print("Stopping simulation")

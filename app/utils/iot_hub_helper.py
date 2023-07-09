@@ -46,14 +46,24 @@ class IoTHubHelper:
         return device_client
     
     def send_message(self, device_client, data):
+        # Prevent manipulation of original data used in other places
+        data_copy = data.copy()
+
+        data_copy["timestamp"] = data_copy["timestamp"].isoformat()
+
+        send_duplicate = data_copy.get("send_duplicate", False)
+        data_copy.pop("send_duplicate", None)
+
         try:
-            json_data = json.dumps(data)
+            json_data = json.dumps(data_copy)
             message = Message(json_data)
-            print("Sending message: {}".format(message))
-            device_client.send_message(message)
-            return Response(True, "Alle Daten erfolgreich gesendet")
+            for _ in range(1 if not send_duplicate else 2):
+                print("Sending message: {}".format(message))
+                device_client.send_message(message)
         except Exception as e:
             return Response(False, "Fehler beim Senden: {}".format(e))
+        else:
+            return Response(True, "Nachricht erfolgreich gesendet")
 
     def send_messages(self, device_client, data):
         try:
@@ -72,7 +82,6 @@ class IoTHubHelper:
             return Response(True, "Alle Daten erfolgreich gesendet")
             
         except Exception as e:
-            print(e)
             return Response(False, "Fehler beim Senden: {}".format(e))
 
 class Response:

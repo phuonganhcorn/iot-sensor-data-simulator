@@ -59,7 +59,6 @@ class Device(DeviceModel):
             sensor.start_simulation(callback=self.send_simulator_data)
 
     def send_simulator_data(self, sensor, data):
-        data["deviceId"] = self.name
         self.iot_hub_helper.send_message(self.client, data)
         self.container_callback(sensor, data)
 

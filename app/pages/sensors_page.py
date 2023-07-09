@@ -4,7 +4,7 @@ from components.sensor_item import SensorItem
 from model.device import Device
 from model.sensor import Sensor
 from constants.units import *
-from components.sensor_error_cards import AnomalyCard, MCARCard
+from components.sensor_error_cards import AnomalyCard, MCARCard, DuplicateDataCard
 
 
 class SensorsPage():
@@ -141,9 +141,12 @@ class SensorsPage():
                     ui.label(
                         'Simuliere Fehler, die bei einer Messung auftreten können.')
 
-                    error_types = {0: 'Kein Fehler',
-                                   1: 'Einmalige Anomalien', 
-                                   3: 'Zufällig fehlend (MCAR)'}
+                    error_types = {
+                        0: 'Kein Fehler',
+                        1: 'Einmalige Anomalien',
+                        3: 'Zufällig fehlend (MCAR)',
+                        4: 'Doppelte Daten'
+                    }
 
                     error_type_input = ui.select(error_types, value=0, label='Fehlertyp',
                                                  on_change=lambda e: self.error_type_input_handler(error_container, e.value))
@@ -190,6 +193,9 @@ class SensorsPage():
         elif value == 3:
             with container:
                 self.sensor_error_card = MCARCard()
+        elif value == 4:
+            with container:
+                self.sensor_error_card = DuplicateDataCard()
 
     def check_general_step_input(self, stepper, name_input):
         if name_input.value == '':
@@ -219,7 +225,7 @@ class SensorsPage():
 
         with self.list_container:
             new_item = SensorItem(sensor=new_sensor,
-                       delete_callback=self.delete_button_handler)
+                                  delete_callback=self.delete_button_handler)
             self.list_items.append(new_item)
 
         dialog.set_visibility(False)
@@ -229,7 +235,8 @@ class SensorsPage():
 
     def delete_button_handler(self, sensor):
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
-            ui.label(f"Möchtest du den Sensor '{sensor.name}' wirklich löschen?")
+            ui.label(
+                f"Möchtest du den Sensor '{sensor.name}' wirklich löschen?")
             with ui.row():
                 ui.button('Abbrechen', on_click=dialog.close).props('flat')
                 ui.button('Löschen', on_click=lambda d=dialog: self.delete_handler(
@@ -240,13 +247,15 @@ class SensorsPage():
 
         # Check if container is active
         if sensor.device is not None and sensor.device.container is not None and sensor.device.container.is_active:
-            ui.notify(f"Löschen nicht möglich während Container '{sensor.device.container.name}' aktiv ist", type="warning")
+            ui.notify(
+                f"Löschen nicht möglich während Container '{sensor.device.container.name}' aktiv ist", type="warning")
             return
 
         sensor.delete()
 
         index = self.sensors.index(sensor)
-        self.list_container.remove(self.list_items[index].item) # Increment due to headings row
+        # Increment due to headings row
+        self.list_container.remove(self.list_items[index].item)
         del self.sensors[index]
         del self.list_items[index]
 
