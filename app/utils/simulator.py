@@ -17,8 +17,15 @@ class Simulator:
         self.drifting = False
         self.error_definition = json.loads(
             sensor.error_definition) if sensor.error_definition else None
+        
+    def generate_bulk_data(self, amount):
+        data = []
+        for _ in range(amount):
+            data.append(self.generate_data(iso_format=True))
 
-    def generate_data(self):
+        return data
+
+    def generate_data(self, iso_format=False):
         value_change = random.uniform(-self.change_rate, self.change_rate)
         value = self.previous_value + value_change
 
@@ -36,9 +43,11 @@ class Simulator:
         if value is not None:
             value = round(value, 2)
 
-        self.iteration += 1
 
-        return {"timestamp": datetime.datetime.now(), "sensorName": self.sensor.name, "value": value, "unit": self.sensor.unit, "deviceId": self.sensor.device_id, "send_duplicate": send_duplicate}
+        self.iteration += 1
+        timestamp = datetime.datetime.now().isoformat() if iso_format else datetime.datetime.now()
+
+        return {"timestamp": timestamp, "sensorId": self.sensor.id, "sensorName": self.sensor.name, "value": value, "unit": self.sensor.unit, "deviceId": self.sensor.device_id, "sendDuplicate": send_duplicate}
 
     def _handle_error_definition(self, value):
         error_type = self.error_definition["type"]

@@ -51,8 +51,8 @@ class IoTHubHelper:
 
         data_copy["timestamp"] = data_copy["timestamp"].isoformat()
 
-        send_duplicate = data_copy.get("send_duplicate", False)
-        data_copy.pop("send_duplicate", None)
+        send_duplicate = data_copy.get("sendDuplicate", False)
+        data_copy.pop("sendDuplicate", None)
 
         try:
             json_data = json.dumps(data_copy)

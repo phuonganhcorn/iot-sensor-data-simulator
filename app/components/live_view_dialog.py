@@ -90,7 +90,6 @@ class LiveViewDialog():
         
         sensor = Sensor.get_by_id(sensor_id)
         self.update_y_axis(sensor)
-        
 
     def clear_chart(self):
         self.chart.options["series"][0]["data"] = []

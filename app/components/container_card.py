@@ -1,7 +1,13 @@
 from nicegui import ui
 from model.device import Device
+from model.sensor import Sensor
 from components.live_view_dialog import LiveViewDialog
 from components.logs_dialog import LogsDialog
+from components.sensor_selection import SensorSelection
+from constants.units import UNITS
+from tkinter import filedialog
+import json
+import pprint
 
 
 class ContainerCard():
@@ -11,6 +17,7 @@ class ContainerCard():
         self.card = None
         self.visible = True
         self.sensor_count = 0
+        self.generated_container_data = None
         self.logs_dialog = LogsDialog(wrapper)
         container.log = self.logs_dialog.log
         self.active_dot = None
@@ -59,11 +66,14 @@ class ContainerCard():
                                                            (' bg-green-500' if container.is_active else ' bg-red-500'))
                         ui.label().bind_text_from(container, 'is_active',
                                                   backward=lambda is_active: f'{"Aktiv" if is_active else "Inaktiv"}')
-                    with ui.row().classes('gap-2'):
-                        ui.button(icon='play_arrow', on_click=lambda c=container: start_callback(
-                            c)).props('flat').classes('px-2 text-black')
-                        ui.button(icon='pause', on_click=lambda c=container: stop_callback(
-                            c)).props('flat').classes('px-2 text-black')
+                    with ui.row().classes('h-9 gap-0.5'):
+                        with ui.row().classes('gap-0.5'):
+                            ui.button(icon='play_arrow', on_click=lambda c=container: start_callback(
+                                c)).props('flat').classes('px-2 text-black')
+                            ui.button(icon='pause', on_click=lambda c=container: stop_callback(
+                                c)).props('flat').classes('px-2 text-black')
+                        ui.row().classes('w-px h-full bg-gray-300')
+                        ui.button(icon='exit_to_app', on_click=lambda: self.show_export_dialog()).props('flat').classes('px-2 text-black')
 
     def set_active(self):
         self.active_dot.classes('bg-green-500', remove='bg-red-500')
@@ -165,6 +175,123 @@ class ContainerCard():
                 device_node['children'].append(sensor_node)
             tree.append(device_node)
         return tree
+    
+    def show_export_dialog(self):
+        with self.wrapper:
+            with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none overflow-auto"):
+                self.dialog = dialog
+                with ui.row().classes("w-full justify-between items-center"):
+                    ui.label(
+                        f"Massenexport - '{self.container.name}'").classes("text-xl font-semibold")
+                    ui.button(icon="close", on_click=dialog.close).props(
+                        "flat").classes("px-2 text-black")
+                
+                ui.label("Führe einen Massenexport aus und wähle aus, wie die Daten exportiert werden sollen.")
+
+                with ui.row().classes("gap-6 items-center"):
+                    self.bulk_amount_input = ui.number(label="Werte pro Sensor", min=1, max=1000, step=1, value=10).classes('w-24')
+                    ui.button("Daten generieren", on_click=self.generate_bulk_data).props("flat")
+
+                ui.label("Vorschau").classes("text-lg font-semibold mt-2")
+
+                SensorSelection(container=self.container, sensor_select_callback=self.update_export_preview)
+
+                self.chart_wrapper = ui.row().classes('w-full h-64 justify-center items-center')
+
+                with self.chart_wrapper:
+                    ui.label("Keine Daten").classes("w-full text-center")
+
+                self.export_button = ui.button("Exportieren", on_click=self.save_bulk_to_file).classes("mt-8 self-end")
+                self.export_button.set_enabled(False)
+
+    def generate_bulk_data(self):
+        container_data = {}
+        bulk_amount = int(self.bulk_amount_input.value)
+
+        for device in self.container.devices:
+            device_data = {}
+            for sensor in device.sensors:
+                data = sensor.start_bulk_simulation(bulk_amount)
+                device_data[sensor.name] = data
+            container_data[device.name] = device_data
+        
+        self.generated_container_data = container_data
+
+        self.show_export_preview(container_data)
+        self.export_button.set_enabled(True)
+
+    def show_export_preview(self, container_data):
+        self.chart_wrapper.clear()
+
+        # get first 
+        first_device_key = next(iter(container_data))
+        first_device = next(iter(container_data.values()))
+        first_sensor_key = next(iter(first_device))
+
+        time_series_data = container_data[first_device_key][first_sensor_key]
+        sensor_id = time_series_data[0]["sensorId"]
+        sensor = Sensor.get_by_id(sensor_id)
+        
+        data = [[time_series_data[i]["timestamp"], time_series_data[i]["value"]] for i in range(len(time_series_data))]
+
+        with self.chart_wrapper:
+            self.chart = ui.chart({
+                "title": False,
+                "series": [
+                    {"name": "Motor", "data": data},
+                ],
+                "yAxis": {
+                    "title": {
+                        "text": UNITS[sensor.unit]["name"]
+                    },
+                    "labels": {
+                        "format": "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
+                    }
+                },
+                "xAxis": {
+                    "title": {
+                        "text": "Zeit"
+                    },
+                    "labels": {
+                        "format": "{value}s"
+                    }
+                },
+            }).classes("w-full h-64")
+
+    def update_export_preview(self, sensor):
+        if self.generate_bulk_data is None:
+            return
+        elif sensor is None:
+            self.chart.options["series"][0]["name"] = "Leer"
+            self.chart.options["series"][0]["data"] = []
+            self.chart.update()
+            return
+        
+        time_series_data = self.generated_container_data[sensor.device.name][sensor.name]
+        data = [[time_series_data[i]["timestamp"], time_series_data[i]["value"]] for i in range(len(time_series_data))]
+
+        # Update data
+        self.chart.options["series"][0]["name"] = sensor.name
+        self.chart.options["series"][0]["data"] = data
+
+        # Update y axis
+        self.chart.options["yAxis"]["title"]["text"] = UNITS[sensor.unit]["name"]
+        self.chart.options["yAxis"]["labels"]["format"] = "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
+
+        # Update legend
+        self.chart.options["series"][0]["name"] = sensor.name
+
+        self.chart.update()
+
+    def save_bulk_to_file(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json")])
+
+        if file_path.endswith(".json"):
+            with open(file_path, "w") as json_file:
+                json.dump(self.container_data, json_file, indent=4)
+            ui.notify(f"Daten erfolgreich exportiert", type="positive")
+
+        self.dialog.close()
 
     def add_device_handler(self):
         if self.container.is_active:

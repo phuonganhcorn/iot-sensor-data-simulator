@@ -99,7 +99,7 @@ class Container(ContainerModel):
         unit = UNITS[int(data['unit'])]
         unit_abbrev = unit["unit_abbreviation"]
 
-        send_duplicate = data.get("send_duplicate", False)
+        send_duplicate = data.get("sendDuplicate", False)
 
         for _ in range (2 if send_duplicate else 1):
             self.log.push(
