@@ -105,84 +105,86 @@ class SensorsPage():
         self.sensor_error_card = None
         device_select = None
 
-        with ui.row().classes('fixed inset-0 bg-black/50 z-10') as container:
+        with ui.dialog(value=True) as dialog, ui.card().classes("relative w-[696px] !max-w-none"):
+                ui.button(icon="close", on_click=dialog.close).props(
+                    "flat").classes("absolute top-6 right-6 px-2 text-black")
 
-            with ui.stepper().props('vertical').classes('absolute left-1/2 top-[15vh] w-[70%] h-[70vh] bg-white -translate-x-1/2 overflow-auto z-50') as stepper:
-                with ui.step('Allgemein'):
-                    with ui.grid(columns=3):
-                        name_input = ui.input('Name*')
+                with ui.stepper().props('vertical').classes('') as stepper:
+                    with ui.step('Allgemein'):
+                        with ui.grid(columns=3):
+                            name_input = ui.input('Name*')
 
-                        units = {}
-                        for index, unit in enumerate(UNITS):
-                            units[index] = f"{unit['name']} [{unit['unit_abbreviation']}]"
+                            units = {}
+                            for index, unit in enumerate(UNITS):
+                                units[index] = f"{unit['name']} [{unit['unit_abbreviation']}]"
 
-                        unit_input = ui.select(units, value=0, label='Einheit')
-                    with ui.stepper_navigation():
-                        ui.button('Abbrechen', on_click=lambda: container.set_visibility(False)).props(
-                            'flat')
-                        ui.button('Weiter', on_click=lambda: self.check_general_step_input(
-                            stepper, name_input))
-                with ui.step('Simulationswerte'):
-                    with ui.grid(columns=3).classes('w-full'):
-                        base_value_input = ui.number(
-                            label='Basiswert', value=25.00, format='%.2f')
-                        variation_range_input = ui.number(label='Variationsbereich',
-                                                          value=5.00, min=0, format='%.2f')
-                        with ui.number(label='Max. Änderungsrate +/-', value=0.5, min=0, max=10) as input:
-                            change_rate_input = input
-                            ui.tooltip(
-                                'Die maximale Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
-                        interval_input = ui.number(
-                            label='Interval [s]', value=10, min=0, max=3600)
-                    with ui.stepper_navigation():
-                        ui.button('Zurück', on_click=stepper.previous).props(
-                            'flat')
-                        ui.button('Weiter', on_click=stepper.next)
-                with ui.step('Fehlersimulation'):
-                    ui.label(
-                        'Simuliere Fehler, die bei einer Messung auftreten können.')
-
-                    error_types = {
-                        NO_ERROR: 'Kein Fehler',
-                        ANOMALY: 'Einmalige Anomalien',
-                        MCAR: 'Zufällig fehlend (MCAR)',
-                        DUPLICATE_DATA: 'Doppelte Daten',
-                        DRIFT: 'Drift',
-                    }
-
-                    error_type_input = ui.select(error_types, value=0, label='Fehlertyp',
-                                                 on_change=lambda e: self.error_type_input_handler(error_container, e.value))
-                    error_container = ui.row()
-
-                    with ui.stepper_navigation():
-                        ui.button('Zurück', on_click=stepper.previous).props(
-                            'flat')
-                        ui.button('Weiter', on_click=stepper.next)
-                with ui.step('Gerätezuordnung'):
-                    devices = Device.get_all()
-                    devices_options = {
-                        device.id: device.name for device in devices}
-                    if len(devices) > 0:
-                        with ui.column():
-                            ui.label(
-                                'Wähle das Gerät aus zu dem der Sensor hinzugefügt werden soll (Optional).')
-                            device_select = ui.select(
-                                options=devices_options, with_input=True).classes('w-40')
-                    else:
+                            unit_input = ui.select(units, value=0, label='Einheit')
+                        with ui.stepper_navigation():
+                            ui.button('Abbrechen', on_click=lambda: dialog.close).props(
+                                'flat')
+                            ui.button('Weiter', on_click=lambda: self.check_general_step_input(
+                                stepper, name_input))
+                    with ui.step('Simulationswerte'):
+                        with ui.grid(columns=3).classes('w-full'):
+                            base_value_input = ui.number(
+                                label='Basiswert', value=25.00, format='%.2f')
+                            variation_range_input = ui.number(label='Variationsbereich',
+                                                            value=5.00, min=0, format='%.2f')
+                            with ui.number(label='Max. Änderungsrate +/-', value=0.5, min=0, max=10) as input:
+                                change_rate_input = input
+                                ui.tooltip(
+                                    'Die maximale Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
+                            interval_input = ui.number(
+                                label='Interval [s]', value=10, min=0, max=3600)
+                        with ui.stepper_navigation():
+                            ui.button('Zurück', on_click=stepper.previous).props(
+                                'flat')
+                            ui.button('Weiter', on_click=stepper.next)
+                    with ui.step('Fehlersimulation'):
                         ui.label(
-                            'Es sind aktuell noch keine Geräte vorhanden. Du kannst danach zur Geräte-Seite wechseln, ein Gerät erstellen und diesen Sensor dann hinzufügen.')
-                    with ui.stepper_navigation():
-                        ui.button('Zurück', on_click=stepper.previous).props(
-                            'flat')
-                        ui.button('Weiter', on_click=stepper.next)
-                with ui.step('Abschließen'):
-                    ui.label(
-                        'Erstelle einen neuen Sensor mit den angegebenen Werten.')
-                    with ui.stepper_navigation():
-                        ui.button('Zurück', on_click=stepper.previous).props(
-                            'flat')
-                        ui.button('Sensor erstellen', on_click=lambda: self.create_sensor(
-                            container, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select))
+                            'Simuliere Fehler, die bei einer Messung auftreten können.')
+
+                        error_types = {
+                            NO_ERROR: 'Kein Fehler',
+                            ANOMALY: 'Einmalige Anomalien',
+                            MCAR: 'Zufällig fehlend (MCAR)',
+                            DUPLICATE_DATA: 'Doppelte Daten',
+                            DRIFT: 'Drift',
+                        }
+
+                        error_type_input = ui.select(error_types, value=0, label='Fehlertyp',
+                                                    on_change=lambda e: self.error_type_input_handler(error_container, e.value))
+                        error_container = ui.row()
+
+                        with ui.stepper_navigation():
+                            ui.button('Zurück', on_click=stepper.previous).props(
+                                'flat')
+                            ui.button('Weiter', on_click=stepper.next)
+                    with ui.step('Gerätezuordnung'):
+                        devices = Device.get_all()
+                        devices_options = {
+                            device.id: device.name for device in devices}
+                        if len(devices) > 0:
+                            with ui.column():
+                                ui.label(
+                                    'Wähle das Gerät aus zu dem der Sensor hinzugefügt werden soll (Optional).')
+                                device_select = ui.select(
+                                    options=devices_options, with_input=True).classes('w-40')
+                        else:
+                            ui.label(
+                                'Es sind aktuell noch keine Geräte vorhanden. Du kannst danach zur Geräte-Seite wechseln, ein Gerät erstellen und diesen Sensor dann hinzufügen.')
+                        with ui.stepper_navigation():
+                            ui.button('Zurück', on_click=stepper.previous).props(
+                                'flat')
+                            ui.button('Weiter', on_click=stepper.next)
+                    with ui.step('Abschließen'):
+                        ui.label(
+                            'Erstelle einen neuen Sensor mit den angegebenen Werten.')
+                        with ui.stepper_navigation():
+                            ui.button('Zurück', on_click=stepper.previous).props(
+                                'flat')
+                            ui.button('Sensor erstellen', on_click=lambda: self.create_sensor(
+                                dialog, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select))
 
     def error_type_input_handler(self, container, value):
         container.clear()
@@ -232,7 +234,7 @@ class SensorsPage():
                                   delete_callback=self.delete_button_handler)
             self.list_items.append(new_item)
 
-        dialog.set_visibility(False)
+        dialog.close()
         ui.notify(f"Sensor '{name}' erfolgreich erstellt", type="positive")
 
         self.update_stats()
