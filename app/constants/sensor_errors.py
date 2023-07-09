@@ -1,3 +1,4 @@
+NO_ERROR = "no_error"
 ANOMALY = "anomaly"
 MCAR = "mcar"
 DUPLICATE_DATA = "duplicate_data"
