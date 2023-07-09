@@ -13,6 +13,7 @@ class Simulator:
         self.variation_range = sensor.variation_range
         self.change_rate = sensor.change_rate
         self.previous_value = sensor.base_value
+        self.last_duplicate = -1 # Used to prevent more than one duplicate in a row
         self.error_definition = json.loads(sensor.error_definition) if sensor.error_definition else None
 
     def generate_data(self):
@@ -23,11 +24,19 @@ class Simulator:
                     min(self.base_value + self.variation_range, value))
         self.previous_value = value
 
+        send_duplicate = False
         if self.error_definition:
-            value = self._handle_error_definition(value)
+            result = self._handle_error_definition(value)
+            value = result["value"]
+            send_duplicate = result.get("duplicate", False)
+
+        # Errors might change the value to None
+        if value is not None:
+            value = round(value, 2)
+
         self.iteration += 1
 
-        return {"value": value, "timestamp": datetime.datetime.now(), "sensorName": self.sensor.name, "unit": self.sensor.unit}
+        return {"timestamp": datetime.datetime.now(), "sensorName": self.sensor.name, "value": value, "unit": self.sensor.unit, "deviceId": self.sensor.device_id, "send_duplicate": send_duplicate}
 
     def _handle_error_definition(self, value):
         error_type = self.error_definition["type"]
@@ -36,6 +45,8 @@ class Simulator:
             return self._handle_anomaly_error(value)
         elif error_type == MCAR:
             return self._handle_mcar_error(value)
+        elif error_type == DUPLICATE_DATA:
+            return self.handle_duplicate_data_error(value)
 
     def _handle_anomaly_error(self, value):        
         if random.random() > 1 - self.error_definition[PROBABILITY_POS_ANOMALY]:
@@ -44,9 +55,15 @@ class Simulator:
         if random.random() < self.error_definition[PROBABILITY_NEG_ANOMALY]:
             value -= random.uniform(self.error_definition[NEG_ANOMALY_LOWER_RANGE], self.error_definition[NEG_ANOMALY_UPPER_RANGE])
 
-        return round(value, 2)
+        return {"value": value}
     
     def _handle_mcar_error(self, value):
         if random.random() < self.error_definition[PROBABILITY]:
             return None
-        return value
+        return {"value": value}
+    
+    def handle_duplicate_data_error(self, value):
+        if self.iteration - self.last_duplicate > 2 and random.random() < self.error_definition[PROBABILITY]:
+            self.last_duplicate = self.iteration
+            return {"value": value, "duplicate": True}
+        return {"value": value}

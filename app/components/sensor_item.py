@@ -37,7 +37,7 @@ class SensorItem:
                         "flat").classes("px-2 text-red")
 
     def show_details_dialog(self):
-        with ui.dialog(value=True) as dialog, ui.card().classes("w-[696px] !max-w-none px-6 pb-6"):
+        with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none min-h-[327px]"):
             self.dialog = dialog
             with ui.row().classes("mb-8 w-full justify-between items-center"):
                 ui.label(f"{self.sensor.name}").classes("text-lg font-medium")
