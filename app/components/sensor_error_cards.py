@@ -98,3 +98,29 @@ class DuplicateDataCard:
             return json.dumps(values)
 
         return values
+    
+class DriftCard:
+
+    def __init__(self):
+        with ui.row().classes('mt-4 p-4 gap-0 w-full bg-gray-100 rounded-md'):
+            with ui.column().classes('gap-1'):
+                ui.label('Wahrscheinlichkeit').classes('mt-2 font-bold')
+                ui.label('Definiere nach wie vielen Iterationen n ein linearer Drift eintreten soll und gib die Driftgrößen an.').classes(
+                    'text-[13px] opacity-80')
+            with ui.grid(columns=3).classes('mt-3 mb-4 w-full'):
+                self.after_n_iterations_input = ui.number(label='Ab n Iterationen', value=5, min=0, max=100)
+                self.average_drift_rate_input = ui.number(label='Driftrate', value=1, min=0, max=10)
+                self.variation_range_input = ui.number(label='Variationsbereich', value=0.1, min=0, format='%.2f')
+                
+    def get_values(self, json_dump=False):
+        values = {
+            "type": DRIFT,
+            AFTER_N_ITERATIONS: int(self.after_n_iterations_input.value),
+            AVERAGE_DRIFT_RATE: self.average_drift_rate_input.value,
+            VARIATION_RANGE: self.variation_range_input.value
+        }
+
+        if json_dump:
+            return json.dumps(values)
+
+        return values

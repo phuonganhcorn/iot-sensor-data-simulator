@@ -4,7 +4,7 @@ from components.sensor_item import SensorItem
 from model.device import Device
 from model.sensor import Sensor
 from constants.units import *
-from components.sensor_error_cards import AnomalyCard, MCARCard, DuplicateDataCard
+from components.sensor_error_cards import AnomalyCard, MCARCard, DuplicateDataCard, DriftCard
 
 
 class SensorsPage():
@@ -127,10 +127,10 @@ class SensorsPage():
                             label='Basiswert', value=25.00, format='%.2f')
                         variation_range_input = ui.number(label='Variationsbereich',
                                                           value=5.00, min=0, format='%.2f')
-                        with ui.number(label='Änderungsrate +/-', value=0.5, min=0, max=10) as input:
+                        with ui.number(label='Max. Änderungsrate +/-', value=0.5, min=0, max=10) as input:
                             change_rate_input = input
                             ui.tooltip(
-                                'Die Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
+                                'Die maximale Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
                         interval_input = ui.number(
                             label='Interval [s]', value=10, min=0, max=3600)
                     with ui.stepper_navigation():
@@ -145,7 +145,8 @@ class SensorsPage():
                         0: 'Kein Fehler',
                         1: 'Einmalige Anomalien',
                         3: 'Zufällig fehlend (MCAR)',
-                        4: 'Doppelte Daten'
+                        4: 'Doppelte Daten',
+                        5: 'Drift',
                     }
 
                     error_type_input = ui.select(error_types, value=0, label='Fehlertyp',
@@ -196,6 +197,9 @@ class SensorsPage():
         elif value == 4:
             with container:
                 self.sensor_error_card = DuplicateDataCard()
+        elif value == 5:
+            with container:
+                self.sensor_error_card = DriftCard()
 
     def check_general_step_input(self, stepper, name_input):
         if name_input.value == '':
