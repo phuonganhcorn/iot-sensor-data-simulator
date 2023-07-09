@@ -1,13 +1,11 @@
 from nicegui import ui
 from model.device import Device
-from model.sensor import Sensor
 from components.live_view_dialog import LiveViewDialog
 from components.logs_dialog import LogsDialog
 from components.sensor_selection import SensorSelection
-from constants.units import UNITS
+from components.chart import Chart
 from tkinter import filedialog
 import json
-import pprint
 
 
 class ContainerCard():
@@ -194,12 +192,8 @@ class ContainerCard():
 
                 ui.label("Vorschau").classes("text-lg font-semibold mt-2")
 
-                SensorSelection(container=self.container, sensor_select_callback=self.update_export_preview)
-
-                self.chart_wrapper = ui.row().classes('w-full h-64 justify-center items-center')
-
-                with self.chart_wrapper:
-                    ui.label("Keine Daten").classes("w-full text-center")
+                self.sensor_selection = SensorSelection(container=self.container, sensor_select_callback=self.update_export_preview)
+                self.chart = Chart()
 
                 self.export_button = ui.button("Exportieren", on_click=self.save_bulk_to_file).classes("mt-8 self-end")
                 self.export_button.set_enabled(False)
@@ -221,67 +215,19 @@ class ContainerCard():
         self.export_button.set_enabled(True)
 
     def show_export_preview(self, container_data):
-        self.chart_wrapper.clear()
-
-        # get first 
-        first_device_key = next(iter(container_data))
-        first_device = next(iter(container_data.values()))
-        first_sensor_key = next(iter(first_device))
-
-        time_series_data = container_data[first_device_key][first_sensor_key]
-        sensor_id = time_series_data[0]["sensorId"]
-        sensor = Sensor.get_by_id(sensor_id)
+        selected_sensor = self.sensor_selection.get_sensor()
+        time_series_data = container_data[selected_sensor.device.name][selected_sensor.name]
+        self.chart.show(time_series_data)
         
-        data = [[time_series_data[i]["timestamp"], time_series_data[i]["value"]] for i in range(len(time_series_data))]
-
-        with self.chart_wrapper:
-            self.chart = ui.chart({
-                "title": False,
-                "series": [
-                    {"name": "Motor", "data": data},
-                ],
-                "yAxis": {
-                    "title": {
-                        "text": UNITS[sensor.unit]["name"]
-                    },
-                    "labels": {
-                        "format": "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
-                    }
-                },
-                "xAxis": {
-                    "title": {
-                        "text": "Zeit"
-                    },
-                    "labels": {
-                        "format": "{value}s"
-                    }
-                },
-            }).classes("w-full h-64")
-
     def update_export_preview(self, sensor):
-        if self.generate_bulk_data is None:
+        if self.generated_container_data is None:
             return
         elif sensor is None:
-            self.chart.options["series"][0]["name"] = "Leer"
-            self.chart.options["series"][0]["data"] = []
-            self.chart.update()
+            self.chart.empty()
             return
         
         time_series_data = self.generated_container_data[sensor.device.name][sensor.name]
-        data = [[time_series_data[i]["timestamp"], time_series_data[i]["value"]] for i in range(len(time_series_data))]
-
-        # Update data
-        self.chart.options["series"][0]["name"] = sensor.name
-        self.chart.options["series"][0]["data"] = data
-
-        # Update y axis
-        self.chart.options["yAxis"]["title"]["text"] = UNITS[sensor.unit]["name"]
-        self.chart.options["yAxis"]["labels"]["format"] = "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
-
-        # Update legend
-        self.chart.options["series"][0]["name"] = sensor.name
-
-        self.chart.update()
+        self.chart.update(sensor, time_series_data)
 
     def save_bulk_to_file(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json")])

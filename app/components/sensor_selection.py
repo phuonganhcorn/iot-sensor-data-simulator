@@ -46,3 +46,9 @@ class SensorSelection:
     def sensor_select_change_handler(self):
         sensor = Sensor.get_by_id(self.sensor_select.value)
         self.sensor_select_callback(sensor)
+
+    def get_device(self):
+        return Device.get_by_id(self.device_select.value)
+
+    def get_sensor(self):
+        return Sensor.get_by_id(self.sensor_select.value)
