@@ -175,6 +175,10 @@ class ContainerCard():
         return tree
     
     def show_export_dialog(self):
+        if self.container.is_active:
+            ui.notify("Bitte deaktiviere den Container, um einen Massenexport ausführen zu können.", type="warning")
+            return
+
         with self.wrapper:
             with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none overflow-auto"):
                 self.dialog = dialog
