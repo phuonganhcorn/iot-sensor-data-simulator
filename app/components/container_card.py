@@ -217,7 +217,7 @@ class ContainerCard():
     def show_export_preview(self, container_data):
         selected_sensor = self.sensor_selection.get_sensor()
         time_series_data = container_data[selected_sensor.device.name][selected_sensor.name]
-        self.chart.show(time_series_data)
+        self.chart.show(time_series_data=time_series_data)
         
     def update_export_preview(self, sensor):
         if self.generated_container_data is None:
