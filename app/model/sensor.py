@@ -43,6 +43,11 @@ class Sensor(SensorModel):
                 interval=self.interval, function=self.callback, args=[device_callback])
             timer.start()
 
+    def start_bulk_simulation(self, amount):
+        simulator = Simulator(sensor=self)
+        data = simulator.generate_bulk_data(amount)
+        return data
+    
     def start_simulation(self, callback):
         self.simulator = Simulator(sensor=self)
         self.running = True
