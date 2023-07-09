@@ -58,12 +58,13 @@ class ContainersPage:
             with self.cards_grid:
                 for container in self.containers:
                     new_container_card = ContainerCard(wrapper=self.cards_grid, container=container, start_callback=self.start_container,
-                                                        stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
+                                                       stop_callback=self.stop_container, delete_callback=self.delete_container, live_view_callback=self.show_live_view_dialog)
                     self.cards.append(new_container_card)
 
     def setup_note_label(self):
         with self.cards_grid:
-            self.note_label = ui.label().classes('absolute left-1/2 top-48 self-center -translate-x-1/2')
+            self.note_label = ui.label().classes(
+                'absolute left-1/2 top-48 self-center -translate-x-1/2')
             self.note_label.set_visibility(False)
 
     def setup_live_view_dialog(self):
@@ -101,7 +102,10 @@ class ContainersPage:
         self.note_label.set_visibility(False)
 
     def open_create_container_dialog(self):
-        with ui.dialog(value=True) as dialog, ui.card().classes('w-full min-h-[500px]'):
+        with ui.dialog(value=True) as dialog, ui.card().classes('w-[696px] min-h-[500px]'):
+            ui.button(icon="close", on_click=dialog.close).props(
+                "flat").classes("absolute top-6 right-6 px-2 text-black")
+
             with ui.stepper().props('vertical').classes('w-full h-full') as stepper:
                 with ui.step('Allgemein'):
                     with ui.column():
