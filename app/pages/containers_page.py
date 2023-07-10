@@ -183,6 +183,10 @@ class ContainersPage:
         self.update_stats()
 
     def start_container(self, container):
+        if len(container.devices) == 0:
+            ui.notify("Es sind keine Geräte vorhanden!", type="warning")
+            return
+
         container.start(self.iot_hub_helper)
         index = self.containers.index(container)
         self.cards[index].set_active()
@@ -216,4 +220,8 @@ class ContainersPage:
             self.show_note("Keine Container vorhanden")
 
     def show_live_view_dialog(self, container):
+        if len(container.devices) == 0:
+            ui.notify("Es sind keine Geräte vorhanden!", type="warning")
+            return
+
         self.live_view_dialog.show(container)

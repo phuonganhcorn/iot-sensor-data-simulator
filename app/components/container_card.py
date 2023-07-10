@@ -83,9 +83,6 @@ class ContainerCard():
         for device in self.container.devices:
             self.sensor_count += len(device.sensors)
 
-    def show_live_view_dialog(self, wrapper, container):
-        LiveViewDialog(wrapper, container)
-
     def show_details_dialog(self):
         with self.wrapper:
             with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none overflow-auto"):
@@ -174,6 +171,10 @@ class ContainerCard():
         return tree
     
     def show_export_dialog(self):
+        if len(self.container.devices) == 0:
+            ui.notify("Es sind keine Geräte vorhanden!", type="warning")
+            return
+
         if self.container.is_active:
             ui.notify("Bitte deaktiviere den Container, um einen Massenexport ausführen zu können.", type="warning")
             return
