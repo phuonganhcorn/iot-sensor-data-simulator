@@ -44,8 +44,8 @@ class ContainersPage:
             with ui.row():
                 self.filter_input = ui.input(
                     placeholder='Filter', on_change=self.filter_handler).classes('w-44')
-                ui.select({1: "Alle", 2: "Aktiv", 3: "Inaktiv"},
-                          value=1).classes('w-24')
+                self.filter_state_select = ui.select({1: "Alle", 2: "Aktiv", 3: "Inaktiv"},
+                          value=1, on_change=self.filter_handler).classes('w-24')
 
     def setup_cards_grid(self):
         self.cards_grid = ui.grid().classes(
@@ -83,6 +83,10 @@ class ContainersPage:
         search_text = self.filter_input.value
         results = list(filter(lambda c: search_text.lower()
                        in c.container.name.lower(), self.cards))
+        
+        if self.filter_state_select.value > 1:
+            is_active = self.filter_state_select.value == 2
+            results = [container_card for container_card in results if container_card.container.is_active == is_active]
 
         for card in self.cards:
             card.visible = card in results
