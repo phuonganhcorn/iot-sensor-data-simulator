@@ -108,9 +108,8 @@ class Container(ContainerModel):
 
         send_duplicate = data.get("sendDuplicate", False)
 
-        for _ in range (2 if send_duplicate else 1):
-            self.log.push(
-                f"{timestamp_formatted}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
+        for _ in range(2 if send_duplicate else 1):
+            self.log.push(f"{timestamp_formatted}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
             self.live_view_dialog.append_data_point(sensor, timestamp, value)
 
     def stop(self):

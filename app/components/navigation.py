@@ -19,7 +19,8 @@ class Navigation():
                 ui.link('Sensoren', '/sensoren').classes('text-white !no-underline')
             with ui.row().classes('items-center divide-x divide-white/50'):
                 ui.label(f'Host: {self.host_name}').classes('text-white')
-                ui.switch('Demo-Modus', on_change=self.switch_handler).classes('text-white')
+                demo_switch = ui.switch('Demo-Modus', on_change=self.switch_handler).classes('text-white')
+                demo_switch.value = Options.get_boolean('demo_mode')
                 ui.query('.q-toggle__inner--falsy').classes('!text-white/50')
 
     def query_connection_string(self):
