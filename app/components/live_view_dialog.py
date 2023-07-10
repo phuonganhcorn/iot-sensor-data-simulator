@@ -1,6 +1,4 @@
 from nicegui import ui
-from model.device import Device
-from model.sensor import Sensor
 from constants.units import *
 from components.sensor_selection import SensorSelection
 from components.chart import Chart
@@ -44,7 +42,7 @@ class LiveViewDialog():
         self.chart.empty()
         self.update_chart_legend(sensor)
 
-    def append_value(self, sensor, value):
+    def append_data_point(self, sensor, timestamp, value):
         # Return if the dialog is not open
         if not self.dialog.value:
             return
@@ -54,7 +52,8 @@ class LiveViewDialog():
             return
 
         if self.chart.chart is None:
-            self.chart.show(sensor=sensor, data=[[0, value]])
+            self.chart.show(sensor=sensor, data=[[timestamp, value]])
             return
 
-        self.chart.append_value(sensor=sensor, value=value)
+        self.chart.append_data_point(
+            sensor=sensor, timestamp=timestamp, value=value)

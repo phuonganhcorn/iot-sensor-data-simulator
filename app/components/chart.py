@@ -26,6 +26,8 @@ class Chart:
             data = [[time_series_data[i]["timestamp"], time_series_data[i]["value"]]
                     for i in range(len(time_series_data))]
 
+        x_values = [i * sensor.interval for i in range(len(data))]
+
         self.wrapper.clear()
         with self.wrapper:
             self.chart = ui.chart({
@@ -47,7 +49,8 @@ class Chart:
                     },
                     "labels": {
                         "format": "{value}s"
-                    }
+                    },
+                    "categories": x_values,
                 },
             }).classes("w-full h-64")
 
@@ -69,14 +72,19 @@ class Chart:
         self.chart.options["series"][0]["name"] = sensor.name
         self.chart.update()
 
-    def append_value(self, sensor, value):
+    def append_data_point(self, sensor, timestamp, value):
+        # Append data point
         data = self.chart.options["series"][0]["data"]
-        last_item = data[-1] if len(data) > 0 else None
-        new_time = last_item[0] + 10 if last_item is not None else 0
-        data.append([new_time, value])
-
-        self.chart.options["series"][0]["name"] = sensor.name
+        data.append([timestamp, value])
         self.chart.options["series"][0]["data"] = data
+
+        # Update x axis
+        x_values = self.chart.options["xAxis"]["categories"]
+        x_values.append(x_values[-1] + sensor.interval)
+        self.chart.options["xAxis"]["categories"] = x_values
+
+        # Update dataset name
+        self.chart.options["series"][0]["name"] = sensor.name
         self.chart.update()
 
     def empty(self):

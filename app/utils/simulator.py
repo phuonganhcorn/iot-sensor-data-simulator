@@ -20,12 +20,19 @@ class Simulator:
         
     def generate_bulk_data(self, amount):
         data = []
-        for _ in range(amount):
-            data.append(self.generate_data(iso_format=True))
+        start_time = datetime.datetime.now()
+        interval = self.sensor.interval
+
+        for i in range(amount):
+            timestamp = (start_time + datetime.timedelta(seconds = i * interval))
+            data.append(self.generate_data(timestamp=timestamp))
 
         return data
 
-    def generate_data(self, iso_format=False):
+    def generate_data(self, **kwargs):
+        iso_format = kwargs.get("iso_format", False)
+        timestamp = kwargs.get("timestamp", None)
+
         value_change = random.uniform(-self.change_rate, self.change_rate)
         value = self.previous_value + value_change
 
@@ -42,10 +49,9 @@ class Simulator:
         # Errors might change the value to None
         if value is not None:
             value = round(value, 2)
-
-
         self.iteration += 1
-        timestamp = datetime.datetime.now().isoformat() if iso_format else datetime.datetime.now()
+        if timestamp is None:
+            timestamp = datetime.datetime.now().isoformat() if iso_format else datetime.datetime.now()
 
         return {"timestamp": timestamp, "sensorId": self.sensor.id, "sensorName": self.sensor.name, "value": value, "unit": self.sensor.unit, "deviceId": self.sensor.device_id, "sendDuplicate": send_duplicate}
 
@@ -76,7 +82,7 @@ class Simulator:
 
     def _handle_mcar_error(self, value):
         if random.random() < self.error_definition[PROBABILITY]:
-            return None
+            return {"value": None}
         return {"value": value}
 
     def handle_duplicate_data_error(self, value):
