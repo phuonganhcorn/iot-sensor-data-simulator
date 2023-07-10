@@ -14,7 +14,7 @@ class Chart:
         with ui.row().classes('w-full h-64 justify-center items-center') as wrapper:
             self.wrapper = wrapper
             self.note_label = ui.label(
-                "Keine Daten").classes("w-full text-center")
+                "Keine Daten").classes("w-full text-center -translate-y-full")
 
     def show_note(self, text):
         self.note_label.set_text(text)
