@@ -23,8 +23,12 @@ class Chart:
         if time_series_data is not None:
             sensor_id = time_series_data[0]["sensorId"]
             sensor = Sensor.get_by_id(sensor_id)
-            data = [[time_series_data[i]["timestamp"], time_series_data[i]["value"]]
-                    for i in range(len(time_series_data))]
+            data = [
+                [  
+                    time_series_data[i]["timestamp"].strftime("%d.%m.%Y, %H:%M:%S"), time_series_data[i]["value"]
+                ]
+                for i in range(len(time_series_data))
+            ]
 
         x_values = [i * sensor.interval for i in range(len(data))]
 
@@ -55,7 +59,7 @@ class Chart:
             }).classes("w-full h-64")
 
     def update(self, sensor, time_series_data):
-        data = [[time_series_data[i]["timestamp"], time_series_data[i]["value"]]
+        data = [[time_series_data[i]["timestamp"].strftime("%d.%m.%Y, %H:%M:%S"), time_series_data[i]["value"]]
                 for i in range(len(time_series_data))]
 
         # Update data
