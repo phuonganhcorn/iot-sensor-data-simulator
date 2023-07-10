@@ -15,8 +15,7 @@ class DeviceItem:
             with ui.row().classes('gap-6'):
                 ui.label(f'{device.id}').classes('w-[30px]')
                 ui.label(f'{device.name}').classes('w-[130px]')
-                if device.container:
-                    self.container_label = ui.label(device.container.name).classes('w-[130px]')
+                self.container_label = ui.label(device.container.name if device.container else "").classes('w-[130px]')
                 self.sensor_count_label = ui.label(f'{len(device.sensors)}').classes('w-[60px]')
             with ui.row().classes('gap-2'):
                 ui.button(icon="info_outline", on_click=self.show_details_dialog).props(
