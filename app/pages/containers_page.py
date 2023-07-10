@@ -148,6 +148,11 @@ class ContainersPage:
             ui.notify('Bitte gib einen Namen an.',
                       type='negative')
             return
+        else:
+            name_in_use = Container.check_if_name_in_use(name_input.value)
+            if name_in_use:
+                ui.notify('Es existiert bereits ein Container mit diesem Namen.', type='negative')
+                return
         
         if len(description_textarea.value) > 255:
             ui.notify('Die Beschreibung darf maximal 255 Zeichen lang sein.',
@@ -159,6 +164,8 @@ class ContainersPage:
     def complete_container_creation(self, dialog, name_input, description_textarea, location_input, devices_input):
         self.create_container(name_input.value, description_textarea.value,
                               location_input.value, devices_input.value)
+        
+        ui.notify('Container erfolgreich erstellt.', type='positive')
         dialog.close()
 
     def create_container(self, name, description, location, device_ids):

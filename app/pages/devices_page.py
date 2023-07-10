@@ -114,32 +114,35 @@ class DevicesPage:
                 with ui.step('Sensoren'):
                     sensors = Sensor.get_all_unassigned()
 
+                    sensors_options = {
+                        sensor.id: sensor.name for sensor in sensors}
+
                     if len(sensors) == 0:
                         ui.label(
-                            "Es sind keine freien Sensoren verfügbar. Erstelle zuerst einen neuen Sensor.")
-
-                        ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
-                            'flat')
+                            "Es sind keine freien Sensoren verfügbar.")
                     else:
-                        sensors_options = {
-                            sensor.id: sensor.name for sensor in sensors}
-
                         ui.label(
-                            "Wähle die Sensoren aus, die dem Gerät zugeordnet werden sollen. Mehrfachauswahl möglich. Später können keine weiteren Sensoren hinzugefügt werden.")
-                        sensors_input = ui.select(sensors_options, multiple=True, label='Sensoren auswählen').props(
-                            'use-chips').classes('w-64')
+                            "Wähle die Sensoren aus, die dem Gerät zugeordnet werden sollen. Mehrfachauswahl möglich.")
+                    sensors_input = ui.select(sensors_options, multiple=True, label='Sensoren auswählen').props(
+                        'use-chips').classes('w-64')
 
-                        with ui.stepper_navigation():
-                            ui.button('Zurück', on_click=stepper.previous).props(
-                                'flat')
-                            ui.button('Erstellen', on_click=lambda: self.complete_device_creation(
-                                dialog, name_input, sensors_input))
+                    with ui.stepper_navigation():
+                        ui.button('Zurück', on_click=stepper.previous).props(
+                            'flat')
+                        ui.button('Erstellen', on_click=lambda: self.complete_device_creation(
+                            dialog, name_input, sensors_input))
 
     def check_device_name_input(self, stepper, name_input):
         if name_input.value == '':
-            ui.notify('Bitte gib einen Namen für das Gerät an.',
+            ui.notify('Bitte gib einen Namen an.',
                       type='negative')
             return
+        else:
+            name = self.replace_special_characters(name_input.value)
+            name_in_use = Device.check_if_name_in_use(name)
+            if name_in_use:
+                ui.notify('Es existiert bereits ein Container mit diesem Namen.', type='negative')
+                return
 
         stepper.next()
 

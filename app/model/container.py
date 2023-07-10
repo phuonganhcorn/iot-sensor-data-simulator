@@ -32,6 +32,10 @@ class Container(ContainerModel):
         Container.session.commit()
         container_db.create_relationship_to_devices(container_db, device_ids)
         return container_db
+    
+    @staticmethod
+    def check_if_name_in_use(name):
+        return Container.session.query(Container).filter(Container.name.ilike(name)).first() is not None
 
     def create_relationship_to_devices(self, container, device_ids):
         devices = Device.get_all_by_ids(device_ids)

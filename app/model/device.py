@@ -39,6 +39,10 @@ class Device(DeviceModel):
         device_db.create_relationship_to_sensors(sensor_ids)
 
         return device_db
+    
+    @staticmethod
+    def check_if_name_in_use(name):
+        return Device.session.query(Device).filter(Device.name.ilike(name)).first() is not None
 
     def create_relationship_to_sensors(self, sensor_ids):
         sensors = Sensor.get_all_by_ids(sensor_ids)
