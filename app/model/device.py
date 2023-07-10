@@ -27,7 +27,7 @@ class Device(DeviceModel):
     @staticmethod
     def store(device, sensor_ids):
         primary_key = device.authentication.symmetric_key.primary_key
-        host_name = Options.get_option('host_name').value
+        host_name = Options.get_value('host_name')
         connection_string = f"HostName={host_name}.azure-devices.net;DeviceId={device.device_id};SharedAccessKey={primary_key}"
 
         device_db = Device(name=device.device_id, generation_id=device.generation_id,

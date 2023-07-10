@@ -17,13 +17,15 @@ class Navigation():
                 ui.link('Container', '/').classes('text-white !no-underline')
                 ui.link('Geräte', '/geraete').classes('text-white !no-underline')
                 ui.link('Sensoren', '/sensoren').classes('text-white !no-underline')
-            with ui.row():
+            with ui.row().classes('items-center divide-x divide-white/50'):
                 ui.label(f'Host: {self.host_name}').classes('text-white')
+                ui.switch('Demo-Modus', on_change=self.switch_handler).classes('text-white')
+                ui.query('.q-toggle__inner--falsy').classes('!text-white/50')
 
     def query_connection_string(self):
-        option = Options.get_option('host_name')
+        host_name = Options.get_value('host_name')
         
-        if option is None:
+        if host_name is None:
             with ui.row().classes('fixed inset-0 flex justify-center items-center bg-black/50 z-[100]') as container:
                 with ui.column().classes('bg-white rounded-lg shadow-lg p-8'):
                     ui.label('Willkommen zum IoT-Telemetrie-Simulator').classes('text-xl font-bold')
@@ -32,7 +34,7 @@ class Navigation():
                     ui.button('Loslegen', on_click=lambda: self.save_host_name_string(container, host_name_input))
             return
         
-        self.host_name = option.value
+        self.host_name = host_name
 
     def save_host_name_string(self, container, host_name_input):
         if host_name_input.value is None or host_name_input.value == '':
@@ -43,3 +45,13 @@ class Navigation():
         Options.set_option('host_name', host_name_input.value)
         container.set_visibility(False)
         ui.notify('Hostname erfolgreich gespeichert.', type='positive')
+
+    def switch_handler(self, switch):
+        Options.set_option('demo_mode', switch.value)
+        
+        if switch.value:
+            ui.query('.q-toggle__inner--truthy').classes('!text-white')
+            ui.query('.q-toggle__inner--falsy').classes(remove='!text-white/50')
+        else:
+            ui.query('.q-toggle__inner--falsy').classes('!text-white/50')
+            ui.query('.q-toggle__inner--truthy').classes(remove='!text-white')
