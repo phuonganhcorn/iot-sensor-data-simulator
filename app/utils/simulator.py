@@ -17,17 +17,23 @@ class Simulator:
         self.drifting = False
         self.error_definition = json.loads(
             sensor.error_definition) if sensor.error_definition else None
-        
+
     def generate_bulk_data(self, amount):
-        data = []
+        records = []
         start_time = datetime.datetime.now()
         interval = self.sensor.interval
 
         for i in range(amount):
-            timestamp = (start_time + datetime.timedelta(seconds = i * interval))
-            data.append(self.generate_data(timestamp=timestamp))
+            timestamp = (start_time + datetime.timedelta(seconds=i * interval))
+            record = self.generate_data(timestamp=timestamp)
+            send_duplicate = record["sendDuplicate"]
+            del record["sendDuplicate"]
+            records.append(record)
 
-        return data
+            if send_duplicate:
+                records.append(record)
+
+        return records
 
     def generate_data(self, **kwargs):
         iso_format = kwargs.get("iso_format", False)
@@ -51,7 +57,8 @@ class Simulator:
             value = round(value, 2)
         self.iteration += 1
         if timestamp is None:
-            timestamp = datetime.datetime.now().isoformat() if iso_format else datetime.datetime.now()
+            timestamp = datetime.datetime.now().isoformat(
+            ) if iso_format else datetime.datetime.now()
 
         return {"timestamp": timestamp, "sensorId": self.sensor.id, "sensorName": self.sensor.name, "value": value, "unit": self.sensor.unit, "deviceId": self.sensor.device_id, "sendDuplicate": send_duplicate}
 

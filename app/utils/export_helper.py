@@ -4,11 +4,13 @@ import xlsxwriter
 import json
 import csv
 
+
 class ExportHelper:
 
     def save_to_file(self, data):
         filetypes = [("CSV", "*.csv"), ("JSON", "*.json"), ("Excel", "*.xlsx")]
-        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=filetypes)
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".csv", filetypes=filetypes)
 
         if file_path.endswith(".csv"):
             self._save_as_csv(file_path, data)
@@ -19,7 +21,8 @@ class ExportHelper:
 
     def _save_as_json(self, file_path, data):
         with open(file_path, "w") as json_file:
-            json.dump(data, json_file, indent=4, default=self._datetime_to_string)
+            json.dump(data, json_file, indent=4,
+                      default=self._datetime_to_string)
 
     def _save_as_csv(self, file_path, data):
         all_records = self._convert_data_dict_to_list(data)
@@ -53,7 +56,8 @@ class ExportHelper:
     def _datetime_to_string(self, obj):
         if isinstance(obj, datetime):
             return obj.isoformat()
-        raise TypeError(f"Object of type '{type(obj)}' is not JSON serializable")
+        raise TypeError(
+            f"Object of type '{type(obj)}' is not JSON serializable")
 
     def _convert_data_dict_to_list(self, data):
         all_records = []
@@ -63,11 +67,11 @@ class ExportHelper:
             for sensor_key in sensor_keys:
                 records = data[device_key][sensor_key]
                 for record in records:
-                    record['timestamp'] = record['timestamp'].isoformat()
+                    # Check if timestamp is datetime object
+                    if isinstance(record["timestamp"], datetime):
+                        record['timestamp'] = record["timestamp"].isoformat()
                     all_records.append(record)
 
         # sort all_records by timestamp
         all_records.sort(key=lambda record: record["timestamp"])
         return all_records
-
-
