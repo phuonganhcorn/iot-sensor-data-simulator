@@ -6,7 +6,7 @@ import csv
 class ExportHelper:
 
     def save_to_file(self, data):
-        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json"), ("CSV", "*.csv")])
+        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV", "*.csv"), ("JSON", "*.json")])
 
         if file_path.endswith(".json"):
             self._save_as_json(file_path, data)
