@@ -1,14 +1,10 @@
-import time
-import json
 from azure.iot.device import IoTHubDeviceClient, Message
 from azure.iot.hub import IoTHubRegistryManager
 import os
+import json
 
 
 class IoTHubHelper:
-    # def __init__(self, connection_string):
-    #     self.= None
-    #     self.init_device_client()
 
     def __init__(self):
         self.setup_registry_manager()
