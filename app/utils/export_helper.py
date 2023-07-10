@@ -1,18 +1,22 @@
 from tkinter import filedialog
 from datetime import datetime
+import xlsxwriter
 import json
 import csv
 
 class ExportHelper:
 
     def save_to_file(self, data):
-        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV", "*.csv"), ("JSON", "*.json")])
+        filetypes = [("CSV", "*.csv"), ("JSON", "*.json"), ("Excel", "*.xlsx")]
+        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=filetypes)
 
-        if file_path.endswith(".json"):
-            self._save_as_json(file_path, data)
-        elif file_path.endswith(".csv"):
+        if file_path.endswith(".csv"):
             self._save_as_csv(file_path, data)
-    
+        elif file_path.endswith(".json"):
+            self._save_as_json(file_path, data)
+        elif file_path.endswith(".xlsx"):
+            self._save_as_xlsx(file_path, data)
+
     def _save_as_json(self, file_path, data):
         with open(file_path, "w") as json_file:
             json.dump(data, json_file, indent=4, default=self._datetime_to_string)
@@ -25,6 +29,26 @@ class ExportHelper:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(all_records)
+
+    def _save_as_xlsx(self, file_path, data):
+        all_records = self._convert_data_dict_to_list(data)
+
+        # Create a new workbook and add a worksheet
+        workbook = xlsxwriter.Workbook(file_path)
+        worksheet = workbook.add_worksheet()
+
+        # Write the header row
+        fieldnames = all_records[0].keys()
+        for col, fieldname in enumerate(fieldnames):
+            worksheet.write(0, col, fieldname)
+
+        # Write the data rows
+        for row, record in enumerate(all_records, start=1):
+            for col, value in enumerate(record.values()):
+                worksheet.write(row, col, value)
+
+        # Close the workbook
+        workbook.close()
 
     def _datetime_to_string(self, obj):
         if isinstance(obj, datetime):
