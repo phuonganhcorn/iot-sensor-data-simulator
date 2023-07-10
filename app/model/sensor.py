@@ -32,6 +32,10 @@ class Sensor(SensorModel):
     def get_all_unassigned():
         return Sensor.session.query(Sensor).filter(Sensor.device_id == None).all()
     
+    @staticmethod
+    def check_if_name_in_use(name):
+        return Sensor.session.query(Sensor).filter(Sensor.name.ilike(name)).first() is not None
+    
     def callback(self, device_callback):
         # Überprüfen, ob die Schleife unterbrochen werden soll
         if self.running:

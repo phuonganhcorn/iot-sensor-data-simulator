@@ -167,7 +167,7 @@ class SensorsPage():
                         if len(devices) > 0:
                             with ui.column():
                                 ui.label(
-                                    'Wähle das Gerät aus zu dem der Sensor hinzugefügt werden soll (Optional).')
+                                    'Wähle das Gerät aus zu dem dieser Sensor zugeordnet werden soll (optional).')
                                 device_select = ui.select(
                                     options=devices_options, with_input=True).classes('w-40')
                         else:
@@ -205,9 +205,14 @@ class SensorsPage():
 
     def check_general_step_input(self, stepper, name_input):
         if name_input.value == '':
-            ui.notify('Bitte gib einen Namen für den Sensor an.',
-                      type='warning')
+            ui.notify('Bitte gib einen Namen an.',
+                      type='negative')
             return
+        else:
+            name_in_use = Sensor.check_if_name_in_use(name_input.value)
+            if name_in_use:
+                ui.notify('Es existiert bereits ein Sensor mit diesem Namen.', type='negative')
+                return
 
         stepper.next()
 
