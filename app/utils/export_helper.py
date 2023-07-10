@@ -38,7 +38,9 @@ class ExportHelper:
             sensor_keys = data[device_key].keys()
             for sensor_key in sensor_keys:
                 records = data[device_key][sensor_key]
-                all_records.extend(records)
+                for record in records:
+                    record['timestamp'] = record['timestamp'].isoformat()
+                    all_records.append(record)
 
         # sort all_records by timestamp
         all_records.sort(key=lambda record: record["timestamp"])
