@@ -37,7 +37,7 @@ class Chart:
             self.chart = ui.chart({
                 "title": False,
                 "series": [
-                    {"name": "Motor", "data": data},
+                    {"name": sensor.name, "data": data},
                 ],
                 "yAxis": {
                     "title": {
