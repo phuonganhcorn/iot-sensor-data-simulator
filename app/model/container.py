@@ -95,7 +95,10 @@ class Container(ContainerModel):
     def message_callback(self, sensor, data):
         self.message_count += 1
 
-        timestamp = data["timestamp"].strftime("%H:%M:%S")
+        value = data["value"]
+        timestamp = data["timestamp"]
+        timestamp_formatted = timestamp.strftime("%H:%M:%S")
+
         unit = UNITS[int(data['unit'])]
         unit_abbrev = unit["unit_abbreviation"]
 
@@ -103,8 +106,8 @@ class Container(ContainerModel):
 
         for _ in range (2 if send_duplicate else 1):
             self.log.push(
-                f"{timestamp}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
-            self.live_view_dialog.append_value(sensor, data['value'])
+                f"{timestamp_formatted}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
+            self.live_view_dialog.append_data_point(sensor, timestamp, value)
 
     def stop(self):
         print("Stopping simulation")
