@@ -1,7 +1,7 @@
 from nicegui import ui
 from model.container import Container
 from model.sensor import Sensor
-
+import pyperclip
 
 class DeviceItem:
 
@@ -61,6 +61,12 @@ class DeviceItem:
                                 value=preselect_value, options=container_options, with_input=True).classes("min-w-[120px]")
                             ui.button("Speichern", on_click=self.change_container).props(
                                 "flat")
+            
+            with ui.row().classes("mt-4 p-4 w-full justify-between items-center bg-gray-100 !rounded-md"):
+                with ui.column().classes("w-[90%] gap-0"):
+                    ui.label("Primäre Verbindungszeichenfolge").classes("text-sm text-gray-500")
+                    ui.label(self.device.connection_string).classes("w-full text-md font-medium overflow-x-auto")
+                ui.button(icon="content_copy", on_click=lambda: self.copy_to_clipboard(self.device.connection_string)).classes("px-2").props("flat")
 
             ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
 
@@ -82,6 +88,10 @@ class DeviceItem:
                             options=sensor_options, multiple=True, value=preselected).props('use-chips').classes("w-[130px] max-w-[350px]")
                         ui.button("Speichern", on_click=self.change_sensors).props(
                             "flat")
+
+    def copy_to_clipboard(self, text):
+        pyperclip.copy(text)
+        ui.notify("In Zwischenablage kopiert.")
 
     def change_container(self):
         # Check if container is active
