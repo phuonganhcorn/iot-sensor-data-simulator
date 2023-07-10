@@ -110,57 +110,54 @@ class ContainersPage:
             ui.button(icon="close", on_click=dialog.close).props(
                 "flat").classes("absolute top-6 right-6 px-2 text-black z-10")
 
-            with ui.stepper().props('vertical') as stepper:
+            with ui.stepper().classes('w-full').props('vertical') as stepper:
                 with ui.step('Allgemein'):
                     with ui.column():
                         name_input = ui.input('Name*')
-                        description_input = ui.input(
-                            'Beschreibung (max. 255 Zeichen)').classes('w-full')
+                        description_textarea = ui.textarea(
+                            label='Beschreibung (max. 255 Zeichen)', validation={'Maximal 255 Zeichen erlaubt!': lambda value: len(value) < 256}).classes('w-full')
                         location_input = ui.input('Standort').classes('w-full')
                     with ui.stepper_navigation():
                         ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
                             'flat')
-                        ui.button('Weiter', on_click=lambda: self.check_container_name_input(
-                            stepper, name_input))
+                        ui.button('Weiter', on_click=lambda: self.check_container_general_input(
+                            stepper, name_input, description_textarea))
                 with ui.step('Geräte'):
                     devices = Device.get_all_unassigned()
+                        
+                    devices_options = {
+                        device.id: device.name for device in devices}
 
                     if len(devices) == 0:
                         ui.label(
-                            "Es sind keine freien Geräte verfügbar. Erstelle zuerst ein neues Gerät.")
-
-                        ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
-                            'flat')
+                            "Es sind keine freien Geräte verfügbar.")
                     else:
-                        devices_options = {
-                            device.id: device.name for device in devices}
-
                         ui.label(
-                            "Wähle die Geräte aus, die dem Container zugeordnet werden sollen. Mehrfachauswahl möglich. Später können keine weiteren Geräte hinzugefügt werden.")
-                        devices_input = ui.select(devices_options, multiple=True, label='Geräte auswählen').props(
-                            'use-chips').classes('w-64')
+                            "Wähle die Geräte aus, die dem Container zugeordnet werden sollen. Mehrfachauswahl möglich.")
+                    devices_input = ui.select(devices_options, multiple=True, label='Geräte auswählen').props(
+                        'use-chips').classes('w-64')
 
-                        with ui.stepper_navigation():
-                            ui.button('Zurück', on_click=stepper.previous).props(
-                                'flat')
-                            ui.button('Erstellen', on_click=lambda: self.complete_container_creation(
-                                dialog, name_input, description_input, location_input, devices_input))
+                    with ui.stepper_navigation():
+                        ui.button('Zurück', on_click=stepper.previous).props(
+                            'flat')
+                        ui.button('Erstellen', on_click=lambda: self.complete_container_creation(
+                            dialog, name_input, description_textarea, location_input, devices_input))
 
-    def check_container_name_input(self, stepper, name_input):
+    def check_container_general_input(self, stepper, name_input, description_textarea):
         if name_input.value == '':
-            ui.notify('Bitte gib einen Namen für den Container an.',
-                      type='warning')
+            ui.notify('Bitte gib einen Namen an.',
+                      type='negative')
+            return
+        
+        if len(description_textarea.value) > 255:
+            ui.notify('Die Beschreibung darf maximal 255 Zeichen lang sein.',
+                      type='negative')
             return
 
         stepper.next()
 
-    def complete_container_creation(self, dialog, name_input, description_input, location_input, devices_input):
-        if len(devices_input.value) == 0:
-            ui.notify('Bitte wähle mindestens ein Gerät aus.',
-                      type='warning')
-            return
-
-        self.create_container(name_input.value, description_input.value,
+    def complete_container_creation(self, dialog, name_input, description_textarea, location_input, devices_input):
+        self.create_container(name_input.value, description_textarea.value,
                               location_input.value, devices_input.value)
         dialog.close()
 
