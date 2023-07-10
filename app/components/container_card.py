@@ -4,9 +4,7 @@ from components.live_view_dialog import LiveViewDialog
 from components.logs_dialog import LogsDialog
 from components.sensor_selection import SensorSelection
 from components.chart import Chart
-from tkinter import filedialog
-import json
-import csv
+from utils.export_helper import ExportHelper
 
 
 class ContainerCard():
@@ -219,12 +217,15 @@ class ContainerCard():
         self.show_export_preview(container_data)
         self.export_button.set_enabled(True)
 
+    def save_bulk_to_file(self):
+        ExportHelper().save_to_file(self.generated_container_data)
+        ui.notify(f"Daten erfolgreich exportiert", type="positive")
+        self.dialog.close()
+
     def show_export_preview(self, container_data):
         selected_sensor = self.sensor_selection.get_sensor()
         time_series_data = container_data[selected_sensor.device.name][selected_sensor.name]
         self.chart.show(time_series_data=time_series_data)
-
-        self.convert_data_to_list(self.generated_container_data)
 
     def update_export_preview(self, sensor):
         if self.generated_container_data is None:
@@ -235,37 +236,6 @@ class ContainerCard():
         
         time_series_data = self.generated_container_data[sensor.device.name][sensor.name]
         self.chart.update(sensor, time_series_data)
-
-    def save_bulk_to_file(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json"), ("CSV", "*.csv")])
-
-        if file_path.endswith(".json"):
-            with open(file_path, "w") as json_file:
-                json.dump(self.container_data, json_file, indent=4)
-            ui.notify(f"Daten erfolgreich exportiert", type="positive")
-        elif file_path.endswith(".csv"):
-            all_records = self.convert_data_to_list(self.generated_container_data)
-            fieldnames = all_records[0].keys()
-
-            with open(file_path, 'w', newline='') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerows(all_records)
-
-        self.dialog.close()
-
-    def convert_data_to_list(self, data):
-        all_records = []
-        device_keys = data.keys()
-        for device_key in device_keys:
-            sensor_keys = self.generated_container_data[device_key].keys()
-            for sensor_key in sensor_keys:
-                records = self.generated_container_data[device_key][sensor_key]
-                all_records.extend(records)
-
-        # sort all_records by timestamp
-        all_records.sort(key=lambda record: record["timestamp"])
-        return all_records
 
     def add_device_handler(self):
         if self.container.is_active:
