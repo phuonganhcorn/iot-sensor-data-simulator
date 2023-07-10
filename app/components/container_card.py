@@ -6,6 +6,7 @@ from components.sensor_selection import SensorSelection
 from components.chart import Chart
 from tkinter import filedialog
 import json
+import csv
 
 
 class ContainerCard():
@@ -222,7 +223,9 @@ class ContainerCard():
         selected_sensor = self.sensor_selection.get_sensor()
         time_series_data = container_data[selected_sensor.device.name][selected_sensor.name]
         self.chart.show(time_series_data=time_series_data)
-        
+
+        self.convert_data_to_list(self.generated_container_data)
+
     def update_export_preview(self, sensor):
         if self.generated_container_data is None:
             return
@@ -234,14 +237,35 @@ class ContainerCard():
         self.chart.update(sensor, time_series_data)
 
     def save_bulk_to_file(self):
-        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json")])
+        file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON", "*.json"), ("CSV", "*.csv")])
 
         if file_path.endswith(".json"):
             with open(file_path, "w") as json_file:
                 json.dump(self.container_data, json_file, indent=4)
             ui.notify(f"Daten erfolgreich exportiert", type="positive")
+        elif file_path.endswith(".csv"):
+            all_records = self.convert_data_to_list(self.generated_container_data)
+            fieldnames = all_records[0].keys()
+
+            with open(file_path, 'w', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(all_records)
 
         self.dialog.close()
+
+    def convert_data_to_list(self, data):
+        all_records = []
+        device_keys = data.keys()
+        for device_key in device_keys:
+            sensor_keys = self.generated_container_data[device_key].keys()
+            for sensor_key in sensor_keys:
+                records = self.generated_container_data[device_key][sensor_key]
+                all_records.extend(records)
+
+        # sort all_records by timestamp
+        all_records.sort(key=lambda record: record["timestamp"])
+        return all_records
 
     def add_device_handler(self):
         if self.container.is_active:
