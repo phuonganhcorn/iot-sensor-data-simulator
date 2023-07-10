@@ -93,7 +93,7 @@ class SensorItem:
                                 ui.label(f"{self.sensor.change_rate}").classes("text-md font-medium")
                             with ui.column().classes("gap-0"):
                                 ui.label("Interval [s]").classes("text-sm text-gray-500")
-                                ui.label(f"{self.sensor.change_rate}").classes("text-md font-medium")
+                                ui.label(f"{self.sensor.interval}").classes("text-md font-medium")
 
                     if self.error_definition:
                         ui.label("Fehlersimulation").classes("text-[16px] font-medium mt-8 mb-4")
