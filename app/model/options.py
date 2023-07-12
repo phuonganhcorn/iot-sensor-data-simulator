@@ -9,7 +9,10 @@ class Options(OptionsModel):
     
     @staticmethod
     def get_value(name):
-        return Options._get_option(name).value
+        option = Options._get_option(name)
+        if option is not None:
+            return option.value
+        return None
     
     @staticmethod
     def get_boolean(name):
