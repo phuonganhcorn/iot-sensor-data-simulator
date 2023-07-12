@@ -18,7 +18,7 @@ class Navigation():
                 ui.link('Geräte', '/geraete').classes('text-white !no-underline')
                 ui.link('Sensoren', '/sensoren').classes('text-white !no-underline')
             with ui.row().classes('items-center divide-x divide-white/50'):
-                ui.label(f'Host: {self.host_name}').classes('text-white')
+                self.host_name_label = ui.label(f'Host: {self.host_name}').classes('text-white')
                 demo_switch = ui.switch('Demo-Modus', on_change=self.switch_handler).classes('text-white')
                 demo_switch.value = Option.get_boolean('demo_mode')
                 ui.query('.q-toggle__inner--falsy').classes('!text-white/50')
@@ -43,6 +43,7 @@ class Navigation():
             return
         
         self.host_name = host_name_input.value
+        self.host_name_label.set_text(f'Host: {self.host_name}')
         Option.set_option('host_name', host_name_input.value)
         container.set_visibility(False)
         ui.notify('Hostname erfolgreich gespeichert.', type='positive')
