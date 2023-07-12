@@ -22,7 +22,7 @@ class Option(OptionModel):
         return value == "1"
 
     @staticmethod
-    def set_option(name, value):
+    def set_value(name, value):
         option = Option._get_option(name)
         if option is None:
             option = Option(name=name, value=value)

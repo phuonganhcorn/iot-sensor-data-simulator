@@ -12,6 +12,8 @@ class IoTHubHelper:
 
     def setup_registry_manager(self):
         connection_string = os.getenv("IOTHUB_CONNECTION_STRING")
+        if connection_string is None:
+            raise Exception("No connection string set in .env file!")
         self.registry_manager = IoTHubRegistryManager(connection_string) # throws error: Error in sys.excepthook:
 
     def get_devices(self):
