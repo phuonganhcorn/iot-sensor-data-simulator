@@ -8,10 +8,15 @@ import datetime
 class Container(ContainerModel):
 
     message_count = None
+    device_clients = {}
 
     @staticmethod
     def get_all():
         return Container.session.query(Container).all()
+    
+    @staticmethod
+    def get_by_id(id):
+        return Container.session.query(Container).filter(Container.id == id).first()
 
     def get_device_count(self):
         return len(self.devices)
@@ -27,6 +32,10 @@ class Container(ContainerModel):
         Container.session.commit()
         container_db.create_relationship_to_devices(container_db, device_ids)
         return container_db
+    
+    @staticmethod
+    def check_if_name_in_use(name):
+        return Container.session.query(Container).filter(Container.name.ilike(name)).first() is not None
 
     def create_relationship_to_devices(self, container, device_ids):
         devices = Device.get_all_by_ids(device_ids)
@@ -44,6 +53,9 @@ class Container(ContainerModel):
 
         iot_hub_helper = kwargs.get("iot_hub_helper")
 
+        # separate list because Container.session.commit() sets some device.client to None for some inexplicable reason
+        device_clients = []
+
         # Start Container
 
         # Connect all device clients
@@ -51,6 +63,7 @@ class Container(ContainerModel):
             device_client = iot_hub_helper.init_device_client(
                 device.connection_string)
             device.client = device_client
+            device_clients.append(device_client)
 
         # Update container status
         self.is_active = True
@@ -72,8 +85,10 @@ class Container(ContainerModel):
         # Stop Container
 
         # Disconnect all device clients
+        for client in device_clients:
+            client.disconnect()
+        device_clients = None
         for device in self.devices:
-            device.client.disconnect()
             device.client = None
 
         # Reset container status
@@ -81,13 +96,21 @@ class Container(ContainerModel):
         self.start_time = None
         Container.session.commit()
 
-    def message_callback(self, data):
+    def message_callback(self, sensor, data):
         self.message_count += 1
-        
-        timestamp = data["timestamp"].strftime("%H:%M:%S")
+
+        value = data["value"]
+        timestamp = data["timestamp"]
+        timestamp_formatted = timestamp.strftime("%H:%M:%S")
+
         unit = UNITS[int(data['unit'])]
         unit_abbrev = unit["unit_abbreviation"]
-        self.log.push(f"{timestamp}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
+
+        send_duplicate = data.get("sendDuplicate", False)
+
+        for _ in range(2 if send_duplicate else 1):
+            self.log.push(f"{timestamp_formatted}: {data['deviceId']} - {data['sensorName']} - {data['value']} {unit_abbrev}")
+            self.live_view_dialog.append_data_point(sensor, timestamp, value)
 
     def stop(self):
         print("Stopping simulation")

@@ -63,10 +63,11 @@ class SensorModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
     base_value = Column(Float)
-    unit = Column(String(20))
+    unit = Column(Integer)
     variation_range = Column(Float)
     change_rate = Column(Float)
     interval = Column(Float)
+    error_definition = Column(String(500))
     device_id = Column(Integer, ForeignKey(DeviceModel.id))
 
     device = relationship(DeviceModel, back_populates='sensors')

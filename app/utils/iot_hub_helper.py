@@ -1,14 +1,11 @@
-import time
-import json
 from azure.iot.device import IoTHubDeviceClient, Message
 from azure.iot.hub import IoTHubRegistryManager
+from model.options import Options
 import os
+import json
 
 
 class IoTHubHelper:
-    # def __init__(self, connection_string):
-    #     self.= None
-    #     self.init_device_client()
 
     def __init__(self):
         self.setup_registry_manager()
@@ -27,7 +24,7 @@ class IoTHubHelper:
         
         try:
             device = self.registry_manager.create_device_with_sas(device_id, primary_key, secondary_key, status)
-            return Response(True, "Device {} erfolgreich erstellt".format(device_id), device)
+            return Response(True, "Gerät '{}' erfolgreich erstellt".format(device_id), device)
         except Exception as e:
             return Response(False, "Fehler beim Erstellen: {}".format(e))
 
@@ -37,7 +34,7 @@ class IoTHubHelper:
         except Exception as e:
             return Response(False, "Fehler beim Löschen: {}".format(e))
         
-        return Response(True, "Gerät {} erfolgreich gelöscht".format(device_id))
+        return Response(True, f"Gerät '{device_id}' erfolgreich gelöscht")
 
 
     def init_device_client(self, connection_string):
@@ -46,16 +43,34 @@ class IoTHubHelper:
         return device_client
     
     def send_message(self, device_client, data):
+        is_demo_mode = Options.get_boolean('demo_mode')
+        if is_demo_mode:
+            return Response(False, "Demo-Modus aktiviert. Nachrichten werden nicht gesendet.")
+
+        # Prevent manipulation of original data used in other places
+        data_copy = data.copy()
+
+        data_copy["timestamp"] = data_copy["timestamp"].isoformat()
+
+        send_duplicate = data_copy.get("sendDuplicate", False)
+        data_copy.pop("sendDuplicate", None)
+
         try:
-            json_data = json.dumps(data)
+            json_data = json.dumps(data_copy)
             message = Message(json_data)
-            print("Sending message: {}".format(message))
-            device_client.send_message(message)
-            return Response(True, "Alle Daten erfolgreich gesendet")
+            for _ in range(1 if not send_duplicate else 2):
+                print("Sending message: {}".format(message))
+                device_client.send_message(message)
         except Exception as e:
             return Response(False, "Fehler beim Senden: {}".format(e))
+        else:
+            return Response(True, "Nachricht erfolgreich gesendet")
 
     def send_messages(self, device_client, data):
+        is_demo_mode = Options.get_boolean('demo_mode')
+        if is_demo_mode:
+            return Response(False, "Demo-Modus aktiviert. Nachrichten werden nicht gesendet.")
+
         try:
             print("Start sending telemetry messages")
             for msg in data:
@@ -72,7 +87,6 @@ class IoTHubHelper:
             return Response(True, "Alle Daten erfolgreich gesendet")
             
         except Exception as e:
-            print(e)
             return Response(False, "Fehler beim Senden: {}".format(e))
 
 class Response:
