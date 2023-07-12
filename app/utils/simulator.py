@@ -60,7 +60,7 @@ class Simulator:
             timestamp = datetime.datetime.now().isoformat(
             ) if iso_format else datetime.datetime.now()
 
-        return {"timestamp": timestamp, "sensorId": self.sensor.id, "sensorName": self.sensor.name, "value": value, "unit": self.sensor.unit, "deviceId": self.sensor.device_id, "sendDuplicate": send_duplicate}
+        return {"timestamp": timestamp, "sensorId": self.sensor.id, "sensorName": self.sensor.name, "value": value, "unit": self.sensor.unit, "deviceId": self.sensor.device_id, "deviceName": self.sensor.device.name, "sendDuplicate": send_duplicate}
 
     def _handle_error_definition(self, value):
         error_type = self.error_definition["type"]
