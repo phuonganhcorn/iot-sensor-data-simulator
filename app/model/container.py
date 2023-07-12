@@ -30,17 +30,17 @@ class Container(ContainerModel):
                                  location=location, is_active=False, start_time=None)
         Container.session.add(container_db)
         Container.session.commit()
-        container_db.create_relationship_to_devices(container_db, device_ids)
+        container_db.create_relationship_to_devices(device_ids)
         return container_db
     
     @staticmethod
     def check_if_name_in_use(name):
         return Container.session.query(Container).filter(Container.name.ilike(name)).first() is not None
 
-    def create_relationship_to_devices(self, container, device_ids):
+    def create_relationship_to_devices(self, device_ids):
         devices = Device.get_all_by_ids(device_ids)
         for device in devices:
-            device.container_id = container.id
+            device.container_id = self.id
 
         Container.session.commit()
 
@@ -75,7 +75,7 @@ class Container(ContainerModel):
         self.message_count = 0
 
         for device in self.devices:
-            device.start_simulation(iot_hub_helper, self.message_callback)
+            device.start_simulation(iot_hub_helper, self._message_callback)
 
         # Run simulation for all sensors
 
@@ -96,7 +96,7 @@ class Container(ContainerModel):
         self.start_time = None
         Container.session.commit()
 
-    def message_callback(self, sensor, data):
+    def _message_callback(self, sensor, data):
         self.message_count += 1
 
         value = data["value"]
@@ -113,17 +113,15 @@ class Container(ContainerModel):
             self.live_view_dialog.append_data_point(sensor, timestamp, value)
 
     def stop(self):
-        print("Stopping simulation")
-        for sensor in self.get_all_sensors():
-            sensor.stop()
+        for sensor in self.get_sensors():
+            sensor.stop_simulation()
 
         self.thread.stop()
         self.thread.join()
-        print("Simulation stopped")
 
         self.message_count = None
 
-    def get_all_sensors(self):
+    def get_sensors(self):
         sensors = []
         for device in self.devices:
             sensors.extend(device.sensors)

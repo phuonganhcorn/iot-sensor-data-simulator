@@ -36,7 +36,7 @@ class Sensor(SensorModel):
     def check_if_name_in_use(name):
         return Sensor.session.query(Sensor).filter(Sensor.name.ilike(name)).first() is not None
     
-    def callback(self, device_callback):
+    def _callback(self, device_callback):
         # Überprüfen, ob die Schleife unterbrochen werden soll
         if self.running:
             data = self.simulator.generate_data()
@@ -44,7 +44,7 @@ class Sensor(SensorModel):
 
             # Wiederholung des Callbacks nach einer bestimmten Zeit
             timer = threading.Timer(
-                interval=self.interval, function=self.callback, args=[device_callback])
+                interval=self.interval, function=self._callback, args=[device_callback])
             timer.start()
 
     def start_bulk_simulation(self, amount):
@@ -56,10 +56,10 @@ class Sensor(SensorModel):
         self.simulator = Simulator(sensor=self)
         self.running = True
 
-        timer = threading.Timer(interval=self.interval, function=self.callback, args=[callback])
+        timer = threading.Timer(interval=self.interval, function=self._callback, args=[callback])
         timer.start()
 
-    def stop(self):
+    def stop_simulation(self):
         self.running = False
 
     def delete(self):

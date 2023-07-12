@@ -168,7 +168,7 @@ class DevicesPage:
 
         ui.notify(response.message, type='positive')
 
-        new_device = Device.store(response.object, sensor_ids=sensor_ids)
+        new_device = Device.add(response.object, sensor_ids=sensor_ids)
         self.devices.append(new_device)
 
         self.add_device_to_list(device=new_device)

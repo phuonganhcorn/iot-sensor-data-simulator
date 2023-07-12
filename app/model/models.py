@@ -19,6 +19,7 @@ class OptionsModel(Base):
 
 class ContainerModel(Base):
     __tablename__ = 'container'
+    session = None
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255))
@@ -35,7 +36,6 @@ class ContainerModel(Base):
 
 class DeviceModel(Base):
     __tablename__ = 'device'
-
     session = None
     client = None
 
@@ -56,7 +56,6 @@ class DeviceModel(Base):
 
 class SensorModel(Base):
     __tablename__ = 'sensor'
-
     session = None
     thread = None
 

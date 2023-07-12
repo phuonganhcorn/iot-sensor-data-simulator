@@ -10,10 +10,6 @@ class Device(DeviceModel):
         return Device.session.query(Device).all()
 
     @staticmethod
-    def get_all_unassigned():
-        return Device.session.query(Device).filter_by(container_id=None).all()
-
-    @staticmethod
     def get_all_by_ids(ids):
         return Device.session.query(Device).filter(Device.id.in_(ids)).all()
     
@@ -25,7 +21,7 @@ class Device(DeviceModel):
         return Device.session.query(Device).filter(Device.container_id == None).all()
 
     @staticmethod
-    def store(device, sensor_ids):
+    def add(device, sensor_ids):
         primary_key = device.authentication.symmetric_key.primary_key
         host_name = Options.get_value('host_name')
         connection_string = f"HostName={host_name}.azure-devices.net;DeviceId={device.device_id};SharedAccessKey={primary_key}"
