@@ -1,6 +1,6 @@
 from azure.iot.device import IoTHubDeviceClient, Message
 from azure.iot.hub import IoTHubRegistryManager
-from model.options import Options
+from model.option import Option
 import os
 import json
 
@@ -43,7 +43,7 @@ class IoTHubHelper:
         return device_client
     
     def send_message(self, device_client, data):
-        is_demo_mode = Options.get_boolean('demo_mode')
+        is_demo_mode = Option.get_boolean('demo_mode')
         if is_demo_mode:
             return Response(False, "Demo-Modus aktiviert. Nachrichten werden nicht gesendet.")
 
@@ -67,7 +67,7 @@ class IoTHubHelper:
             return Response(True, "Nachricht erfolgreich gesendet")
 
     def send_messages(self, device_client, data):
-        is_demo_mode = Options.get_boolean('demo_mode')
+        is_demo_mode = Option.get_boolean('demo_mode')
         if is_demo_mode:
             return Response(False, "Demo-Modus aktiviert. Nachrichten werden nicht gesendet.")
 

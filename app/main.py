@@ -7,7 +7,7 @@ from pages.devices_page import DevicesPage
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from model.models import Base
-from model.options import Options
+from model.option import Option
 from model.container import Container
 from model.device import Device
 from model.sensor import Sensor
@@ -19,7 +19,7 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-Options.session = session
+Option.session = session
 Container.session = session
 Device.session = session
 Sensor.session = session

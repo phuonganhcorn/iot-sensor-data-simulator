@@ -5,8 +5,8 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 
-class OptionsModel(Base):
-    __tablename__ = 'options'
+class OptionModel(Base):
+    __tablename__ = 'option'
     session = None
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -14,7 +14,7 @@ class OptionsModel(Base):
     value = Column(String(255))
 
     def __repr__(self):
-        return f"<Options(id={self.id}, name={self.name}, value={self.value})>"
+        return f"<Option(id={self.id}, name={self.name}, value={self.value})>"
 
 
 class ContainerModel(Base):

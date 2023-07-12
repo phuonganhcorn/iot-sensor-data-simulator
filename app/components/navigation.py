@@ -1,5 +1,5 @@
 from nicegui import ui
-from model.options import Options
+from model.option import Option
 
 
 class Navigation():
@@ -20,11 +20,11 @@ class Navigation():
             with ui.row().classes('items-center divide-x divide-white/50'):
                 ui.label(f'Host: {self.host_name}').classes('text-white')
                 demo_switch = ui.switch('Demo-Modus', on_change=self.switch_handler).classes('text-white')
-                demo_switch.value = Options.get_boolean('demo_mode')
+                demo_switch.value = Option.get_boolean('demo_mode')
                 ui.query('.q-toggle__inner--falsy').classes('!text-white/50')
 
     def query_connection_string(self):
-        host_name = Options.get_value('host_name')
+        host_name = Option.get_value('host_name')
         
         if host_name is None:
             with ui.row().classes('fixed inset-0 flex justify-center items-center bg-black/50 z-[100]') as container:
@@ -43,12 +43,12 @@ class Navigation():
             return
         
         self.host_name = host_name_input.value
-        Options.set_option('host_name', host_name_input.value)
+        Option.set_option('host_name', host_name_input.value)
         container.set_visibility(False)
         ui.notify('Hostname erfolgreich gespeichert.', type='positive')
 
     def switch_handler(self, switch):
-        Options.set_option('demo_mode', switch.value)
+        Option.set_option('demo_mode', switch.value)
         
         if switch.value:
             ui.query('.q-toggle__inner--truthy').classes('!text-white')
