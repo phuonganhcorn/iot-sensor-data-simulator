@@ -49,6 +49,8 @@ class Chart:
                     "labels": {
                         "format": "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
                     },
+                    "min": sensor.base_value - sensor.variation_range - sensor.change_rate,
+                    "max": sensor.base_value + sensor.variation_range + sensor.change_rate,
                     "plotBands": [ {
                             "color": 'rgba(0, 0, 255, 0.05)',
                             "from": sensor.base_value - sensor.variation_range,
@@ -88,6 +90,16 @@ class Chart:
         # Update dataset name
         self.chart.options["series"][0]["name"] = sensor.name
         self.chart.update()
+
+    def upate_visualization(self, sensor):
+        self.chart.options["yAxis"]["min"] = sensor.base_value - sensor.variation_range - sensor.change_rate
+        self.chart.options["yAxis"]["max"] = sensor.base_value + sensor.variation_range + sensor.change_rate
+        self.chart.options["yAxis"]["plotBands"] = [ {
+                            "color": 'rgba(0, 0, 255, 0.05)',
+                            "from": sensor.base_value - sensor.variation_range,
+                            "to": sensor.base_value + sensor.variation_range,
+                        }
+                    ]
 
     def append_data_point(self, sensor, timestamp, value):
         # Append data point
