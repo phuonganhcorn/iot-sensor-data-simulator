@@ -50,8 +50,8 @@ class Chart:
                     "labels": {
                         "format": "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
                     },
-                    "min": min,
-                    "max": max,
+                    # "min": min,
+                    # "max": max,
                     "plotBands": [ {
                             "color": 'rgba(0, 0, 255, 0.05)',
                             "from": sensor.base_value - sensor.variation_range,
@@ -96,8 +96,8 @@ class Chart:
         if self.chart is None:
             return
         
-        self.chart.options["yAxis"]["min"] = sensor.base_value - sensor.variation_range - sensor.change_rate
-        self.chart.options["yAxis"]["max"] = sensor.base_value + sensor.variation_range + sensor.change_rate
+        # self.chart.options["yAxis"]["min"] = sensor.base_value - sensor.variation_range - sensor.change_rate
+        # self.chart.options["yAxis"]["max"] = sensor.base_value + sensor.variation_range + sensor.change_rate
         self.chart.options["yAxis"]["plotBands"] = [ {
                             "color": 'rgba(0, 0, 255, 0.05)',
                             "from": sensor.base_value - sensor.variation_range,

@@ -45,6 +45,11 @@ class Container(ContainerModel):
         Container.session.commit()
 
     def start(self, iot_hub_helper):
+        # Update container status
+        self.is_active = True
+        self.start_time = datetime.datetime.now()
+        Container.session.commit()
+
         self.thread = ContainerThread(target=self._thread_function, kwargs={
                                       "iot_hub_helper": iot_hub_helper})
         self.thread.start()
@@ -64,11 +69,6 @@ class Container(ContainerModel):
                 device.connection_string)
             device.client = device_client
             device_clients.append(device_client)
-
-        # Update container status
-        self.is_active = True
-        self.start_time = datetime.datetime.now()
-        Container.session.commit()
 
         # Init simulation for all devices
 
