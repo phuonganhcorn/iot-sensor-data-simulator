@@ -37,7 +37,10 @@ class Chart:
             self.chart = ui.chart({
                 "title": False,
                 "series": [
-                    {"name": sensor.name, "data": data},
+                    {
+                        "name": sensor.name,
+                        "data": data,
+                    },
                 ],
                 "yAxis": {
                     "title": {
@@ -67,6 +70,10 @@ class Chart:
         self.update_legend(sensor)
 
     def update_legend(self, sensor):
+        if sensor is None:
+            self.empty()
+            return
+
         # Update y axis
         self.chart.options["yAxis"]["title"]["text"] = UNITS[sensor.unit]["name"]
         self.chart.options["yAxis"]["labels"]["format"] = "{value} " + \

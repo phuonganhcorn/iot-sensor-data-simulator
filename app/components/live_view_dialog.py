@@ -39,8 +39,7 @@ class LiveViewDialog():
         self.dialog.open()
 
     def sensor_select_change_handler(self, sensor):
-        self.chart.empty()
-        self.update_chart_legend(sensor)
+        self.chart.update_legend(sensor=sensor)
 
     def append_data_point(self, sensor, timestamp, value):
         # Return if the dialog is not open
