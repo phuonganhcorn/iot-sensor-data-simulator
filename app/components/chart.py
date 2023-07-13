@@ -1,5 +1,6 @@
 from nicegui import ui
 from constants.units import UNITS
+from constants.sensor_errors import *
 from model.sensor import Sensor
 
 
@@ -49,8 +50,8 @@ class Chart:
                     "labels": {
                         "format": "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
                     },
-                    "min": sensor.base_value - sensor.variation_range - sensor.change_rate,
-                    "max": sensor.base_value + sensor.variation_range + sensor.change_rate,
+                    "min": min,
+                    "max": max,
                     "plotBands": [ {
                             "color": 'rgba(0, 0, 255, 0.05)',
                             "from": sensor.base_value - sensor.variation_range,
@@ -78,7 +79,7 @@ class Chart:
         self.update_legend(sensor)
 
     def update_legend(self, sensor):
-        if sensor is None:
+        if self.chart is None or sensor is None:
             self.empty()
             return
 
@@ -91,7 +92,10 @@ class Chart:
         self.chart.options["series"][0]["name"] = sensor.name
         self.chart.update()
 
-    def upate_visualization(self, sensor):
+    def update_visualization(self, sensor):
+        if self.chart is None:
+            return
+        
         self.chart.options["yAxis"]["min"] = sensor.base_value - sensor.variation_range - sensor.change_rate
         self.chart.options["yAxis"]["max"] = sensor.base_value + sensor.variation_range + sensor.change_rate
         self.chart.options["yAxis"]["plotBands"] = [ {
@@ -117,6 +121,9 @@ class Chart:
         self.chart.update()
 
     def empty(self):
+        if self.chart is None:
+            return
+        
         self.chart.options["series"][0]["name"] = "Leer"
         self.chart.options["series"][0]["data"] = []
         self.chart.update()

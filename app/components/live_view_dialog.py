@@ -29,17 +29,22 @@ class LiveViewDialog():
         self.title_label.set_text(f"Live View: {container.name}")
         self.selects_row.clear()
 
-        text = "Warten auf Sensordaten..." if container.is_active else "Container ist nicht aktiv"
-        self.chart.show_note(text)
-
         with self.selects_row:
             self.sensor_selection = SensorSelection(
                 container=container, sensor_select_callback=self.sensor_select_change_handler)
+            
+        self.chart.empty()
+        text = "Warten auf Sensordaten..." if container.is_active else "Container ist nicht aktiv"
+        self.chart.show_note(text)
+        sensor = self.sensor_selection.get_sensor()
+        self.chart.update_legend(sensor=sensor)
+        self.chart.update_visualization(sensor=sensor)
 
         self.dialog.open()
 
     def sensor_select_change_handler(self, sensor):
         self.chart.update_legend(sensor=sensor)
+        self.chart.update_visualization(sensor=sensor)
 
     def append_data_point(self, sensor, timestamp, value):
         # Return if the dialog is not open
