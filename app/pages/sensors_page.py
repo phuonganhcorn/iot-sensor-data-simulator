@@ -146,7 +146,7 @@ class SensorsPage():
 
                         error_types = {
                             NO_ERROR: 'Kein Fehler',
-                            ANOMALY: 'Einmalige Anomalien',
+                            ANOMALY: 'Anomalien',
                             MCAR: 'Zufällig fehlend (MCAR)',
                             DUPLICATE_DATA: 'Doppelte Daten',
                             DRIFT: 'Drift',

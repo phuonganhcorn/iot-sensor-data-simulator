@@ -70,9 +70,9 @@ class Simulator:
         elif error_type == MCAR:
             return self._handle_mcar_error(value)
         elif error_type == DUPLICATE_DATA:
-            return self.handle_duplicate_data_error(value)
+            return self._handle_duplicate_data_error(value)
         elif error_type == DRIFT:
-            return self.handle_drift_error(value)
+            return self._handle_drift_error(value)
 
         return {"value": value}
 
@@ -92,13 +92,13 @@ class Simulator:
             return {"value": None}
         return {"value": value}
 
-    def handle_duplicate_data_error(self, value):
+    def _handle_duplicate_data_error(self, value):
         if self.iteration - self.last_duplicate > 2 and random.random() < self.error_definition[PROBABILITY]:
             self.last_duplicate = self.iteration
             return {"value": value, "duplicate": True}
         return {"value": value}
 
-    def handle_drift_error(self, value):
+    def _handle_drift_error(self, value):
         after_n_iterations = self.error_definition[AFTER_N_ITERATIONS]
         if self.drifting or after_n_iterations > self.iteration:
             self.drifting = True
