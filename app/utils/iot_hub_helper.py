@@ -16,9 +16,6 @@ class IoTHubHelper:
             raise Exception("No connection string set in .env file!")
         self.registry_manager = IoTHubRegistryManager(connection_string) # throws error: Error in sys.excepthook:
 
-    def get_devices(self):
-        return self.registry_manager.get_devices()
-
     def create_device(self, device_id):
         primary_key = os.getenv("IOTHUB_PRIMARY_KEY")
         secondary_key = os.getenv("IOTHUB_SECONDARY_KEY")
@@ -45,21 +42,29 @@ class IoTHubHelper:
         return device_client
     
     def send_message(self, device_client, data):
+        '''Sends a message to the IoT Hub.'''
+
+        # Prevent sending messages in demo mode
         is_demo_mode = Option.get_boolean('demo_mode')
         if is_demo_mode:
             return Response(False, "Demo-Modus aktiviert. Nachrichten werden nicht gesendet.")
 
         # Prevent manipulation of original data used in other places
         data_copy = data.copy()
-
+        
+        # Convert datetime to ISO format
         data_copy["timestamp"] = data_copy["timestamp"].isoformat()
 
+        # Remove sendDuplicate flag
         send_duplicate = data_copy.get("sendDuplicate", False)
         data_copy.pop("sendDuplicate", None)
 
+        # Send message
         try:
+            # Convert the dictionary to JSON string
             json_data = json.dumps(data_copy)
             message = Message(json_data)
+            
             for _ in range(1 if not send_duplicate else 2):
                 print("Sending message: {}".format(message))
                 device_client.send_message(message)
@@ -68,6 +73,7 @@ class IoTHubHelper:
         else:
             return Response(True, "Nachricht erfolgreich gesendet")
 
+    # TODO: Remove this method?
     def send_messages(self, device_client, data):
         is_demo_mode = Option.get_boolean('demo_mode')
         if is_demo_mode:

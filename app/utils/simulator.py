@@ -19,17 +19,23 @@ class Simulator:
             sensor.error_definition) if sensor.error_definition else None
 
     def generate_bulk_data(self, amount):
+        '''Generates a list of data records.'''
+
+        # Define the start time and interval
         records = []
         start_time = datetime.datetime.now()
         interval = self.sensor.interval
 
+        # Generate the data
         for i in range(amount):
             timestamp = (start_time + datetime.timedelta(seconds=i * interval))
             record = self.generate_data(timestamp=timestamp)
+            # Handle duplicate data error
             send_duplicate = record["sendDuplicate"]
             del record["sendDuplicate"]
             records.append(record)
 
+            # Append duplicate data if necessary
             if send_duplicate:
                 records.append(record)
 

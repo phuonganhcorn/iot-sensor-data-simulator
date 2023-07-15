@@ -26,18 +26,18 @@ class ContainersPage:
         ui.label("Container").classes('text-2xl font-bold')
 
     def setup_menu_bar(self):
-        with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
+        with ui.row().classes('p-4 w-full flex items-center justify-between bg-gray-200 rounded-lg shadow-md'):
             ui.button('Neuen Container erstellen',
                       on_click=lambda: self.open_create_container_dialog()).classes('')
 
             with ui.row():
-                with ui.row().classes('ml-4 gap-1'):
+                with ui.row().classes('gap-1'):
                     ui.label('Gesamt:').classes('text-sm font-medium')
                     ui.label().classes('text-sm').bind_text(self, 'containers_count')
-                with ui.row().classes('ml-4 gap-1'):
+                with ui.row().classes('gap-1'):
                     ui.label('Aktiv:').classes('text-sm font-medium')
                     ui.label().classes('text-sm').bind_text(self, 'active_containers_count')
-                with ui.row().classes('ml-4 gap-1'):
+                with ui.row().classes('gap-1'):
                     ui.label('Inaktiv:').classes('text-sm font-medium')
                     ui.label().classes('text-sm').bind_text(self, 'inactive_containers_count')
 

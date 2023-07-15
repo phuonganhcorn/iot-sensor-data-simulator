@@ -9,7 +9,6 @@ class DevicesPage:
 
     def __init__(self, iot_hub_helper):
         self.iot_hub_helper = iot_hub_helper
-        self.iot_hub_devices = self.iot_hub_helper.get_devices()
         self.devices = Device.get_all()
         self.list_items = []
         self.update_stats()
