@@ -28,8 +28,10 @@ class Simulator:
 
         # Generate the data
         for i in range(amount):
+            # Calculate the timestamp
             timestamp = (start_time + datetime.timedelta(seconds=i * interval))
             record = self.generate_data(timestamp=timestamp)
+            
             # Handle duplicate data error
             send_duplicate = record["sendDuplicate"]
             del record["sendDuplicate"]
