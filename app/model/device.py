@@ -51,15 +51,25 @@ class Device(DeviceModel):
             sensor.device_id = None
         Sensor.session.commit()
 
-    def start_simulation(self, iot_hub_helper, callback):
-        self.iot_hub_helper = iot_hub_helper
+    def start_simulation(self, interface, callback, **kwargs):
+        self.interface = interface
+
+        if interface == "iothub":
+            self.iot_hub_helper = kwargs.get("iot_hub_helper")
+        elif interface == "mqtt":
+            self.mqtt_helper = kwargs.get("mqtt_helper")
+
         self.container_callback = callback
 
         for sensor in self.sensors:
             sensor.start_simulation(callback=self.send_simulator_data)
 
     def send_simulator_data(self, sensor, data):
-        self.iot_hub_helper.send_message(self.client, data)
+        if self.interface == "iothub" and self.iot_hub_helper is not None:
+            self.iot_hub_helper.send_message(self.client, data)
+        elif self.interface == "mqtt" and self.mqtt_helper is not None:
+            self.mqtt_helper.publish(topic=self.container.name, data=data)
+        
         self.container_callback(sensor, data)
 
     def delete(self):

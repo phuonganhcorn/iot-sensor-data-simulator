@@ -1,6 +1,7 @@
 from azure.iot.device import IoTHubDeviceClient, Message
 from azure.iot.hub import IoTHubRegistryManager
 from model.option import Option
+from utils.response import Response
 import os
 import json
 
@@ -96,9 +97,3 @@ class IoTHubHelper:
             
         except Exception as e:
             return Response(False, "Fehler beim Senden: {}".format(e))
-
-class Response:
-    def __init__(self, success, message="", object=None):
-        self.success = success
-        self.message = message
-        self.object = object
