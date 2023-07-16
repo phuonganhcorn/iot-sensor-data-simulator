@@ -1,7 +1,9 @@
 from model.models import ContainerModel
 from model.device import Device
+from utils.mqtt_helper import MQTTHelper
 from utils.threads import ContainerThread
 from constants.units import *
+from nicegui import ui
 import datetime
 
 
@@ -44,57 +46,71 @@ class Container(ContainerModel):
 
         Container.session.commit()
 
-    def start(self, iot_hub_helper):
+    def start(self, interface, **kwargs):
+        iot_hub_helper = kwargs.get("iot_hub_helper")
+
+        if interface == "iothub" and iot_hub_helper is None:
+            ui.notify("IoT Hub Helper ist nicht initialisiert!", type="negative")
+            return
+
         # Update container status
         self.is_active = True
         self.start_time = datetime.datetime.now()
         Container.session.commit()
 
-        self.thread = ContainerThread(target=self._thread_function, kwargs={
-                                      "iot_hub_helper": iot_hub_helper})
+        self.thread = ContainerThread(target=self._thread_function, kwargs={"interface": interface, "iot_hub_helper": iot_hub_helper})
         self.thread.start()
 
-    def _thread_function(self, **kwargs):
-
+    def _thread_function(self, *args, **kwargs):
+        interface = kwargs.get("interface")
         iot_hub_helper = kwargs.get("iot_hub_helper")
 
-        # separate list because Container.session.commit() sets some device.client to None for some inexplicable reason
-        device_clients = []
-
-        # Start Container
-
-        # Connect all device clients
-        for device in self.devices:
-            device_client = iot_hub_helper.init_device_client(
-                device.connection_string)
-            device.client = device_client
-            device_clients.append(device_client)
+        if interface == "iothub":
+            device_clients = self._connect_device_clients(iot_hub_helper)
+        elif interface == "mqtt":
+            mqtt_helper = MQTTHelper()
+            mqtt_helper.connect()
 
         # Init simulation for all devices
-
         self.message_count = 0
 
         for device in self.devices:
-            device.start_simulation(iot_hub_helper, self._message_callback)
+            if interface == "iothub":
+                device.start_simulation(interface, self._message_callback, iot_hub_helper=iot_hub_helper)
+            elif interface == "mqtt":
+                device.start_simulation(interface, self._message_callback, mqtt_helper=mqtt_helper)
 
-        # Run simulation for all sensors
-
+        # Run simulation
         while not self.thread.stopped():
             pass
 
         # Stop Container
+        if interface == "iothub":
+            self._disconnect_device_clients(device_clients)
 
-        # Disconnect all device clients
+        # Reset container status
+        self.is_active = False
+        self.start_time = None
+        Container.session.commit()
+    
+    def _connect_device_clients(self, iot_hub_helper):
+        clients = []
+
+        for device in self.devices:
+            device_client = iot_hub_helper.init_device_client(
+                device.connection_string)
+            device.client = device_client
+            clients.append(device_client)
+
+        return clients
+
+    def _disconnect_device_clients(self, clients):
         for client in device_clients:
             client.disconnect()
         device_clients = None
         for device in self.devices:
             device.client = None
 
-        # Reset container status
-        self.is_active = False
-        self.start_time = None
-        Container.session.commit()
 
     def _message_callback(self, sensor, data):
         self.message_count += 1

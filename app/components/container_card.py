@@ -65,8 +65,7 @@ class ContainerCard():
                                                   backward=lambda is_active: f'{"Aktiv" if is_active else "Inaktiv"}')
                     with ui.row().classes('h-9 gap-0.5'):
                         with ui.row().classes('gap-0.5'):
-                            ui.button(icon='play_arrow', on_click=lambda c=container: start_callback(
-                                c)).props('flat').classes('px-2 text-black')
+                            ui.button(icon='play_arrow', on_click=lambda: self.show_interface_selection_dialog(container, start_callback)).props('flat').classes('px-2 text-black')
                             ui.button(icon='pause', on_click=lambda c=container: stop_callback(
                                 c)).props('flat').classes('px-2 text-black')
                         ui.row().classes('w-px h-full bg-gray-300')
@@ -83,7 +82,43 @@ class ContainerCard():
         for device in self.container.devices:
             self.sensor_count += len(device.sensors)
 
+    def show_interface_selection_dialog(self, container, start_callback):
+        with self.wrapper:
+            with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 overflow-auto"):
+                with ui.row().classes("w-full justify-between items-center"):
+                    ui.label(
+                        "Schnittstelle auswählen").classes("text-xl font-semibold")
+                    ui.button(icon="close", on_click=dialog.close).props(
+                        "flat").classes("px-2 text-black")
+                
+                with ui.column():
+                    ui.label("Wähle aus über welche Schnittstelle die Daten gesendet werden sollen.")
+
+                with ui.row().classes("w-full justify-between items-center"):
+                    with ui.column().classes("mt-4 gap-1"):
+                        ui.label("IoT Hub").classes("text-sm font-medium")
+                        ui.label(f"Hostname: {'Anton'}")
+                    ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "iothub"))
+
+                with ui.row().classes("w-full items-center"):
+                    ui.row().classes("h-px grow bg-gray-300")
+                    ui.label("oder").classes("text-sm font-medium")
+                    ui.row().classes("h-px grow bg-gray-300")
+
+                with ui.row().classes("w-full justify-between items-center"):
+                    with ui.column().classes("mt-4 gap-1"):
+                        ui.label("MQTT Broker").classes("text-sm font-medium")
+                        ui.label(f"Adresse: {'localhost'}")
+                        ui.label(f"Port: {'1883'}")
+                    ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "mqtt"))
+
+    def start_handler(self, dialog, start_callback, container, interface):
+        '''Starts the container and closes the dialog'''
+        dialog.close()
+        start_callback(container, interface)
+
     def show_details_dialog(self):
+        '''Shows the details dialog'''
         with self.wrapper:
             with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none overflow-auto"):
                 self.dialog = dialog
