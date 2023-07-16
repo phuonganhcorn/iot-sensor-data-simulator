@@ -41,9 +41,9 @@ class MQTTHelper():
     def publish(self, data):
         '''Publish data to a MQTT topic'''
 
+        # Check if client is connected
         if self.client is None:
-            print("MQTT-Client nicht verbunden")
-            return False
+            return Response(False, "MQTT-Client nicht verbunden")
         
         # Prevent sending messages in demo mode
         is_demo_mode = Option.get_boolean('demo_mode')
