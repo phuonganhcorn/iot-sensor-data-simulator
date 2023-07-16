@@ -187,7 +187,9 @@ class ContainersPage:
             ui.notify("Es sind keine Geräte vorhanden!", type="warning")
             return
 
-        container.start(interface, iot_hub_helper=self.iot_hub_helper)
+        container.start(interface, success_callback=self.start_container_success_handler, iot_hub_helper=self.iot_hub_helper)
+
+    def start_container_success_handler(self, container):
         index = self.containers.index(container)
         self.cards[index].set_active()
         self.update_stats()

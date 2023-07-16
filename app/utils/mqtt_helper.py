@@ -7,8 +7,9 @@ import os
 
 class MQTTHelper():
 
-    def __init__(self, container_id=None):
+    def __init__(self, topic, container_id=None):
         '''Initializes the MQTT helper'''
+        self.topic = topic
         client_id = f"container-{container_id}" if container_id else None
         self.client = mqtt.Client(client_id=client_id)
         
@@ -24,15 +25,20 @@ class MQTTHelper():
         # Check if broker address and port are set
         if self.broker_address is None:
             print("MQTT_BROKER_ADDRESS nicht gesetzt")
-            return False
+            return
         elif self.broker_port is None:
             print("MQTT_BROKER_PORT nicht gesetzt")
-            return False
+            return
 
         # Connect to broker
-        self.client.connect(self.broker_address, self.broker_port)
+        try:
+            self.client.connect(self.broker_address, self.broker_port)
+        except ConnectionRefusedError:
+            return Response(False, "Verbindung zum MQTT-Broker fehlgeschlagen")
+        else:
+            return Response(True, "Verbindung zum MQTT-Broker erfolgreich")
 
-    def publish(self, topic, data):
+    def publish(self, data):
         '''Publish data to a MQTT topic'''
 
         if self.client is None:
@@ -59,8 +65,8 @@ class MQTTHelper():
 
         # Publish message
         for _ in range(1 if not send_duplicate else 2):
-            print(f"Sending message '{message}' to topic '{topic}'")
-            self.client.publish(topic, message)
+            print(f"Sending message '{message}' to topic '{self.topic}'")
+            self.client.publish(self.topic, message)
 
         return Response(True, "Nachricht erfolgreich gesendet")
 
@@ -71,4 +77,14 @@ class MQTTHelper():
             return False
 
         self.client.disconnect()
+
+    @staticmethod
+    def get_broker_address():
+        '''Returns the MQTT broker address'''
+        return os.getenv("MQTT_BROKER_ADDRESS")
+    
+    @staticmethod
+    def get_broker_port():
+        '''Returns the MQTT broker port'''
+        return os.getenv("MQTT_BROKER_PORT")
 

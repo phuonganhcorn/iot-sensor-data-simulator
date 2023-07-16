@@ -2,6 +2,7 @@ from azure.iot.device import IoTHubDeviceClient, Message
 from azure.iot.hub import IoTHubRegistryManager
 from model.option import Option
 from utils.response import Response
+import re
 import os
 import json
 
@@ -12,14 +13,14 @@ class IoTHubHelper:
         self.setup_registry_manager()
 
     def setup_registry_manager(self):
-        connection_string = os.getenv("IOTHUB_CONNECTION_STRING")
+        connection_string = os.getenv("IOT_HUB_CONNECTION_STRING")
         if connection_string is None:
             raise Exception("No connection string set in .env file!")
         self.registry_manager = IoTHubRegistryManager(connection_string) # throws error: Error in sys.excepthook:
 
     def create_device(self, device_id):
-        primary_key = os.getenv("IOTHUB_PRIMARY_KEY")
-        secondary_key = os.getenv("IOTHUB_SECONDARY_KEY")
+        primary_key = os.getenv("IOT_HUB_PRIMARY_KEY")
+        secondary_key = os.getenv("IOT_HUB_SECONDARY_KEY")
         status = "enabled"
         
         try:
@@ -97,3 +98,13 @@ class IoTHubHelper:
             
         except Exception as e:
             return Response(False, "Fehler beim Senden: {}".format(e))
+
+    @staticmethod
+    def get_host_name():
+        '''Returns the host name of the IoT Hub from the connection string.'''
+        connection_string = os.getenv("IOT_HUB_CONNECTION_STRING")
+        try:
+            host_name = re.search('HostName=(.+?).azure-devices.net', connection_string).group(1)
+        except AttributeError:
+            host_name = ''
+        return host_name

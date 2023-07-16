@@ -1,9 +1,10 @@
 from nicegui import ui
 from model.device import Device
-from components.live_view_dialog import LiveViewDialog
 from components.logs_dialog import LogsDialog
 from components.sensor_selection import SensorSelection
 from components.chart import Chart
+from utils.iot_hub_helper import IoTHubHelper
+from utils.mqtt_helper import MQTTHelper
 from utils.export_helper import ExportHelper
 
 
@@ -97,7 +98,7 @@ class ContainerCard():
                 with ui.row().classes("w-full justify-between items-center"):
                     with ui.column().classes("mt-4 gap-1"):
                         ui.label("IoT Hub").classes("text-sm font-medium")
-                        ui.label(f"Hostname: {'Anton'}")
+                        ui.label(f"Hostname: {IoTHubHelper.get_host_name()}")
                     ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "iothub"))
 
                 with ui.row().classes("w-full items-center"):
@@ -108,8 +109,8 @@ class ContainerCard():
                 with ui.row().classes("w-full justify-between items-center"):
                     with ui.column().classes("mt-4 gap-1"):
                         ui.label("MQTT Broker").classes("text-sm font-medium")
-                        ui.label(f"Adresse: {'localhost'}")
-                        ui.label(f"Port: {'1883'}")
+                        ui.label(f"Adresse: {MQTTHelper.get_broker_address()}")
+                        ui.label(f"Port: {MQTTHelper.get_broker_port()}")
                     ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "mqtt"))
 
     def start_handler(self, dialog, start_callback, container, interface):

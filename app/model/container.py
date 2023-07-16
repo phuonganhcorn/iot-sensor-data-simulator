@@ -46,7 +46,7 @@ class Container(ContainerModel):
 
         Container.session.commit()
 
-    def start(self, interface, **kwargs):
+    def start(self, interface, success_callback, **kwargs):
         iot_hub_helper = kwargs.get("iot_hub_helper")
 
         if interface == "iothub" and iot_hub_helper is None:
@@ -58,27 +58,33 @@ class Container(ContainerModel):
         self.start_time = datetime.datetime.now()
         Container.session.commit()
 
-        self.thread = ContainerThread(target=self._thread_function, kwargs={"interface": interface, "iot_hub_helper": iot_hub_helper})
+        self.thread = ContainerThread(target=self._thread_function, kwargs={"interface": interface, "iot_hub_helper": iot_hub_helper, "success_callback": success_callback})
         self.thread.start()
 
     def _thread_function(self, *args, **kwargs):
         interface = kwargs.get("interface")
         iot_hub_helper = kwargs.get("iot_hub_helper")
+        success_callback = kwargs.get("success_callback")
 
         if interface == "iothub":
             device_clients = self._connect_device_clients(iot_hub_helper)
-        elif interface == "mqtt":
-            mqtt_helper = MQTTHelper()
-            mqtt_helper.connect()
 
-        # Init simulation for all devices
-        self.message_count = 0
-
-        for device in self.devices:
-            if interface == "iothub":
+            for device in self.devices:
                 device.start_simulation(interface, self._message_callback, iot_hub_helper=iot_hub_helper)
-            elif interface == "mqtt":
-                device.start_simulation(interface, self._message_callback, mqtt_helper=mqtt_helper)
+        elif interface == "mqtt":
+            mqtt_helper = MQTTHelper(topic=self.name, container_id=self.id)
+            response = mqtt_helper.connect()
+
+            if response.success:
+                for device in self.devices:
+                    device.start_simulation(interface, self._message_callback, mqtt_helper=mqtt_helper)
+            else:
+                print(response.message)
+                self._reset_container_status()
+                return
+
+        self.message_count = 0
+        success_callback(self)
 
         # Run simulation
         while not self.thread.stopped():
@@ -88,10 +94,7 @@ class Container(ContainerModel):
         if interface == "iothub":
             self._disconnect_device_clients(device_clients)
 
-        # Reset container status
-        self.is_active = False
-        self.start_time = None
-        Container.session.commit()
+        self._reset_container_status()
     
     def _connect_device_clients(self, iot_hub_helper):
         clients = []
@@ -105,12 +108,16 @@ class Container(ContainerModel):
         return clients
 
     def _disconnect_device_clients(self, clients):
-        for client in device_clients:
+        for client in clients:
             client.disconnect()
         device_clients = None
         for device in self.devices:
             device.client = None
 
+    def _reset_container_status(self):
+        self.is_active = False
+        self.start_time = None
+        Container.session.commit()
 
     def _message_callback(self, sensor, data):
         self.message_count += 1
@@ -129,6 +136,9 @@ class Container(ContainerModel):
             self.live_view_dialog.append_data_point(sensor, timestamp, value)
 
     def stop(self):
+        if self.is_active is False:
+            return
+
         for sensor in self.get_sensors():
             sensor.stop_simulation()
 
