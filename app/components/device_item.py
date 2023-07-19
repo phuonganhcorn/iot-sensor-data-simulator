@@ -24,69 +24,70 @@ class DeviceItem:
                     'flat').classes('px-2 text-red')
 
     def show_details_dialog(self):
-        with ui.dialog(value=True) as dialog, ui.card().classes("w-[696px] !max-w-none px-6 pb-6"):
+        with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none"):
             self.dialog = dialog
-            with ui.row().classes("w-full justify-between items-center"):
-                ui.label(
-                    f"Details - '{self.device.name}'").classes("text-xl font-semibold")
-                ui.button(icon="close", on_click=self.dialog.close).props(
-                    "flat").classes("px-2 text-black")
+            with ui.column().classes("w-full flex flex-col md:flex-row"):
+                with ui.row().classes("w-full justify-between items-center"):
+                    ui.label(
+                        f"Details - '{self.device.name}'").classes("text-xl font-semibold")
+                    ui.button(icon="close", on_click=self.dialog.close).props(
+                        "flat").classes("px-2 text-black")
 
-            with ui.row().classes("grid grid-cols-2 gap-4 mt-4"):
-                with ui.column().classes("gap-4"):
-                    ui.label("Allgemein").classes("text-lg font-semibold mt-2")
-                    with ui.row().classes("gap-10"):
-                        with ui.column().classes("gap-0"):
-                            ui.label("ID").classes("text-sm text-gray-500")
-                            ui.label(f"{self.device.id}").classes(
-                                "text-md font-medium")
-                        with ui.column().classes("gap-0"):
-                            ui.label("Name").classes("text-sm text-gray-500")
-                            ui.label(f"{self.device.name}").classes(
-                                "text-md font-medium")
+                with ui.row().classes("grid md:grid-cols-2 gap-4 mt-4"):
+                    with ui.column().classes("gap-4"):
+                        ui.label("Allgemein").classes("text-lg font-semibold mt-2")
+                        with ui.row().classes("gap-10"):
+                            with ui.column().classes("gap-0"):
+                                ui.label("ID").classes("text-sm text-gray-500")
+                                ui.label(f"{self.device.id}").classes(
+                                    "text-md font-medium")
+                            with ui.column().classes("gap-0"):
+                                ui.label("Name").classes("text-sm text-gray-500")
+                                ui.label(f"{self.device.name}").classes(
+                                    "text-md font-medium")
 
-                with ui.column().classes("gap-4"):
-                    ui.label("Container").classes("text-lg font-semibold mt-2")
+                    with ui.column().classes("gap-4"):
+                        ui.label("Container").classes("text-lg font-semibold mt-2")
+                        with ui.column().classes("gap-2"):
+                            ui.label(
+                                "Wähle aus zu welchem Container dieses Gerät gehören soll.")
+                            containers = Container.get_all()
+                            container_options = {
+                                container.id: container.name for container in containers}
+                            preselect_value = self.device.container.id if self.device.container else None
+
+                            with ui.row().classes("items-center"):
+                                self.container_select = ui.select(
+                                    value=preselect_value, options=container_options, with_input=True).classes("min-w-[120px]")
+                                ui.button("Speichern", on_click=self.change_container).props(
+                                    "flat")
+                
+                with ui.row().classes("mt-4 p-4 w-full justify-between items-center bg-gray-100 !rounded-md"):
+                    with ui.column().classes("w-[90%] gap-0"):
+                        ui.label("Primäre Verbindungszeichenfolge").classes("text-sm text-gray-500")
+                        ui.label(self.device.connection_string).classes("w-full text-md font-medium overflow-x-auto")
+                    ui.button(icon="content_copy", on_click=lambda: self.copy_to_clipboard(self.device.connection_string)).classes("px-2").props("flat")
+
+                ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
+
+                with ui.column().classes("pl-4 gap-4"):
+                    ui.label("Sensoren").classes("text-lg font-semibold mt-2")
                     with ui.column().classes("gap-2"):
                         ui.label(
-                            "Wähle aus zu welchem Container dieses Gerät gehören soll.")
-                        containers = Container.get_all()
-                        container_options = {
-                            container.id: container.name for container in containers}
-                        preselect_value = self.device.container.id if self.device.container else None
+                            "Wähle aus welche Sensoren zu diesem Gerät gehören sollen. Nur Sensoren erlaubt, die noch keinem Gerät zugewiesen wurden.")
+                        sensors = Sensor.get_all_unassigned()
+                        sensors.extend(self.device.sensors)
+                        sensors.sort(key=lambda x: x.id)
+
+                        sensor_options = {
+                            sensor.id: sensor.name for sensor in sensors}
+                        preselected = [sensor.id for sensor in self.device.sensors]
 
                         with ui.row().classes("items-center"):
-                            self.container_select = ui.select(
-                                value=preselect_value, options=container_options, with_input=True).classes("min-w-[120px]")
-                            ui.button("Speichern", on_click=self.change_container).props(
+                            self.sensor_select = ui.select(
+                                options=sensor_options, multiple=True, value=preselected).props('use-chips').classes("w-[130px] max-w-[350px]")
+                            ui.button("Speichern", on_click=self.change_sensors).props(
                                 "flat")
-            
-            with ui.row().classes("mt-4 p-4 w-full justify-between items-center bg-gray-100 !rounded-md"):
-                with ui.column().classes("w-[90%] gap-0"):
-                    ui.label("Primäre Verbindungszeichenfolge").classes("text-sm text-gray-500")
-                    ui.label(self.device.connection_string).classes("w-full text-md font-medium overflow-x-auto")
-                ui.button(icon="content_copy", on_click=lambda: self.copy_to_clipboard(self.device.connection_string)).classes("px-2").props("flat")
-
-            ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
-
-            with ui.column().classes("pl-4 gap-4"):
-                ui.label("Sensoren").classes("text-lg font-semibold mt-2")
-                with ui.column().classes("gap-2"):
-                    ui.label(
-                        "Wähle aus welche Sensoren zu diesem Gerät gehören sollen. Nur Sensoren erlaubt, die noch keinem Gerät zugewiesen wurden.")
-                    sensors = Sensor.get_all_unassigned()
-                    sensors.extend(self.device.sensors)
-                    sensors.sort(key=lambda x: x.id)
-
-                    sensor_options = {
-                        sensor.id: sensor.name for sensor in sensors}
-                    preselected = [sensor.id for sensor in self.device.sensors]
-
-                    with ui.row().classes("items-center"):
-                        self.sensor_select = ui.select(
-                            options=sensor_options, multiple=True, value=preselected).props('use-chips').classes("w-[130px] max-w-[350px]")
-                        ui.button("Speichern", on_click=self.change_sensors).props(
-                            "flat")
 
     def copy_to_clipboard(self, text):
         pyperclip.copy(text)
