@@ -133,7 +133,7 @@ class ContainerCard():
                     with ui.column().classes("gap-4"):
                         ui.label("Allgemein").classes(
                             "text-lg font-semibold mt-2")
-                        with ui.row().classes("gap-10"):
+                        with ui.row().classes("grid grid-cols-2 gap-y-4 gap-x-10 sm:flex"):
                             with ui.column().classes("gap-0"):
                                 ui.label("ID").classes("text-sm text-gray-500")
                                 ui.label(f"{self.container.id}").classes(
