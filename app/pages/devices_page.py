@@ -122,7 +122,7 @@ class DevicesPage:
                         ui.label(
                             "Wähle die Sensoren aus, die dem Gerät zugeordnet werden sollen. Mehrfachauswahl möglich.")
                     sensors_input = ui.select(sensors_options, multiple=True, label='Sensoren auswählen').props(
-                        'use-chips').classes('w-64')
+                        'use-chips').classes('sm:w-64')
 
                     with ui.stepper_navigation():
                         ui.button('Zurück', on_click=stepper.previous).props(
