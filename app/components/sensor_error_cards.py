@@ -11,7 +11,7 @@ class AnomalyCard:
                 ui.label('Wahrscheinlichkeiten').classes('mt-2 font-bold')
                 ui.label('Definiere mit welcher Wahrscheinlichkeit Anomalien auftreten sollen.').classes(
                     'text-[13px] opacity-80')
-            with ui.grid(columns=3).classes('mt-3 mb-4 w-full'):
+            with ui.grid().classes('mt-3 mb-4 w-full sm:grid-cols-3'):
                 self.probability_pos_anomaly_input = ui.number(
                     label='Wkt. für pos. Anomalien', value=5, min=0, max=100, suffix='%')
                 self.probability_neg_anomaly_input = ui.number(
@@ -21,7 +21,7 @@ class AnomalyCard:
                 ui.label('Abweichungsbereiche').classes('mt-4 font-bold')
                 ui.label('Definiere den Wertebereich, in dem Anomalien entstehen können.').classes(
                     'text-[13px] opacity-80')
-            with ui.grid(columns=3).classes('mt-3 pb-4 w-full'):
+            with ui.grid().classes('mt-3 pb-4 w-full sm:grid-cols-3'):
                 with ui.column().classes('gap-0'):
                     ui.label('Positiv').classes('font-medium opacity-70')
                     self.pos_anomaly_upper_range_input = ui.number(
@@ -107,7 +107,7 @@ class DriftCard:
                 ui.label('Wahrscheinlichkeit').classes('mt-2 font-bold')
                 ui.label('Definiere nach wie vielen Iterationen n ein linearer Drift eintreten soll und gib die Driftgrößen an.').classes(
                     'text-[13px] opacity-80')
-            with ui.grid(columns=3).classes('mt-3 mb-4 w-full'):
+            with ui.grid().classes('mt-3 mb-4 w-full sm:grid-cols-3'):
                 self.after_n_iterations_input = ui.number(label='Ab n Iterationen', value=5, min=0, max=100)
                 self.average_drift_rate_input = ui.number(label='Driftrate', value=1, min=0, max=10)
                 self.variation_range_input = ui.number(label='Variationsbereich', value=0.1, min=0, format='%.2f')

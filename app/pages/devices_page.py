@@ -23,21 +23,20 @@ class DevicesPage:
         self.setup_list()
 
     def setup_menu_bar(self):
-        with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
+        with ui.row().classes('p-4 w-full flex items-center justify-between bg-gray-200 rounded-lg shadow-md'):
             ui.button('Neues Gerät erstellen',
                       on_click=lambda: self.show_create_device_dialog()).classes('')
 
-            with ui.row():
-                with ui.row().classes('ml-4 gap-1'):
-                    ui.label('Gesamt:').classes('text-sm font-medium')
-                    ui.label().classes('text-sm').bind_text(self, 'devices_count')
+            with ui.row().classes('gap-1'):
+                ui.label('Gesamt:').classes('text-sm font-medium')
+                ui.label().classes('text-sm').bind_text(self, 'devices_count')
 
             with ui.row():
                 self.filter_input = ui.input(
                     placeholder='Filter', on_change=self.filter_handler).classes('w-44')
 
     def setup_list(self):
-        self.list_container = ui.column().classes('relative w-full gap-0 divide-y')
+        self.list_container = ui.column().classes('relative w-full min-w-[600px] overflow-x-auto gap-0 divide-y')
 
         with self.list_container:
             headings = [{'name': 'ID', 'classes': 'w-[30px]'},
@@ -123,7 +122,7 @@ class DevicesPage:
                         ui.label(
                             "Wähle die Sensoren aus, die dem Gerät zugeordnet werden sollen. Mehrfachauswahl möglich.")
                     sensors_input = ui.select(sensors_options, multiple=True, label='Sensoren auswählen').props(
-                        'use-chips').classes('w-64')
+                        'use-chips').classes('sm:w-64')
 
                     with ui.stepper_navigation():
                         ui.button('Zurück', on_click=stepper.previous).props(

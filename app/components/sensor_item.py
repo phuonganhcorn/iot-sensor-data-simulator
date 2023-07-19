@@ -37,18 +37,19 @@ class SensorItem:
     def show_details_dialog(self):
         with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none min-h-[327px]"):
             self.dialog = dialog
-            with ui.row().classes("mb-8 w-full justify-between items-center"):
+            with ui.row().classes("relative mb-8 w-full justify-between items-center"):
                 ui.label(f"{self.sensor.name}").classes("text-lg font-medium")
                 with ui.tabs().classes('') as tabs:
                     general_tab = ui.tab('Allgemein')
                     simulation_tab = ui.tab('Simulation')
-                ui.button(icon="close", on_click=self.dialog.close).props("flat").classes("px-2 text-black")
+                ui.row()
+                ui.button(icon="close", on_click=self.dialog.close).props("flat").classes("absolute top-0 right-0 px-2 text-black md:top-1")
 
             with ui.tab_panels(tabs, value=general_tab).classes('w-full'):
                 with ui.tab_panel(general_tab).classes("p-0"):
 
                     with ui.column().classes("gap-4"):
-                        with ui.row().classes("gap-10"):
+                        with ui.row().classes("gap-x-10 gap-y-4"):
                             with ui.column().classes("gap-0"):
                                 ui.label("ID").classes("text-sm text-gray-500")
                                 ui.label(f"{self.sensor.id}").classes("text-md font-medium")
@@ -79,7 +80,7 @@ class SensorItem:
 
                 with ui.tab_panel(simulation_tab).classes("p-0"):
                     with ui.column().classes("gap-4"):
-                        with ui.row().classes("gap-10"):
+                        with ui.row().classes("gap-x-10 gap-y-4"):
                             with ui.column().classes("gap-0"):
                                 ui.label("Basiswert").classes("text-sm text-gray-500")
                                 ui.label(f"{self.sensor.base_value}").classes("text-md font-medium")

@@ -135,7 +135,7 @@ class ContainersPage:
                         ui.label(
                             "Wähle die Geräte aus, die dem Container zugeordnet werden sollen. Mehrfachauswahl möglich.")
                     devices_input = ui.select(devices_options, multiple=True, label='Geräte auswählen').props(
-                        'use-chips').classes('w-64')
+                        'use-chips').classes('sm:w-64')
 
                     with ui.stepper_navigation():
                         ui.button('Zurück', on_click=stepper.previous).props(
