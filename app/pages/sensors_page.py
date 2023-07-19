@@ -26,14 +26,13 @@ class SensorsPage():
         self.setup_list()
 
     def setup_menu_bar(self):
-        with ui.row().classes('px-4 w-full flex items-center justify-between h-20 bg-gray-200 rounded-lg shadow-md'):
+        with ui.row().classes('p-4 w-full flex items-center justify-between bg-gray-200 rounded-lg shadow-md'):
             ui.button('Neuen Sensor erstellen',
                       on_click=lambda: self.show_create_sensor_dialog()).classes('')
 
-            with ui.row():
-                with ui.row().classes('ml-4 gap-1'):
-                    ui.label('Gesamt:').classes('text-sm font-medium')
-                    ui.label().classes('text-sm').bind_text(self, 'sensors_count')
+            with ui.row().classes('gap-1'):
+                ui.label('Gesamt:').classes('text-sm font-medium')
+                ui.label().classes('text-sm').bind_text(self, 'sensors_count')
 
             with ui.row():
                 self.filter_input = ui.input(
@@ -41,7 +40,7 @@ class SensorsPage():
 
     def setup_list(self):
         self.list_container = ui.column().classes(
-            'relative grid w-full gap-0 divide-y')
+            'relative grid w-full min-w-[800px] gap-0 divide-y')
 
         with self.list_container:
             headings = [{'name': 'ID', 'classes': 'w-[30px]'},
@@ -111,7 +110,7 @@ class SensorsPage():
 
                 with ui.stepper().props('vertical').classes('') as stepper:
                     with ui.step('Allgemein'):
-                        with ui.grid(columns=3):
+                        with ui.grid().classes('sm:grid-cols-2'):
                             name_input = ui.input('Name*')
 
                             units = {}
@@ -125,7 +124,7 @@ class SensorsPage():
                             ui.button('Weiter', on_click=lambda: self.check_general_step_input(
                                 stepper, name_input))
                     with ui.step('Simulationswerte'):
-                        with ui.grid(columns=3).classes('w-full'):
+                        with ui.grid().classes('w-full sm:grid-cols-3'):
                             base_value_input = ui.number(
                                 label='Basiswert', value=25.00, format='%.2f')
                             variation_range_input = ui.number(label='Variationsbereich',
@@ -152,7 +151,7 @@ class SensorsPage():
                             DRIFT: 'Drift',
                         }
 
-                        error_type_input = ui.select(error_types, value=0, label='Fehlertyp',
+                        ui.select(error_types, value=0, label='Fehlertyp',
                                                     on_change=lambda e: self.error_type_input_handler(error_container, e.value))
                         error_container = ui.row()
 
