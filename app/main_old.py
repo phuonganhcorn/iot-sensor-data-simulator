@@ -4,7 +4,7 @@ from threading import Thread
 from iot_hub_helper import IoTHubHelper
 from enum import Enum
 from nicegui import app, ui
-import asyncio
+import asynciosetup_container_page
 
 # CONNECTION_STRING = "HostName=IoT-Hub-Tobias1.azure-devices.net;DeviceId=sim000001;SharedAccessKey=5y6hx8YYZC6oLEO2/Jbrd8UGLpf4dKA7gf2et1gxm6s="
 iot_hub_helper = None
@@ -33,7 +33,20 @@ ui.query('.nicegui-content').classes('p-0')
 async def logout_handler():
     await ui.run_javascript('localStorage.removeItem("connectionString");', respond=False)
     iot_hub_helper.close_connection()
-    await handle_connection()
+    ui.notify('Verbindung getrennt')
+    await init_connection()
+
+@ui.page('/sessions')
+def sessions_page():
+    init_sessions_page()
+
+@ui.page('/sensoren')
+def sensors_page():
+    init_sensors_page()
+
+@ui.page('/geraete')
+def devices_page():
+    init_devices_page()
 
 # Create the UI
 with ui.splitter().classes('h-screen') as splitter:
@@ -157,7 +170,7 @@ async def store_connection_string(connection_string):
 async def retrieve_connection_string():
     return await ui.run_javascript('localStorage.getItem("connectionString");')
 
-async def handle_connection():
+async def init_connection():
     global iot_hub_helper, connection_note_container
     connection_string = await retrieve_connection_string()
     
@@ -171,7 +184,7 @@ async def handle_connection():
     else:
         iot_hub_helper = IoTHubHelper(connection_string)
 
-app.on_connect(handle_connection)
+# app.on_connect(init_connection)
 
 # Generate the temperature values
 def generate_temperature(num_values):
@@ -353,6 +366,10 @@ def generate_handler():
 
 async def send_handler():
     global is_data_sent
+
+    if iot_hub_helper is None or not iot_hub_helper.device_client.connected:
+        await init_connection()
+        return
 
     if is_data_sent:
         with ui.dialog(value=True) as dialog, ui.card().classes('!max-w-sm flex items-center'):
