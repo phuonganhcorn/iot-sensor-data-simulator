@@ -65,8 +65,16 @@ class DeviceItem:
                 with ui.row().classes("mt-4 p-4 w-full justify-between items-center bg-gray-100 !rounded-md"):
                     with ui.column().classes("w-[90%] gap-0"):
                         ui.label("Primäre Verbindungszeichenfolge").classes("text-sm text-gray-500")
-                        ui.label(self.device.connection_string).classes("w-full text-md font-medium overflow-x-auto")
-                    ui.button(icon="content_copy", on_click=lambda: self.copy_to_clipboard(self.device.connection_string)).classes("px-2").props("flat")
+
+                        connection_string = self.device.connection_string
+                        connection_string_is_none = connection_string is None
+                        if connection_string is None:
+                            connection_string = "Das Gerät verfügt über keine Verbindung zu einem IoT Hub"
+                        ui.label(connection_string).classes("w-full text-md font-medium overflow-x-auto")
+                    copy_button = ui.button(icon="content_copy", on_click=lambda: self.copy_to_clipboard(self.device.connection_string)).classes("px-2").props("flat")
+                    
+                    if connection_string_is_none:
+                        copy_button.set_enabled(False)
 
                 ui.row().classes("mt-4 mb-2 h-px w-full bg-gray-200 border-0")
 

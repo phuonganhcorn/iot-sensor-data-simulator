@@ -18,8 +18,11 @@ class Navigation():
                 ui.link('Geräte', '/geraete').classes('text-white !no-underline')
                 ui.link('Sensoren', '/sensoren').classes('text-white !no-underline')
             with ui.row().classes('flex-col gap-0 items-center lg:flex-row lg:gap-4 lg:divide-x lg:divide-white/50'):
-                self.host_name_label = ui.label(f'Host: {self.host_name}').classes('text-white')
+                host_name = self.host_name if self.host_name else 'Nicht Konfiguriert'
+                self.host_name_label = ui.label(f'IoT Hub: {host_name}').classes('text-white')
                 demo_switch = ui.switch('Demo-Modus', on_change=self.switch_handler).classes('text-white')
+                with demo_switch:
+                    ui.tooltip('Wenn aktiviert, werden keine Nachrichten an IoT Hub oder MQTT-Broker gesendet.')
                 demo_switch.value = Option.get_boolean('demo_mode')
                 ui.query('.q-toggle__inner--falsy').classes('!text-white/50')
 

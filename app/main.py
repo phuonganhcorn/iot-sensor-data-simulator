@@ -43,4 +43,4 @@ def sensors_page():
     SensorsPage()
 
 
-ui.run(title="IoT Telemetrie Simulator", host="127.0.0.1", port=8081)
+ui.run(title="IoT Telemetrie Simulator", host="127.0.0.1", port=8080)

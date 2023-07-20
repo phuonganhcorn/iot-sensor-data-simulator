@@ -103,7 +103,7 @@ class DevicesPage:
                     with ui.column():
                         ui.label(
                             'Gibt den Namen des Geräts an. Das Gerät kann dann mit diesem Namen im IoT Hub gefunden werden.')
-                        name_input = ui.input('Name (Device ID)')
+                        name_input = ui.input('Name* (Device ID)')
                     with ui.stepper_navigation():
                         ui.button('Abbrechen', on_click=lambda: dialog.close()).props(
                             'flat')
@@ -127,7 +127,7 @@ class DevicesPage:
                     with ui.stepper_navigation():
                         ui.button('Zurück', on_click=stepper.previous).props(
                             'flat')
-                        ui.button('Erstellen', on_click=lambda: self.complete_device_creation(
+                        ui.button('Erstellen', on_click=lambda: self.create_device(
                             dialog, name_input, sensors_input))
 
     def check_device_name_input(self, stepper, name_input):
@@ -144,33 +144,33 @@ class DevicesPage:
 
         stepper.next()
 
-    def complete_device_creation(self, dialog, name_input, sensors_input):
-        if len(sensors_input.value) == 0:
-            ui.notify('Bitte wähle mindestens einen Sensor aus.',
-                      type='warning')
-            return
-
-        self.create_device(name_input.value, sensors_input.value)
+    def create_device(self, dialog, name_input, sensors_input):
         dialog.close()
+        name = name_input.value
+        sensor_ids = sensors_input.value
 
-    def create_device(self, name, sensor_ids):
         if len(self.devices) == 0:
             self.list_container.clear()
 
         device_id = self.replace_special_characters(name)
         response = self.iot_hub_helper.create_device(device_id=device_id)
 
-        if not response.success:
+        new_device = None
+        if response is None:
+            # Handle case when there is no IoT Hub connection configured
+            ui.notify(f"Gerät '{device_id}' erfolgreich erstellt", type="positive")
+            new_device = Device.add(sensor_ids=sensor_ids, device_name=device_id)
+        elif not response.success:
             ui.notify(response.message, type='negative')
             return
+        else:
+            ui.notify(response.message, type='positive')
+            new_device = Device.add(sensor_ids=sensor_ids, device_client=response.object)
 
-        ui.notify(response.message, type='positive')
-
-        new_device = Device.add(response.object, sensor_ids=sensor_ids)
-        self.devices.append(new_device)
-
-        self.add_device_to_list(device=new_device)
-        self.update_stats()
+        if new_device is not None:
+            self.devices.append(new_device)
+            self.add_device_to_list(device=new_device)
+            self.update_stats()
 
     def add_device_to_list(self, device):
         with self.list_container:
