@@ -78,7 +78,7 @@ class Device(DeviceModel):
         if self.interface == "iothub" and self.iot_hub_helper is not None and self.client is not None:
             self.iot_hub_helper.send_message(self.client, data)
         elif self.interface == "mqtt" and self.mqtt_helper is not None:
-            self.mqtt_helper.publish(topic=self.container.name, data=data)
+            self.mqtt_helper.publish(data=data)
         
         self.container_callback(sensor, data)
 

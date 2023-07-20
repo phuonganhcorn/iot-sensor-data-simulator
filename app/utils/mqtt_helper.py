@@ -34,16 +34,21 @@ class MQTTHelper():
         '''Connects to the MQTT broker'''
 
         # Check if broker address and port are set
-        if self.broker_address is None:
+        if not MQTTHelper.is_configured():
             return
-        elif self.broker_port is None:
-            return
+
+        # Set authentication credentials
+        credentials = self.get_auth_credentials()
+        if credentials is not None:
+            self.client.username_pw_set(credentials["username"], credentials["password"])
 
         # Connect to broker
         try:
             self.client.connect(self.broker_address, self.broker_port)
-        except ConnectionRefusedError:
-            return Response(False, "Verbindung zum MQTT-Broker fehlgeschlagen")
+        except ConnectionRefusedError as e:
+            return Response(False, f"Verbindung zum MQTT-Broker verweigert")
+        except Exception as e:
+            return Response(False, f"Verbindung zum MQTT-Broker fehlgeschlagen: {e}")
         else:
             return Response(True, "Verbindung zum MQTT-Broker erfolgreich")
 
@@ -86,6 +91,19 @@ class MQTTHelper():
             return False
 
         self.client.disconnect()
+
+    def get_auth_credentials(self):
+        '''Returns the authentication credentials for the MQTT broker'''
+        username = os.getenv("MQTT_BROKER_USERNAME")
+        password = os.getenv("MQTT_BROKER_PASSWORD")
+
+        if username is None or password is None:
+            return None
+        
+        return {
+            "username": username,
+            "password": password
+        }
 
     @staticmethod
     def get_broker_address():
