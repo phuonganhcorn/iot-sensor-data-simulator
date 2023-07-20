@@ -104,11 +104,13 @@ class ContainerCard():
                         ui.label("IoT Hub").classes("text-sm font-medium")
                         ui.label(f"Hostname: {host_name}")
                         iot_hub_note_label = ui.label().classes("mt-2 py-1 px-2 text-x text-gray-600 bg-gray-100 rounded-md")
-                    iot_hub_button = ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "iothub")).classes('w-28 shrink-0')
+                    iot_hub_start_button = ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "iothub")).classes('w-28 shrink-0')
                     
                     if host_name_is_none:
                         iot_hub_note_label.text = "Zum Konfiguieren Umgebungsvariablen setzen (siehe README.md)"
-                        iot_hub_button.set_enabled(False)
+                        iot_hub_start_button.set_enabled(False)
+                    else:
+                        iot_hub_note_label.set_visibility(False)
 
                 with ui.row().classes("w-full items-center"):
                     ui.row().classes("h-px grow bg-gray-300")
@@ -116,11 +118,20 @@ class ContainerCard():
                     ui.row().classes("h-px grow bg-gray-300")
 
                 with ui.row().classes("w-full justify-between items-center md:flex-nowrap md:gap-8"):
+                    mqtt_broker_address = MQTTHelper.get_broker_address()
+                    mqtt_broker_port = MQTTHelper.get_broker_port()
+
+                    mqtt_broker_address = mqtt_broker_address if mqtt_broker_address else 'Nicht Konfiguriert'
+                    mqtt_broker_port = mqtt_broker_port if mqtt_broker_port else 'Nicht Konfiguriert'
+
                     with ui.column().classes("mt-4 gap-1"):
                         ui.label("MQTT Broker").classes("text-sm font-medium")
-                        ui.label(f"Adresse: {MQTTHelper.get_broker_address()}")
-                        ui.label(f"Port: {MQTTHelper.get_broker_port()}")
-                    ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "mqtt")).classes('w-28 shrink-0')
+                        ui.label(f"Adresse: {mqtt_broker_address}")
+                        ui.label(f"Port: {mqtt_broker_port}")
+                    mqtt_start_button = ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "mqtt")).classes('w-28 shrink-0')
+
+                    if not MQTTHelper.is_configured():
+                        mqtt_start_button.set_enabled(False)
 
     def start_handler(self, dialog, start_callback, container, interface):
         '''Starts the container and closes the dialog'''

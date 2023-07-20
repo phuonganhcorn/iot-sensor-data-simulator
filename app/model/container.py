@@ -48,22 +48,35 @@ class Container(ContainerModel):
 
     def start(self, interface, success_callback, **kwargs):
         iot_hub_helper = kwargs.get("iot_hub_helper")
+        mqtt_helper = None
 
         if interface == "iothub" and iot_hub_helper is None:
             ui.notify("IoT Hub Helper ist nicht initialisiert!", type="negative")
             return
+        elif interface == "mqtt":
+            mqtt_helper = MQTTHelper(topic=self.name, container_id=self.id)
+            response = mqtt_helper.connect()
+            
+            if response is None:
+                return
+            else:
+                ui.notify(response.message, type="positive" if response.success else "negative")
+
+                if not response.success:
+                    return
 
         # Update container status
         self.is_active = True
         self.start_time = datetime.datetime.now()
         Container.session.commit()
 
-        self.thread = ContainerThread(target=self._thread_function, kwargs={"interface": interface, "iot_hub_helper": iot_hub_helper, "success_callback": success_callback})
+        self.thread = ContainerThread(target=self._thread_function, kwargs={"interface": interface, "iot_hub_helper": iot_hub_helper, "mqtt_helper": mqtt_helper,  "success_callback": success_callback})
         self.thread.start()
 
     def _thread_function(self, *args, **kwargs):
         interface = kwargs.get("interface")
         iot_hub_helper = kwargs.get("iot_hub_helper")
+        mqtt_helper = kwargs.get("mqtt_helper")
         success_callback = kwargs.get("success_callback")
 
         if interface == "iothub":
@@ -72,16 +85,8 @@ class Container(ContainerModel):
             for device in self.devices:
                 device.start_simulation(interface, self._message_callback, iot_hub_helper=iot_hub_helper)
         elif interface == "mqtt":
-            mqtt_helper = MQTTHelper(topic=self.name, container_id=self.id)
-            response = mqtt_helper.connect()
-
-            if response.success:
-                for device in self.devices:
-                    device.start_simulation(interface, self._message_callback, mqtt_helper=mqtt_helper)
-            else:
-                print(response.message)
-                self._reset_container_status()
-                return
+            for device in self.devices:
+                device.start_simulation(interface, self._message_callback, mqtt_helper=mqtt_helper)
 
         self.message_count = 0
         success_callback(self)
