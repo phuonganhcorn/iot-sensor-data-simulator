@@ -14,7 +14,7 @@ IoT systems often involve many sensors, generating vast amounts of data that nee
 
 ## Installation
 
-Before you begin, ensure that you have at least Python 3.6 installed on your system. If you don't have Python installed, you can download it from the official website [here](https://www.python.org/downloads/). 
+Before you begin, ensure that you have at least Python 3.7 installed on your system. If you don't have Python installed, you can download it from the official website [here](https://www.python.org/downloads/). 
 
 Additionally, make sure you have the package manager `pip` installed. `pip` usually comes pre-installed with Python versions 2.7.9+ or 3.4+.
 
