@@ -75,7 +75,7 @@ class Device(DeviceModel):
             sensor.start_simulation(callback=self.send_simulator_data)
 
     def send_simulator_data(self, sensor, data):
-        if self.interface == "iothub" and self.iot_hub_helper is not None:
+        if self.interface == "iothub" and self.iot_hub_helper is not None and self.client is not None:
             self.iot_hub_helper.send_message(self.client, data)
         elif self.interface == "mqtt" and self.mqtt_helper is not None:
             self.mqtt_helper.publish(topic=self.container.name, data=data)

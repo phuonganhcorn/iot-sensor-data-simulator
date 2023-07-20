@@ -100,6 +100,9 @@ class Container(ContainerModel):
         clients = []
 
         for device in self.devices:
+            if device.connection_string is None:
+                continue
+
             device_client = iot_hub_helper.init_device_client(
                 device.connection_string)
             device.client = device_client
@@ -110,7 +113,7 @@ class Container(ContainerModel):
     def _disconnect_device_clients(self, clients):
         for client in clients:
             client.disconnect()
-        device_clients = None
+        self.device_clients = None
         for device in self.devices:
             device.client = None
 
