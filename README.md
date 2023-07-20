@@ -50,7 +50,7 @@ If you find any bugs or have a feature request, please open an issue on GitHub. 
 
 ## Diagrams
 
-Some parts of the code and design of the project are described in more detail through diagrams, which can be found in the `Diagrams` folder in the project directory. These diagrams are created with draw.io and saved as .drawio files.
+Some parts of the code and design of the project are described in more detail through diagrams, which can be found in the `diagrams` folder in the project directory. These diagrams are created with draw.io and saved as .drawio files.
 
 To open and edit these diagrams, you can use the [draw.io web app](https://app.diagrams.net/) or a specific Visual Studio Code extension. This extension allows you to view and modify the diagrams directly in Visual Studio Code, providing a better understanding of the project structure and workflow.
 
