@@ -5,14 +5,17 @@ from components.chart import Chart
 
 
 class LiveViewDialog():
+    '''This class represents the live view dialog. It is used to display sensor data in a diagram in realtime.'''
 
     def __init__(self, parent):
+        '''Initializes the live view dialog'''
         self.parent = parent
         self.dialog = None
         self.chart = None
         self.setup()
 
     def setup(self):
+        '''Sets up the UI elements of the dialog'''
         with self.parent:
             with ui.dialog() as dialog, ui.card().classes("w-[696px] !max-w-none"):
                 self.dialog = dialog
@@ -26,6 +29,7 @@ class LiveViewDialog():
                 self.chart = Chart()
 
     def show(self, container):
+        '''Shows the dialog'''
         self.title_label.set_text(f"Live View: {container.name}")
         self.selects_row.clear()
 
@@ -43,10 +47,15 @@ class LiveViewDialog():
         self.dialog.open()
 
     def sensor_select_change_handler(self, sensor):
+        '''Handles the sensor select change event'''
+        self.chart.empty()
+        self.chart.show_note("Warten auf Sensordaten...")
         self.chart.update_legend(sensor=sensor)
         self.chart.update_visualization(sensor=sensor)
 
     def append_data_point(self, sensor, timestamp, value):
+        '''Appends a data point to the chart'''
+
         # Return if the dialog is not open
         if not self.dialog.value:
             return
