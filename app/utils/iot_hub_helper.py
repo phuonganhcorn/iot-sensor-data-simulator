@@ -13,19 +13,23 @@ class IoTHubHelper:
         self.setup_registry_manager()
 
     def setup_registry_manager(self):
+        self.registry_manager = None
         connection_string = os.getenv("IOT_HUB_CONNECTION_STRING")
         
         if connection_string is not None:
             self.registry_manager = IoTHubRegistryManager(connection_string) # throws error: Error in sys.excepthook:
 
     def create_device(self, device_id):
+        if self.registry_manager is None:
+            return None
+
         primary_key = os.getenv("IOT_HUB_PRIMARY_KEY")
         secondary_key = os.getenv("IOT_HUB_SECONDARY_KEY")
         status = "enabled"
         
         try:
             device = self.registry_manager.create_device_with_sas(device_id, primary_key, secondary_key, status)
-            return Response(True, "Gerät '{}' erfolgreich erstellt".format(device_id), device)
+            return Response(True, f"Gerät '{device_id}' erfolgreich erstellt", device)
         except Exception as e:
             return Response(False, "Fehler beim Erstellen: {}".format(e))
 

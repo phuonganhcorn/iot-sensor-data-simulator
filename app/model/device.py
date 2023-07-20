@@ -1,6 +1,6 @@
 from model.models import DeviceModel
-from model.option import Option
 from model.sensor import Sensor
+from utils.iot_hub_helper import IoTHubHelper
 
 
 class Device(DeviceModel):
@@ -21,20 +21,30 @@ class Device(DeviceModel):
         return Device.session.query(Device).filter(Device.container_id == None).all()
 
     @staticmethod
-    def add(device, sensor_ids):
-        primary_key = device.authentication.symmetric_key.primary_key
-        host_name = Option.get_value('host_name')
-        connection_string = f"HostName={host_name}.azure-devices.net;DeviceId={device.device_id};SharedAccessKey={primary_key}"
+    def add(sensor_ids, **kwargs):
+        device_client = kwargs.get("device_client")
+        device_name = kwargs.get("device_name")
 
-        device_db = Device(name=device.device_id, generation_id=device.generation_id,
-                           etag=device.etag, status=device.status, connection_string=connection_string)
+        device_db = None
+        if device_client:
+            primary_key = device_client.authentication.symmetric_key.primary_key
+            host_name = IoTHubHelper.get_host_name()
+            connection_string = f"HostName={host_name}.azure-devices.net;DeviceId={device_client.device_id};SharedAccessKey={primary_key}"
 
-        Device.session.add(device_db)
-        Device.session.commit()
+            device_db = Device(name=device_client.device_id, generation_id=device_client.generation_id,
+                            etag=device_client.etag, status=device_client.status, connection_string=connection_string)
+        elif device_name:
+            device_db = Device(name=device_name)
 
-        device_db.create_relationship_to_sensors(sensor_ids)
+        if device_db is not None:
+            Device.session.add(device_db)
+            Device.session.commit()
 
-        return device_db
+            device_db.create_relationship_to_sensors(sensor_ids)
+
+            return device_db
+        
+        return None
     
     @staticmethod
     def check_if_name_in_use(name):
