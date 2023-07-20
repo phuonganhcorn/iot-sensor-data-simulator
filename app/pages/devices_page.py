@@ -6,8 +6,10 @@ from components.device_item import DeviceItem
 
 
 class DevicesPage:
+    '''This class represents the devices page.'''
 
     def __init__(self, iot_hub_helper):
+        '''Initializes the page'''
         self.iot_hub_helper = iot_hub_helper
         self.devices = Device.get_all()
         self.list_items = []
@@ -15,6 +17,7 @@ class DevicesPage:
         self.setup_page()
 
     def setup_page(self):
+        '''Sets up the page'''
         Navigation()
         ui.query('.nicegui-content').classes('p-8')
         ui.label("Geräte").classes('text-2xl font-bold')
@@ -23,22 +26,28 @@ class DevicesPage:
         self.setup_list()
 
     def setup_menu_bar(self):
+        '''Sets up the menu bar'''
         with ui.row().classes('p-4 w-full flex items-center justify-between bg-gray-200 rounded-lg shadow-md'):
+            # Create new device
             ui.button('Neues Gerät erstellen',
                       on_click=lambda: self.show_create_device_dialog()).classes('')
 
+            # Stats
             with ui.row().classes('gap-1'):
                 ui.label('Gesamt:').classes('text-sm font-medium')
                 ui.label().classes('text-sm').bind_text(self, 'devices_count')
 
+            # Filter
             with ui.row():
                 self.filter_input = ui.input(
                     placeholder='Filter', on_change=self.filter_handler).classes('w-44')
 
     def setup_list(self):
+        '''Sets up the list of devices'''
         self.list_container = ui.column().classes('relative w-full min-w-[600px] overflow-x-auto gap-0 divide-y')
 
         with self.list_container:
+            # Add headings row
             headings = [{'name': 'ID', 'classes': 'w-[30px]'},
                         {'name': 'Name', 'classes': 'w-[130px]'},
                         {'name': 'Container', 'classes': 'w-[130px]'},
@@ -49,6 +58,7 @@ class DevicesPage:
                     ui.label(heading['name']).classes(
                         f'font-medium {heading["classes"]}')
 
+             # Print list items
             if len(self.devices) == 0:
                 self.show_note('Keine Geräte vorhanden')
             else:
@@ -60,12 +70,14 @@ class DevicesPage:
             self.setup_note_label()
 
     def setup_note_label(self):
+        '''Sets up the note label'''
         with self.list_container:
             self.note_label = ui.label().classes(
                 'absolute left-1/2 top-48 self-center -translate-x-1/2 !border-t-0')
             self.note_label.set_visibility(False)
 
     def filter_handler(self):
+        '''Handles the filter input'''
         search_text = self.filter_input.value
         results = list(filter(lambda item: search_text.lower()
                        in item.device.name.lower(), self.list_items))
@@ -84,16 +96,20 @@ class DevicesPage:
             self.list_container.classes(add='divide-y', remove='divide-y-0')
 
     def show_note(self, message):
+        '''Shows a note label with the given message'''
         self.note_label.text = message
         self.note_label.set_visibility(True)
 
     def hide_note(self):
+        '''Hides the note label'''
         self.note_label.set_visibility(False)
 
     def update_stats(self):
+        '''Updates the stats'''
         self.devices_count = len(self.devices)
 
     def show_create_device_dialog(self):
+        '''Shows the create device dialog'''
         with ui.dialog(value=True) as dialog, ui.card().classes('relative w-[696px] min-h-[500px]'):
             ui.button(icon="close", on_click=dialog.close).props(
                     "flat").classes("absolute top-6 right-6 px-2 text-black z-10")
@@ -131,13 +147,16 @@ class DevicesPage:
                             dialog, name_input, sensors_input))
 
     def check_device_name_input(self, stepper, name_input):
+        '''Checks the device name input'''
         if name_input.value == '':
             ui.notify('Bitte gib einen Namen an.',
                       type='negative')
             return
         else:
+            # Check if name is already in use
             name = self.replace_special_characters(name_input.value)
             name_in_use = Device.check_if_name_in_use(name)
+            
             if name_in_use:
                 ui.notify('Es existiert bereits ein Container mit diesem Namen.', type='negative')
                 return
@@ -145,6 +164,7 @@ class DevicesPage:
         stepper.next()
 
     def create_device(self, dialog, name_input, sensors_input):
+        '''Creates a new device'''
         dialog.close()
         name = name_input.value
         sensor_ids = sensors_input.value
@@ -153,19 +173,24 @@ class DevicesPage:
             self.list_container.clear()
 
         device_id = self.replace_special_characters(name)
-        response = self.iot_hub_helper.create_device(device_id=device_id)
 
         new_device = None
-        if response is None:
-            # Handle case when there is no IoT Hub connection configured
+        
+        # Handle case when there is no IoT Hub connection configured
+        if self.iot_hub_helper.registry_manager is None:
             ui.notify(f"Gerät '{device_id}' erfolgreich erstellt", type="positive")
             new_device = Device.add(sensor_ids=sensor_ids, device_name=device_id)
-        elif not response.success:
-            ui.notify(response.message, type='negative')
-            return
+        
+        # Create device in IoT Hub
         else:
-            ui.notify(response.message, type='positive')
-            new_device = Device.add(sensor_ids=sensor_ids, device_client=response.object)
+            response = self.iot_hub_helper.create_device(device_id=device_id)
+            
+            if not response.success:
+                ui.notify(response.message, type='negative')
+                return
+            else:
+                ui.notify(response.message, type='positive')
+                new_device = Device.add(sensor_ids=sensor_ids, device_client=response.object)
 
         if new_device is not None:
             self.devices.append(new_device)
@@ -173,12 +198,14 @@ class DevicesPage:
             self.update_stats()
 
     def add_device_to_list(self, device):
+        '''Adds a device to the list'''
         with self.list_container:
             new_item = DeviceItem(device=device,
                                   delete_callback=self.delete_button_handler)
             self.list_items.append(new_item)
 
     def delete_button_handler(self, device):
+        '''Handles the delete button click. Opens a dialog to confirm the deletion of the device'''
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
             ui.label(
                 f"Möchtest du das Gerät '{device.name}' wirklich löschen?")
@@ -188,6 +215,7 @@ class DevicesPage:
                     d, device)).classes('text-white bg-red')
 
     def delete_handler(self, dialog, device):
+        '''Handles the deletion of a device. Deletes the device from the database and the IoT Hub and updates the list'''
         dialog.close()
 
         # Check if container is active
@@ -195,12 +223,13 @@ class DevicesPage:
             ui.notify(f"Löschen nicht möglich während Container '{device.container.name}' aktiv ist", type="warning")
             return
 
+        # Delete device from IoT Hub
         self.iot_hub_helper.delete_device(
             device_id=device.name, etag=device.etag)
         device.delete()
 
+        # Delete device from list
         index = self.devices.index(device)
-        # Increment due to headings row
         self.list_container.remove(self.list_items[index].item)
         del self.devices[index]
         del self.list_items[index]
@@ -213,6 +242,7 @@ class DevicesPage:
             self.show_note('Keine Geräte vorhanden')
 
     def replace_special_characters(self, value):
+        '''Replaces special characters not allowed in IoT Hub device names'''
         replacements = {
             ' ': '_',
             'Ä': 'AE',

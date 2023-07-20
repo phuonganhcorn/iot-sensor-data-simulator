@@ -4,8 +4,10 @@ import json
 
 
 class AnomalyCard:
+    '''Anomaly card component for displaying input fields for anomaly generation'''
 
     def __init__(self):
+        '''Initializes the anomaly card and sets up the UI elements'''
         with ui.row().classes('mt-4 p-4 gap-0 w-full bg-gray-100 rounded-md'):
             with ui.column().classes('gap-1'):
                 ui.label('Wahrscheinlichkeiten').classes('mt-2 font-bold')
@@ -37,6 +39,7 @@ class AnomalyCard:
                         label='Minimal', value=5, min=0, max=100).classes('w-full')
 
     def get_values(self, json_dump=False):
+        '''Returns the values of the input fields as a dictionary'''
         values = {
             "type": ANOMALY,
             PROBABILITY_POS_ANOMALY: self.probability_pos_anomaly_input.value / 100,
@@ -47,6 +50,7 @@ class AnomalyCard:
             NEG_ANOMALY_LOWER_RANGE: self.neg_anomaly_lower_range_input.value
         }
 
+        # Return values as JSON string if json_dump is True
         if json_dump:
             return json.dumps(values)
 
@@ -54,8 +58,10 @@ class AnomalyCard:
 
 
 class MCARCard:
+    '''MCAR card component for displaying input fields for MCAR generation'''
 
     def __init__(self):
+        '''Initializes the MCAR card and sets up the UI elements'''
         with ui.row().classes('mt-4 p-4 gap-0 w-full bg-gray-100 rounded-md'):
             with ui.column().classes('gap-1'):
                 ui.label('Wahrscheinlichkeit').classes('mt-2 font-bold')
@@ -66,19 +72,23 @@ class MCARCard:
                     label='Wahrscheinlichkeit', value=5, min=0, max=100, suffix='%')
 
     def get_values(self, json_dump=False):
+        '''Returns the values of the input fields as a dictionary'''
         values = {
             "type": MCAR,
             PROBABILITY: self.probability_input.value / 100
         }
 
+        # Return values as JSON string if json_dump is True
         if json_dump:
             return json.dumps(values)
 
         return values
     
 class DuplicateDataCard:
+    '''Duplicate data card component for displaying input fields for duplicate data generation'''
 
     def __init__(self):
+        '''Initializes the duplicate data card and sets up the UI elements'''
         with ui.row().classes('mt-4 p-4 gap-0 w-full bg-gray-100 rounded-md'):
             with ui.column().classes('gap-1'):
                 ui.label('Wahrscheinlichkeit').classes('mt-2 font-bold')
@@ -89,19 +99,23 @@ class DuplicateDataCard:
                     label='Wahrscheinlichkeit', value=5, min=0, max=100, suffix='%')
 
     def get_values(self, json_dump=False):
+        '''Returns the values of the input fields as a dictionary'''
         values = {
             "type": DUPLICATE_DATA,
             PROBABILITY: self.probability_input.value / 100
         }
 
+        # Return values as JSON string if json_dump is True
         if json_dump:
             return json.dumps(values)
 
         return values
     
 class DriftCard:
+    '''Drift card component for displaying input fields for drift generation'''
 
     def __init__(self):
+        '''Initializes the drift card and sets up the UI elements'''
         with ui.row().classes('mt-4 p-4 gap-0 w-full bg-gray-100 rounded-md'):
             with ui.column().classes('gap-1'):
                 ui.label('Wahrscheinlichkeit').classes('mt-2 font-bold')
@@ -113,6 +127,7 @@ class DriftCard:
                 self.variation_range_input = ui.number(label='Variationsbereich', value=0.1, min=0, format='%.2f')
                 
     def get_values(self, json_dump=False):
+        '''Returns the values of the input fields as a dictionary'''
         values = {
             "type": DRIFT,
             AFTER_N_ITERATIONS: int(self.after_n_iterations_input.value),
@@ -120,6 +135,7 @@ class DriftCard:
             VARIATION_RANGE: self.variation_range_input.value
         }
 
+        # Return values as JSON string if json_dump is True
         if json_dump:
             return json.dumps(values)
 

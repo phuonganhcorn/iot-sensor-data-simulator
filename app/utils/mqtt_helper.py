@@ -7,10 +7,12 @@ import os
 
 
 class MQTTHelper():
+    '''Helper class to send data to a MQTT broker'''
 
     def __init__(self, topic, container_id=None):
         '''Initializes the MQTT helper'''
         self.topic = topic
+        self.is_connected = False
         self.broker_address = os.getenv("MQTT_BROKER_ADDRESS")
         self.broker_port = os.getenv("MQTT_BROKER_PORT")
 
@@ -29,12 +31,11 @@ class MQTTHelper():
         client_id = f"container-{container_id}" if container_id else None
         self.client = mqtt.Client(client_id=client_id)
         
-        
     def connect(self):
         '''Connects to the MQTT broker'''
 
-        # Check if broker address and port are set
-        if not MQTTHelper.is_configured():
+        # Check if client is initialized
+        if self.client is None:
             return
 
         # Set authentication credentials
@@ -44,19 +45,25 @@ class MQTTHelper():
 
         # Connect to broker
         try:
+            self.client.on_connect = self._on_connect
             self.client.connect(self.broker_address, self.broker_port)
+            self.client.loop_start()
         except ConnectionRefusedError as e:
             return Response(False, f"Verbindung zum MQTT-Broker verweigert")
         except Exception as e:
             return Response(False, f"Verbindung zum MQTT-Broker fehlgeschlagen: {e}")
         else:
             return Response(True, "Verbindung zum MQTT-Broker erfolgreich")
+        
+    def _on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            self.is_connected = True
 
     def publish(self, data):
         '''Publish data to a MQTT topic'''
 
         # Check if client is connected
-        if self.client is None:
+        if self.client is None or self.is_connected is False:
             return Response(False, "MQTT-Client nicht verbunden")
         
         # Prevent sending messages in demo mode

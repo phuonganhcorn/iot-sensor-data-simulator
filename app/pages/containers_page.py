@@ -7,6 +7,7 @@ from model.device import Device
 
 
 class ContainersPage:
+    '''This class represents the containers page.'''
 
     def __init__(self, iot_hub_helper):
         self.iot_hub_helper = iot_hub_helper
@@ -20,16 +21,20 @@ class ContainersPage:
         self.setup_live_view_dialog()
 
     def setup_layout(self):
+        '''Sets up Navigation and updates page title'''
         Navigation()
         ui.query('main').classes('h-px')
         ui.query('.nicegui-content').classes('p-8')
         ui.label("Container").classes('text-2xl font-bold')
 
     def setup_menu_bar(self):
+        '''Sets up the menu bar'''
         with ui.row().classes('p-4 w-full flex items-center justify-between bg-gray-200 rounded-lg shadow-md'):
+            # Create container button
             ui.button('Neuen Container erstellen',
                       on_click=lambda: self.open_create_container_dialog()).classes('')
 
+            # Container stats
             with ui.row():
                 with ui.row().classes('gap-1'):
                     ui.label('Gesamt:').classes('text-sm font-medium')
@@ -41,6 +46,7 @@ class ContainersPage:
                     ui.label('Inaktiv:').classes('text-sm font-medium')
                     ui.label().classes('text-sm').bind_text(self, 'inactive_containers_count')
 
+            # Filter
             with ui.row():
                 self.filter_input = ui.input(
                     placeholder='Filter', on_change=self.filter_handler).classes('w-44')
@@ -48,6 +54,7 @@ class ContainersPage:
                           value=1, on_change=self.filter_handler).classes('w-24')
 
     def setup_cards_grid(self):
+        '''Sets up the cards grid'''
         self.cards_grid = ui.grid().classes(
             'relative mt-6 w-full grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4')
         self.setup_note_label()
@@ -62,24 +69,28 @@ class ContainersPage:
                     self.cards.append(new_container_card)
 
     def setup_note_label(self):
+        '''Sets up the note label, which is shown when no containers are available for instance'''
         with self.cards_grid:
             self.note_label = ui.label().classes(
                 'absolute left-1/2 top-48 self-center -translate-x-1/2')
             self.note_label.set_visibility(False)
 
     def setup_live_view_dialog(self):
+        '''Sets up the live view dialog. There is only one instance of the dialog, which is reused for every container.'''
         self.live_view_dialog = LiveViewDialog(self.cards_grid)
 
         for container in self.containers:
             container.live_view_dialog = self.live_view_dialog
 
     def update_stats(self):
+        '''Updates the container stats'''
         self.containers_count = len(self.containers)
         self.active_containers_count = len(
             list(filter(lambda c: c.is_active, self.containers)))
         self.inactive_containers_count = self.containers_count - self.active_containers_count
 
     def filter_handler(self):
+        '''Handles the filter input'''
         search_text = self.filter_input.value
         results = list(filter(lambda c: search_text.lower()
                        in c.container.name.lower(), self.cards))
@@ -97,15 +108,18 @@ class ContainersPage:
             self.hide_note()
 
     def show_note(self, message):
+        '''Shows the note label with the given message'''
         self.cards_grid.classes('justify-center')
         self.note_label.text = message
         self.note_label.set_visibility(True)
 
     def hide_note(self):
+        '''Hides the note label'''
         self.cards_grid.classes('justify-start')
         self.note_label.set_visibility(False)
 
     def open_create_container_dialog(self):
+        '''Opens the create container dialog'''
         with ui.dialog(value=True) as dialog, ui.card().classes('w-[696px] min-h-[500px]'):
             ui.button(icon="close", on_click=dialog.close).props(
                 "flat").classes("absolute top-6 right-6 px-2 text-black z-10")
@@ -144,16 +158,21 @@ class ContainersPage:
                             dialog, name_input, description_textarea, location_input, devices_input))
 
     def check_container_general_input(self, stepper, name_input, description_textarea):
+        '''Checks the general input of the create container dialog'''
+
+        # Check if name is empty
         if name_input.value == '':
             ui.notify('Bitte gib einen Namen an.',
                       type='negative')
             return
+        # Check if name is already in use
         else:
             name_in_use = Container.check_if_name_in_use(name_input.value)
             if name_in_use:
                 ui.notify('Es existiert bereits ein Container mit diesem Namen.', type='negative')
                 return
         
+        # Check if description is too long
         if len(description_textarea.value) > 255:
             ui.notify('Die Beschreibung darf maximal 255 Zeichen lang sein.',
                       type='negative')
@@ -162,6 +181,7 @@ class ContainersPage:
         stepper.next()
 
     def complete_container_creation(self, dialog, name_input, description_textarea, location_input, devices_input):
+        '''Completes the container creation'''
         self.create_container(name_input.value, description_textarea.value,
                               location_input.value, devices_input.value)
         
@@ -169,6 +189,7 @@ class ContainersPage:
         dialog.close()
 
     def create_container(self, name, description, location, device_ids):
+        '''Creates a new container'''
         if len(self.containers) == 0:
             self.cards_grid.clear()
             self.note_label.set_visibility(False)
@@ -183,6 +204,7 @@ class ContainersPage:
         self.update_stats()
 
     def start_container(self, container, interface):
+        '''Starts the container simulation'''
         if len(container.devices) == 0:
             ui.notify("Es sind keine Geräte vorhanden!", type="warning")
             return
@@ -190,17 +212,20 @@ class ContainersPage:
         container.start(interface, success_callback=self.start_container_success_handler, iot_hub_helper=self.iot_hub_helper)
 
     def start_container_success_handler(self, container):
+        '''Handles the success of the container start'''
         index = self.containers.index(container)
         self.cards[index].set_active()
         self.update_stats()
 
     def stop_container(self, container):
+        '''Stops the container simulation'''
         container.stop()
         index = self.containers.index(container)
         self.cards[index].set_inactive()
         self.update_stats()
 
     def delete_container(self, container, dialog):
+        '''Deletes the container'''
         if container.is_active:
             ui.notify(
                 'Container ist aktiv und kann nicht gelöscht werden.', type='warning')
@@ -222,6 +247,7 @@ class ContainersPage:
             self.show_note("Keine Container vorhanden")
 
     def show_live_view_dialog(self, container):
+        '''Shows the live view dialog'''
         if len(container.devices) == 0:
             ui.notify("Es sind keine Geräte vorhanden!", type="warning")
             return

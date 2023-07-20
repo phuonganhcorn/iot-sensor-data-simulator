@@ -5,8 +5,10 @@ import json
 
 
 class Simulator:
+    '''Simulates sensor data.'''
 
     def __init__(self, sensor):
+        '''Initializes the simulator.'''
         self.iteration = 0
         self.sensor = sensor
         self.base_value = sensor.base_value
@@ -44,6 +46,7 @@ class Simulator:
         return records
 
     def generate_data(self, **kwargs):
+        '''Generates a single data record.'''
         iso_format = kwargs.get("iso_format", False)
         timestamp = kwargs.get("timestamp", None)
 
@@ -60,7 +63,7 @@ class Simulator:
             value = result["value"]
             send_duplicate = result.get("duplicate", False)
 
-        # Errors might change the value to None
+        # Check if None. Errors might change the value to None
         if value is not None:
             value = round(value, 2)
         self.iteration += 1
@@ -68,9 +71,11 @@ class Simulator:
             timestamp = datetime.datetime.now().isoformat(
             ) if iso_format else datetime.datetime.now()
 
+        # Return the data record with typical characteristics of an IoT sensor
         return {"timestamp": timestamp, "sensorId": self.sensor.id, "sensorName": self.sensor.name, "value": value, "unit": self.sensor.unit, "deviceId": self.sensor.device_id, "deviceName": self.sensor.device.name, "sendDuplicate": send_duplicate}
 
     def _handle_error_definition(self, value):
+        '''Handles the error definition of a sensor.'''
         error_type = self.error_definition["type"]
 
         if error_type == ANOMALY:
@@ -85,34 +90,46 @@ class Simulator:
         return {"value": value}
 
     def _handle_anomaly_error(self, value):
+        '''Handles the anomaly error type.'''
         if random.random() > 1 - self.error_definition[PROBABILITY_POS_ANOMALY]:
+            # Add a random positive anomaly
             value += random.uniform(self.error_definition[POS_ANOMALY_LOWER_RANGE],
                                     self.error_definition[POS_ANOMALY_UPPER_RANGE])
 
         if random.random() < self.error_definition[PROBABILITY_NEG_ANOMALY]:
+            # Add a random negative anomaly
             value -= random.uniform(self.error_definition[NEG_ANOMALY_LOWER_RANGE],
                                     self.error_definition[NEG_ANOMALY_UPPER_RANGE])
 
         return {"value": value}
 
     def _handle_mcar_error(self, value):
+        '''Handles the MCAR error type.'''
         if random.random() < self.error_definition[PROBABILITY]:
+            # Set value to None
             return {"value": None}
         return {"value": value}
 
     def _handle_duplicate_data_error(self, value):
+        '''Handles the duplicate data error type.'''
         if self.iteration - self.last_duplicate > 2 and random.random() < self.error_definition[PROBABILITY]:
             self.last_duplicate = self.iteration
             return {"value": value, "duplicate": True}
         return {"value": value}
 
     def _handle_drift_error(self, value):
+        '''Handles the drift error type.'''
+        
+        # Init drift after n iterations
         after_n_iterations = self.error_definition[AFTER_N_ITERATIONS]
         if self.drifting or after_n_iterations > self.iteration:
             self.drifting = True
+
+            # Only drift every 10 iterations
             if self.iteration % 10 != 0:
                 return {"value": value}
 
+            # Calculate the drift change
             average_drift_rate = self.error_definition[AVERAGE_DRIFT_RATE]
             variation_range = self.error_definition[VARIATION_RANGE]
             deviation = random.uniform(-variation_range, variation_range)
