@@ -95,23 +95,32 @@ class ContainerCard():
                 with ui.column():
                     ui.label("Wähle aus über welche Schnittstelle die Daten gesendet werden sollen.")
 
-                with ui.row().classes("w-full justify-between items-center"):
+                with ui.row().classes("w-full justify-between items-center md:flex-nowrap md:gap-8"):
+                    host_name = IoTHubHelper.get_host_name()
+                    host_name_is_none = host_name is None
+                    host_name = host_name if host_name else 'Nicht Konfiguriert'
+                    
                     with ui.column().classes("mt-4 gap-1"):
                         ui.label("IoT Hub").classes("text-sm font-medium")
-                        ui.label(f"Hostname: {IoTHubHelper.get_host_name()}")
-                    ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "iothub"))
+                        ui.label(f"Hostname: {host_name}")
+                        iot_hub_note_label = ui.label().classes("mt-2 py-1 px-2 text-x text-gray-600 bg-gray-100 rounded-md")
+                    iot_hub_button = ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "iothub")).classes('w-28 shrink-0')
+                    
+                    if host_name_is_none:
+                        iot_hub_note_label.text = "Zum Konfiguieren Umgebungsvariablen setzen (siehe README.md)"
+                        iot_hub_button.set_enabled(False)
 
                 with ui.row().classes("w-full items-center"):
                     ui.row().classes("h-px grow bg-gray-300")
                     ui.label("oder").classes("text-sm font-medium")
                     ui.row().classes("h-px grow bg-gray-300")
 
-                with ui.row().classes("w-full justify-between items-center"):
+                with ui.row().classes("w-full justify-between items-center md:flex-nowrap md:gap-8"):
                     with ui.column().classes("mt-4 gap-1"):
                         ui.label("MQTT Broker").classes("text-sm font-medium")
                         ui.label(f"Adresse: {MQTTHelper.get_broker_address()}")
                         ui.label(f"Port: {MQTTHelper.get_broker_port()}")
-                    ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "mqtt"))
+                    ui.button('Start', icon='play_arrow', on_click=lambda: self.start_handler(dialog, start_callback, container, "mqtt")).classes('w-28 shrink-0')
 
     def start_handler(self, dialog, start_callback, container, interface):
         '''Starts the container and closes the dialog'''

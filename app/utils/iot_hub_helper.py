@@ -14,9 +14,9 @@ class IoTHubHelper:
 
     def setup_registry_manager(self):
         connection_string = os.getenv("IOT_HUB_CONNECTION_STRING")
-        if connection_string is None:
-            raise Exception("No connection string set in .env file!")
-        self.registry_manager = IoTHubRegistryManager(connection_string) # throws error: Error in sys.excepthook:
+        
+        if connection_string is not None:
+            self.registry_manager = IoTHubRegistryManager(connection_string) # throws error: Error in sys.excepthook:
 
     def create_device(self, device_id):
         primary_key = os.getenv("IOT_HUB_PRIMARY_KEY")
@@ -102,9 +102,12 @@ class IoTHubHelper:
     @staticmethod
     def get_host_name():
         '''Returns the host name of the IoT Hub from the connection string.'''
-        connection_string = os.getenv("IOT_HUB_CONNECTION_STRING")
         try:
+            connection_string = os.getenv("IOT_HUB_CONNECTION_STRING")
             host_name = re.search('HostName=(.+?).azure-devices.net', connection_string).group(1)
         except AttributeError:
-            host_name = ''
+            host_name = None
+        except TypeError:
+            host_name = None
+        
         return host_name
