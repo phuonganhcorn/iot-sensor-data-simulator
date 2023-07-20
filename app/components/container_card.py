@@ -9,7 +9,11 @@ from utils.export_helper import ExportHelper
 
 
 class ContainerCard():
+    '''Container card component for displaying container information'''
+
     def __init__(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None, live_view_callback=None):
+        '''Initializes the container card'''
+
         self.wrapper = wrapper
         self.container = container
         self.card = None
@@ -23,11 +27,14 @@ class ContainerCard():
                    stop_callback=stop_callback, delete_callback=delete_callback, live_view_callback=live_view_callback)
 
     def setup(self, wrapper, container, start_callback=None, stop_callback=None, delete_callback=None, live_view_callback=None):
+        '''Sets up initial UI elements of the container card'''
+
         self.update_sensor_count()
 
         with ui.card().tight().bind_visibility(self, 'visible') as card:
             self.card = card
             with ui.card_section().classes('min-h-[260px]'):
+                # Container header
                 with ui.row().classes('pb-2 w-full justify-between items-center border-b border-gray-200'):
                     ui.label(container.name).classes('text-xl font-semibold')
                     with ui.row().classes('gap-0.5'):
@@ -41,6 +48,8 @@ class ContainerCard():
                                     'flex items-center')
                                 ui.menu_item('Löschen', lambda w=wrapper, c=container, callback=delete_callback: self.show_delete_dialog(
                                     w, c, callback)).classes('text-red-500').classes('flex items-center')
+                
+                # Container information
                 with ui.column().classes('py-4 gap-2'):
                     with ui.row().classes('gap-1'):
                         ui.label('Geräte:').classes('text-sm font-medium')
@@ -57,6 +66,8 @@ class ContainerCard():
                         ui.label('Startzeit:').classes('text-sm font-medium')
                         ui.label().classes('text-sm').bind_text_from(container, 'start_time',
                                                                      backward=lambda t: f'{t.strftime("%d.%m.%Y, %H:%M:%S")} Uhr' if t else '')
+            
+            # Container controls
             with ui.card_section().classes('bg-gray-100'):
                 with ui.row().classes('items-center justify-between'):
                     with ui.row().classes('gap-3 items-center'):
@@ -73,17 +84,21 @@ class ContainerCard():
                         ui.button(icon='exit_to_app', on_click=lambda: self.show_export_dialog()).props('flat').classes('px-2 text-black')
 
     def set_active(self):
+        '''Sets the container to active'''
         self.active_dot.classes('bg-green-500', remove='bg-red-500')
 
     def set_inactive(self):
+        '''Sets the container to inactive'''
         self.active_dot.classes('bg-red-500', remove='bg-green-500')
 
     def update_sensor_count(self):
+        '''Updates the sensor count'''
         self.sensor_count = 0
         for device in self.container.devices:
             self.sensor_count += len(device.sensors)
 
     def show_interface_selection_dialog(self, container, start_callback):
+        '''Shows the interface selection dialog, wheather to use IoT Hub or MQTT'''
         with self.wrapper:
             with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 overflow-auto"):
                 with ui.row().classes("w-full justify-between items-center"):
@@ -95,6 +110,7 @@ class ContainerCard():
                 with ui.column():
                     ui.label("Wähle aus über welche Schnittstelle die Daten gesendet werden sollen.")
 
+                # IoT Hub
                 with ui.row().classes("w-full justify-between items-center md:flex-nowrap md:gap-8"):
                     host_name = IoTHubHelper.get_host_name()
                     host_name_is_none = host_name is None
@@ -112,11 +128,13 @@ class ContainerCard():
                     else:
                         iot_hub_note_label.set_visibility(False)
 
+                # Separator
                 with ui.row().classes("w-full items-center"):
                     ui.row().classes("h-px grow bg-gray-300")
                     ui.label("oder").classes("text-sm font-medium")
                     ui.row().classes("h-px grow bg-gray-300")
 
+                # MQTT
                 with ui.row().classes("w-full justify-between items-center md:flex-nowrap md:gap-8"):
                     mqtt_broker_address = MQTTHelper.get_broker_address()
                     mqtt_broker_port = MQTTHelper.get_broker_port()
@@ -150,6 +168,7 @@ class ContainerCard():
                         "flat").classes("px-2 text-black")
 
                 with ui.row().classes("w-full flex justify-between"):
+                    # Container information
                     with ui.column().classes("gap-4"):
                         ui.label("Allgemein").classes(
                             "text-lg font-semibold mt-2")
@@ -176,6 +195,8 @@ class ContainerCard():
                                 description = self.container.description
                                 ui.label(f"{description if description else 'k.A.'}").classes(
                                     "text-md font-medium")
+                                
+                    # Container status
                     with ui.column().classes('pr-3 gap-1 items-end'):
                         ui.label("Status").classes("text-sm text-gray-500")
                         with ui.row().classes('gap-3 items-center'):
@@ -184,10 +205,12 @@ class ContainerCard():
                             ui.label().bind_text_from(self.container, 'is_active',
                                                       backward=lambda is_active: f'{"Aktiv" if is_active else "Inaktiv"}')
 
+                # Container and sensors
                 with ui.column().classes("w-full gap-4"):
                     ui.label("Geräte und Sensoren").classes(
                         "text-lg font-semibold mt-2")
 
+                    # Device tree
                     with ui.row().classes("gap-x-28"):
                         with ui.column().classes('gap-0'):
                             ui.label("Ansicht").classes(
@@ -199,6 +222,7 @@ class ContainerCard():
                                 ui.tree(
                                     data, label_key="id")
 
+                        # Add device
                         unassigned_devices = Device.get_all_unassigned()
                         with ui.column().classes('gap-0'):
                             device_options = {
@@ -217,6 +241,7 @@ class ContainerCard():
                                     "Keine weiteren Geräte frei.").classes()
 
     def create_tree_data(self, devices):
+        '''Creates the tree data for the device tree'''
         tree = []
         for device in devices:
             device_node = {'id': device.name, 'children': []}
@@ -227,6 +252,7 @@ class ContainerCard():
         return tree
     
     def show_export_dialog(self):
+        '''Shows the export dialog for exporting bulk data'''
         if len(self.container.devices) == 0:
             ui.notify("Es sind keine Geräte vorhanden!", type="warning")
             return
@@ -246,10 +272,12 @@ class ContainerCard():
                 
                 ui.label("Führe einen Massenexport aus und wähle aus, wie die Daten exportiert werden sollen.")
 
+                # Bulk data generation
                 with ui.row().classes("gap-6 items-center"):
                     self.bulk_amount_input = ui.number(label="Werte pro Sensor", min=1, max=1000, step=1, value=10).classes('w-24')
                     ui.button("Daten generieren", on_click=self.generate_bulk_data).props("flat")
 
+                # Visualization
                 ui.label("Vorschau").classes("text-lg font-semibold mt-2")
 
                 self.sensor_selection = SensorSelection(container=self.container, sensor_select_callback=self.update_export_preview)
@@ -259,6 +287,7 @@ class ContainerCard():
                 self.export_button.set_enabled(False)
 
     def generate_bulk_data(self):
+        '''Generates bulk data for the export'''
         container_data = {}
         bulk_amount = int(self.bulk_amount_input.value)
 
@@ -275,16 +304,19 @@ class ContainerCard():
         self.export_button.set_enabled(True)
 
     def save_bulk_to_file(self):
+        '''Saves the generated bulk data to a file'''
         ExportHelper().save_to_file(self.generated_container_data)
         ui.notify(f"Daten erfolgreich exportiert", type="positive")
         self.dialog.close()
 
     def show_export_preview(self, container_data):
+        '''Shows the export preview chart'''
         selected_sensor = self.sensor_selection.get_sensor()
         time_series_data = container_data[selected_sensor.device.name][selected_sensor.name]
         self.chart.show(time_series_data=time_series_data)
 
     def update_export_preview(self, sensor):
+        '''Updates the export preview chart'''
         if self.generated_container_data is None:
             return
         elif sensor is None:
@@ -295,6 +327,7 @@ class ContainerCard():
         self.chart.update(sensor, time_series_data)
 
     def add_device_handler(self):
+        '''Adds a device to the container'''
         if self.container.is_active:
             ui.notify(
                 f"Hinzufügen nicht möglich während dieser Container aktiv ist.", type="negative")
@@ -320,6 +353,7 @@ class ContainerCard():
             ui.tree(new_data, label_key="id")
 
     def show_logs_dialog(self, container):
+        '''Shows the logs dialog'''
         if not container.is_active:
             ui.notify('Container ist nicht aktiv', type='warning')
             return
@@ -327,6 +361,7 @@ class ContainerCard():
         self.logs_dialog.show()
 
     def show_delete_dialog(self, wrapper, container, delete_callback):
+        '''Shows the delete dialog'''
         with wrapper:
             with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
                 ui.label('Soll der Container wirklich gelöscht werden?')

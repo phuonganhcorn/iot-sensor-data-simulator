@@ -7,18 +7,23 @@ import json
 
 
 class SensorItem:
+    '''Sensor item component for displaying a sensor in a list'''
 
     def __init__(self, sensor, delete_callback):
+        '''Initializes the sensor item'''
         self.item = None
         self.sensor = sensor
         self.visible = True
         self.error_definition = None
-
+        self.setup(sensor, delete_callback)
+    
+    def setup(self, sensor, delete_callback):
+        '''Sets up the UI elements of the sensor item'''
         error_type = None
         if sensor.error_definition:
             self.error_definition = json.loads(sensor.error_definition) if sensor.error_definition else None
             error_type = self.error_definition["type"]
-        
+
         with ui.row().bind_visibility(self, "visible").classes("px-3 py-4 flex justify-between items-center w-full hover:bg-gray-50") as row:
             self.item = row
             with ui.row().classes("gap-6"):
@@ -35,19 +40,23 @@ class SensorItem:
                         "flat").classes("px-2 text-red")
 
     def show_details_dialog(self):
+        '''Shows the details dialog for a sensor'''
         with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none min-h-[327px]"):
             self.dialog = dialog
             with ui.row().classes("relative mb-8 w-full justify-between items-center"):
                 ui.label(f"{self.sensor.name}").classes("text-lg font-medium")
+                # Setup tabs
                 with ui.tabs().classes('') as tabs:
                     general_tab = ui.tab('Allgemein')
                     simulation_tab = ui.tab('Simulation')
                 ui.row()
                 ui.button(icon="close", on_click=self.dialog.close).props("flat").classes("absolute top-0 right-0 px-2 text-black md:top-1")
 
+            # Setup tab panels
             with ui.tab_panels(tabs, value=general_tab).classes('w-full'):
-                with ui.tab_panel(general_tab).classes("p-0"):
 
+                # Setup general tab to show general sensor settings
+                with ui.tab_panel(general_tab).classes("p-0"):
                     with ui.column().classes("gap-4"):
                         with ui.row().classes("gap-x-10 gap-y-4"):
                             with ui.column().classes("gap-0"):
@@ -78,6 +87,7 @@ class SensorItem:
                                 self.device_select = ui.select(value=preselect_value, options=device_options, with_input=True).classes("min-w-[120px]")
                                 ui.button("Speichern", on_click=self.change_device).props("flat")
 
+                # Setup simulation tab to show sensor simulation settings
                 with ui.tab_panel(simulation_tab).classes("p-0"):
                     with ui.column().classes("gap-4"):
                         with ui.row().classes("gap-x-10 gap-y-4"):
@@ -94,6 +104,7 @@ class SensorItem:
                                 ui.label("Interval [s]").classes("text-sm text-gray-500")
                                 ui.label(f"{self.sensor.interval}").classes("text-md font-medium")
 
+                    # Show error simulation settings if error definition is set
                     if self.error_definition:
                         ui.label("Fehlersimulation").classes("text-[16px] font-medium mt-8 mb-4")
 
@@ -109,8 +120,10 @@ class SensorItem:
                                         ui.label(formatted_value).classes("text-md font-medium")
     
     def change_device(self):
+        '''Changes the device of the sensor'''
+
         # Check if container is active
-        if self._check_if_container_is_active(self.sensor.device):
+        if self._check_if_container_is_active():
             return
         
         # Check if container of new device is active
@@ -124,8 +137,9 @@ class SensorItem:
         self.device_name_label.text = new_device.name
         ui.notify(f"Änderung erfolgreich gespeichert.", type="positive")
 
-    def _check_if_container_is_active(self, device):
-        container = device.container
+    def _check_if_container_is_active(self):
+        '''Checks if the parent container is active'''
+        container = self.sensor.container
         if container is not None and container.is_active:
             ui.notify(f"Änderung kann nicht übernommen werden während Container '{container.name}' aktiv ist.", type="negative")
             return True

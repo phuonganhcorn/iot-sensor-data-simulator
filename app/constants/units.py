@@ -1,3 +1,5 @@
+# Description: Units for the sensor data
+# Used to encode the unit of the sensor data in the database
 UNITS = [
     {"id": 0, "name": "Temperatur", "unit": "Celsius", "unit_abbreviation": "°C"},
     {"id": 1, "name": "Druck", "unit": "Pascal", "unit_abbreviation": "Pa"},

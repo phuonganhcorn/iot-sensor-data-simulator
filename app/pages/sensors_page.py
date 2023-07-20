@@ -9,8 +9,10 @@ from components.sensor_error_cards import AnomalyCard, MCARCard, DuplicateDataCa
 
 
 class SensorsPage():
+    '''This class represents the sensors page.'''
 
     def __init__(self):
+        '''Initializes the page'''
         self.sensors = Sensor.get_all()
         self.list_items = []
         self.sensor_error_card = None
@@ -18,6 +20,7 @@ class SensorsPage():
         self.setup_page()
 
     def setup_page(self):
+        '''Setup the page'''
         Navigation()
         ui.query('.nicegui-content').classes('p-8')
         ui.label("Sensoren").classes('text-2xl font-bold')
@@ -26,23 +29,29 @@ class SensorsPage():
         self.setup_list()
 
     def setup_menu_bar(self):
+        '''Setup the menu bar'''
         with ui.row().classes('p-4 w-full flex items-center justify-between bg-gray-200 rounded-lg shadow-md'):
+            # New sensor button
             ui.button('Neuen Sensor erstellen',
                       on_click=lambda: self.show_create_sensor_dialog()).classes('')
 
+            # Stats
             with ui.row().classes('gap-1'):
                 ui.label('Gesamt:').classes('text-sm font-medium')
                 ui.label().classes('text-sm').bind_text(self, 'sensors_count')
 
+            # Filter
             with ui.row():
                 self.filter_input = ui.input(
                     placeholder='Filter', on_change=self.filter_handler).classes('w-44')
 
     def setup_list(self):
+        '''Setup the list'''
         self.list_container = ui.column().classes(
             'relative grid w-full min-w-[800px] gap-0 divide-y')
 
         with self.list_container:
+            # Add headings row
             headings = [{'name': 'ID', 'classes': 'w-[30px]'},
                         {'name': 'Name', 'classes': 'w-[130px]'},
                         {'name': 'Typ', 'classes': 'w-[130px]'},
@@ -54,6 +63,7 @@ class SensorsPage():
                     ui.label(heading['name']).classes(
                         f'font-medium {heading["classes"]}')
 
+            # Print list items
             if len(self.sensors) == 0:
                 self.show_note('Keine Sensoren vorhanden')
             else:
@@ -65,12 +75,14 @@ class SensorsPage():
             self.setup_note_label()
 
     def setup_note_label(self):
+        '''Setup the note label'''
         with self.list_container:
             self.note_label = ui.label().classes(
                 'absolute left-1/2 top-48 self-center -translate-x-1/2 !border-t-0')
             self.note_label.set_visibility(False)
 
     def filter_handler(self):
+        '''Filter the list'''
         search_text = self.filter_input.value
         results = list(filter(lambda item: search_text.lower()
                        in item.sensor.name.lower(), self.list_items))
@@ -89,18 +101,22 @@ class SensorsPage():
             self.list_container.classes(add='divide-y', remove='divide-y-0')
 
     def show_note(self, message):
+        '''Show a note'''
         self.list_container.classes(add='divide-y-0', remove='divide-y')
         self.note_label.text = message
         self.note_label.set_visibility(True)
 
     def hide_note(self):
+        '''Hide the note'''
         self.list_container.classes(add='divide-y', remove='divide-y-0')
         self.note_label.set_visibility(False)
 
     def update_stats(self):
+        '''Update the stats'''
         self.sensors_count = len(self.sensors)
 
     def show_create_sensor_dialog(self):
+        '''Show the create sensor dialog'''
         self.sensor_error_card = None
         device_select = None
 
@@ -109,6 +125,7 @@ class SensorsPage():
                     "flat").classes("absolute top-6 right-6 px-2 text-black z-10")
 
                 with ui.stepper().props('vertical').classes('') as stepper:
+                    # General values
                     with ui.step('Allgemein'):
                         with ui.grid().classes('sm:grid-cols-2'):
                             name_input = ui.input('Name*')
@@ -123,6 +140,7 @@ class SensorsPage():
                                 'flat')
                             ui.button('Weiter', on_click=lambda: self.check_general_step_input(
                                 stepper, name_input))
+                    # Simulation values 
                     with ui.step('Simulationswerte'):
                         with ui.grid().classes('w-full sm:grid-cols-3'):
                             base_value_input = ui.number(
@@ -139,6 +157,7 @@ class SensorsPage():
                             ui.button('Zurück', on_click=stepper.previous).props(
                                 'flat')
                             ui.button('Weiter', on_click=stepper.next)
+                    # Error simulation values
                     with ui.step('Fehlersimulation'):
                         ui.label(
                             'Simuliere Fehler, die bei einer Messung auftreten können.')
@@ -159,6 +178,7 @@ class SensorsPage():
                             ui.button('Zurück', on_click=stepper.previous).props(
                                 'flat')
                             ui.button('Weiter', on_click=stepper.next)
+                    # Device assignment
                     with ui.step('Gerätezuordnung'):
                         devices = Device.get_all()
                         devices_options = {
@@ -176,6 +196,7 @@ class SensorsPage():
                             ui.button('Zurück', on_click=stepper.previous).props(
                                 'flat')
                             ui.button('Weiter', on_click=stepper.next)
+                    # Finish
                     with ui.step('Abschließen'):
                         ui.label(
                             'Erstelle einen neuen Sensor mit den angegebenen Werten.')
@@ -186,6 +207,8 @@ class SensorsPage():
                                 dialog, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select))
 
     def error_type_input_handler(self, container, value):
+        '''Handle the error type. Updates the input container with the corresponding error card.'''
+
         container.clear()
 
         if value == NO_ERROR:
@@ -203,10 +226,14 @@ class SensorsPage():
                 self.sensor_error_card = DriftCard()
 
     def check_general_step_input(self, stepper, name_input):
+        '''Check the general step input'''
+
+        # Check if name is empty
         if name_input.value == '':
             ui.notify('Bitte gib einen Namen an.',
                       type='negative')
             return
+        # Check if name is already in use
         else:
             name_in_use = Sensor.check_if_name_in_use(name_input.value)
             if name_in_use:
@@ -216,9 +243,11 @@ class SensorsPage():
         stepper.next()
 
     def create_sensor(self, dialog, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select):
+        '''Create a new sensor'''
         if len(self.sensors) == 0:
             self.list_container.clear()
 
+        # Read values from inputs
         name = name_input.value
         unit = unit_input.value
         base_value = base_value_input.value
@@ -229,10 +258,12 @@ class SensorsPage():
             json_dump=True)
         device_id = None if device_select is None else device_select.value
 
+        # Create sensor
         new_sensor = Sensor.add(name=name, base_value=base_value, unit=unit, variation_range=variation_range,
                                 change_rate=change_rate, interval=interval, error_definition=error_definition, device_id=device_id)
         self.sensors.append(new_sensor)
 
+        # Add to list
         with self.list_container:
             new_item = SensorItem(sensor=new_sensor,
                                   delete_callback=self.delete_button_handler)
@@ -244,6 +275,7 @@ class SensorsPage():
         self.update_stats()
 
     def delete_button_handler(self, sensor):
+        '''Handles the delete button click. Opens a dialog to confirm the deletion of the device'''
         with ui.dialog(value=True) as dialog, ui.card().classes('items-center'):
             ui.label(
                 f"Möchtest du den Sensor '{sensor.name}' wirklich löschen?")
@@ -253,6 +285,7 @@ class SensorsPage():
                     d, sensor)).classes('text-white bg-red')
 
     def delete_handler(self, dialog, sensor):
+        '''Handles the deletion of a sensor. Deletes the sensor from the database and updates the list'''
         dialog.close()
 
         # Check if container is active

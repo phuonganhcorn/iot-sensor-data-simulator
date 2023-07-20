@@ -5,6 +5,7 @@ from model.sensor import Sensor
 
 
 class Chart:
+    '''Chart component for displaying time series data'''
 
     def __init__(self):
         self.wrapper = None
@@ -12,15 +13,22 @@ class Chart:
         self.setup()
 
     def setup(self):
+        '''Sets up initial UI elements of the chart'''
+
         with ui.row().classes('w-full h-64 justify-center items-center') as wrapper:
             self.wrapper = wrapper
             self.note_label = ui.label(
                 "Keine Daten").classes("w-full text-center -translate-y-full")
 
     def show_note(self, text):
+        '''Shows a note on the chart'''
+
         self.note_label.set_text(text)
 
     def show(self, sensor=None, time_series_data=None, data=None):
+        '''Shows the chart'''
+
+        # Prepare data
         if time_series_data is not None:
             sensor_id = time_series_data[0]["sensorId"]
             sensor = Sensor.get_by_id(sensor_id)
@@ -31,9 +39,12 @@ class Chart:
                 for i in range(len(time_series_data))
             ]
 
+        # Prepare x axis
         x_values = [i * sensor.interval for i in range(len(data))]
 
         self.wrapper.clear()
+
+        # Draw chart
         with self.wrapper:
             self.chart = ui.chart({
                 "title": False,
@@ -71,6 +82,8 @@ class Chart:
             }).classes("w-full h-64")
 
     def update(self, sensor, time_series_data):
+        '''Updates the chart with new data'''
+
         data = [[time_series_data[i]["timestamp"].strftime("%d.%m.%Y, %H:%M:%S"), time_series_data[i]["value"]]
                 for i in range(len(time_series_data))]
 
@@ -79,6 +92,8 @@ class Chart:
         self.update_legend(sensor)
 
     def update_legend(self, sensor):
+        '''Updates the chart legend'''
+
         if self.chart is None or sensor is None:
             self.empty()
             return
@@ -93,11 +108,15 @@ class Chart:
         self.chart.update()
 
     def update_visualization(self, sensor):
+        '''Updates the chart visualization'''
+
         if self.chart is None:
             return
         
+        # If uncommented, the chart will be zoomed in on the sensors range
         # self.chart.options["yAxis"]["min"] = sensor.base_value - sensor.variation_range - sensor.change_rate
         # self.chart.options["yAxis"]["max"] = sensor.base_value + sensor.variation_range + sensor.change_rate
+
         self.chart.options["yAxis"]["plotBands"] = [ {
                             "color": 'rgba(0, 0, 255, 0.05)',
                             "from": sensor.base_value - sensor.variation_range,
@@ -106,6 +125,8 @@ class Chart:
                     ]
 
     def append_data_point(self, sensor, timestamp, value):
+        '''Appends a data point to the chart'''
+
         # Append data point
         data = self.chart.options["series"][0]["data"]
         data.append([timestamp, value])
@@ -121,6 +142,8 @@ class Chart:
         self.chart.update()
 
     def empty(self):
+        '''Empties the chart'''
+        
         if self.chart is None:
             return
         

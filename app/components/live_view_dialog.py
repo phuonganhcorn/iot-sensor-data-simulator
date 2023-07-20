@@ -36,7 +36,8 @@ class LiveViewDialog():
         with self.selects_row:
             self.sensor_selection = SensorSelection(
                 container=container, sensor_select_callback=self.sensor_select_change_handler)
-            
+        
+        # Prepare chart
         self.chart.empty()
         text = "Warten auf Sensordaten..." if container.is_active else "Container ist nicht aktiv"
         self.chart.show_note(text)
@@ -64,9 +65,11 @@ class LiveViewDialog():
         if self.sensor_selection.device_select.value != sensor.device_id or self.sensor_selection.sensor_select.value != sensor.id:
             return
 
+        # Show/create chart if not already done
         if self.chart.chart is None:
             self.chart.show(sensor=sensor, data=[[timestamp, value]])
             return
 
+        # Append data point
         self.chart.append_data_point(
             sensor=sensor, timestamp=timestamp, value=value)

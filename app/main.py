@@ -12,35 +12,43 @@ from model.container import Container
 from model.device import Device
 from model.sensor import Sensor
 
+# Load environment variables
 load_dotenv()
 
+# Create database if it does not exist
+# Setup database session
 engine = create_engine('sqlite:///telemetry_simulator.db')
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+# Set database session for all models
 Option.session = session
 Container.session = session
 Device.session = session
 Sensor.session = session
 
 
+# Create IoT Hub helper
 iot_hub_helper = IoTHubHelper()
-
 
 @ui.page('/')
 def containers_page():
+    '''Renders the containers page at / path.'''
     ContainersPage(iot_hub_helper)
 
 
 @ui.page('/geraete')
 def devices_page():
+    '''Renders the devices page at /geraete path.'''
     DevicesPage(iot_hub_helper)
 
 
 @ui.page('/sensoren')
 def sensors_page():
+    '''Renders the sensors page at /sensoren path.'''
     SensorsPage()
 
 
+# Start the UI
 ui.run(title="IoT Telemetrie Simulator", host="127.0.0.1", port=8080)

@@ -6,6 +6,7 @@ Base = declarative_base()
 
 
 class OptionModel(Base):
+    '''This class represents an option. Options are used to store global settings.'''
     __tablename__ = 'option'
     session = None
 
@@ -18,6 +19,7 @@ class OptionModel(Base):
 
 
 class ContainerModel(Base):
+    '''This class represents a container. A container is a collection of devices. Used for defining the database schema.'''
     __tablename__ = 'container'
     session = None
 
@@ -35,6 +37,7 @@ class ContainerModel(Base):
 
 
 class DeviceModel(Base):
+    '''This class represents a device. A device is a collection of sensors. Used for defining the database schema.'''
     __tablename__ = 'device'
     session = None
     client = None
@@ -55,6 +58,7 @@ class DeviceModel(Base):
 
 
 class SensorModel(Base):
+    '''This class represents a sensor. Used for defining the database schema.'''
     __tablename__ = 'sensor'
     session = None
     thread = None

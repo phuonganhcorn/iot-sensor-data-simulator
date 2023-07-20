@@ -7,6 +7,7 @@ import os
 
 
 class MQTTHelper():
+    '''Helper class to send data to a MQTT broker'''
 
     def __init__(self, topic, container_id=None):
         '''Initializes the MQTT helper'''
