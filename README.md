@@ -14,9 +14,11 @@ IoT systems often involve many sensors, generating vast amounts of data that nee
 
 ## Installation
 
-Ensure that you have Python and pip installed on your system.
+Before you begin, ensure that you have at least Python 3.6 installed on your system. If you don't have Python installed, you can download it from the official website [here](https://www.python.org/downloads/). 
 
-Clone the repository:
+Additionally, make sure you have the package manager `pip` installed. `pip` usually comes pre-installed with Python versions 2.7.9+ or 3.4+.
+
+Once you've verified your Python and pip installations, clone the repository to your local machine:
 
 ```python
 git clone https://github.com/antonsarg/iot-sensor-data-simulator
