@@ -44,6 +44,36 @@ python3 app/main.py
 
 You can then access the simulator's user interface in your web browser at `http://localhost:8080`.
 
+### Sending Data to Azure IoT Hub
+
+To send data to the Azure IoT Hub, an `.env` file must be created in the project root containing the following environment variables:
+
+```python
+IOT_HUB_CONNECTION_STRING=YourConnectionStringHere
+IOT_HUB_PRIMARY_KEY=YourPrimaryKeyHere
+IOT_HUB_SECONDARY_KEY=YourSecondaryKeyHere
+```
+
+These values are used to establish a connection to the IoT Hub and are not required for running the application without IoT Hub connectivity.
+
+### Sending Data to MQTT Broker
+
+The software also supports sending data to an MQTT broker. Similarly, the `.env` file should contain the broker's address and port number:
+
+```python
+MQTT_BROKER_ADDRESS=YourBrokerAddressHere
+MQTT_BROKER_PORT=YourBrokerPortHere
+```
+
+For brokers requiring authentication, you can provide a username and password:
+
+```python
+MQTT_BROKER_USERNAME=YourUsernameHere
+MQTT_BROKER_PASSWORD=YourPasswordHere
+```
+
+Again, these details are optional and are not necessary to run the application without MQTT broker connectivity.
+
 ## Contribution
 
 If you find any bugs or have a feature request, please open an issue on GitHub. I welcome any contributions, whether it's improving the documentation, fixing bugs, or implementing new features. 
