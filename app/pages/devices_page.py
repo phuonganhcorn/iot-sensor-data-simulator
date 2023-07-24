@@ -19,7 +19,7 @@ class DevicesPage:
     def setup_page(self):
         '''Sets up the page'''
         Navigation()
-        ui.query('.nicegui-content').classes('p-8')
+        ui.query('.nicegui-content').classes('mx-auto max-w-screen-2xl p-8')
         ui.label("Geräte").classes('text-2xl font-bold')
 
         self.setup_menu_bar()

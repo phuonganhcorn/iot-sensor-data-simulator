@@ -26,7 +26,7 @@ class SensorsPage():
     def setup_page(self):
         '''Setup the page'''
         Navigation()
-        ui.query('.nicegui-content').classes('p-8')
+        ui.query('.nicegui-content').classes('mx-auto max-w-screen-2xl p-8')
         ui.label("Sensoren").classes('text-2xl font-bold')
 
         self.setup_menu_bar()
