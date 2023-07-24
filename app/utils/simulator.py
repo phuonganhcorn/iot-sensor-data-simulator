@@ -12,8 +12,6 @@ class Simulator:
         self.iteration = 0
         self.sensor = sensor
         self.base_value = sensor.base_value
-        self.variation_range = sensor.variation_range
-        self.change_rate = sensor.change_rate
         self.previous_value = sensor.base_value
         self.last_duplicate = -1  # Used to prevent more than one duplicate in a row
         self.drifting = False
@@ -50,11 +48,11 @@ class Simulator:
         iso_format = kwargs.get("iso_format", False)
         timestamp = kwargs.get("timestamp", None)
 
-        value_change = random.uniform(-self.change_rate, self.change_rate)
+        value_change = random.uniform(-self.sensor.change_rate, self.sensor.change_rate)
         value = self.previous_value + value_change
 
-        value = max(self.base_value - self.variation_range,
-                    min(self.base_value + self.variation_range, value))
+        value = max(self.base_value - self.sensor.variation_range,
+                    min(self.base_value + self.sensor.variation_range, value))
         self.previous_value = value
 
         send_duplicate = False
