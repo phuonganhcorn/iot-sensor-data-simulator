@@ -24,7 +24,7 @@ class ContainersPage:
         '''Sets up Navigation and updates page title'''
         Navigation()
         ui.query('main').classes('h-px')
-        ui.query('.nicegui-content').classes('p-8')
+        ui.query('.nicegui-content').classes('mx-auto max-w-screen-2xl p-8')
         ui.label("Container").classes('text-2xl font-bold')
 
     def setup_menu_bar(self):
