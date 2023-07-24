@@ -7,6 +7,10 @@ from constants.units import *
 from constants.sensor_errors import *
 from components.sensor_error_cards import AnomalyCard, MCARCard, DuplicateDataCard, DriftCard
 
+DEFAULT_BASE_VALUE = 25.00
+DEFAULT_VARIATION_RANGE = 5.00
+DEFAULT_CHANGE_RATE = 0.5
+DEFAULT_INTERVAL = 2
 
 class SensorsPage():
     '''This class represents the sensors page.'''
@@ -144,15 +148,15 @@ class SensorsPage():
                     with ui.step('Simulationswerte'):
                         with ui.grid().classes('w-full sm:grid-cols-3'):
                             base_value_input = ui.number(
-                                label='Basiswert', value=25.00, format='%.2f')
+                                label='Basiswert', value=DEFAULT_BASE_VALUE, format='%.2f')
                             variation_range_input = ui.number(label='Variationsbereich',
-                                                            value=5.00, min=0, format='%.2f')
-                            with ui.number(label='Max. Änderungsrate +/-', value=0.5, min=0, max=10) as input:
+                                                            value=DEFAULT_VARIATION_RANGE, min=0, format='%.2f')
+                            with ui.number(label='Max. Änderungsrate +/-', value=DEFAULT_CHANGE_RATE, min=0, max=10) as input:
                                 change_rate_input = input
                                 ui.tooltip(
                                     'Die maximale Änderungsrate gibt an, wie stark sich ein Wert pro Interval bezogen auf den vorherigen Wert maximal ändern kann.').classes('mx-4')
                             interval_input = ui.number(
-                                label='Interval [s]', value=10, min=0, max=3600)
+                                label='Interval [s]', value=DEFAULT_INTERVAL, min=0, max=3600)
                         with ui.stepper_navigation():
                             ui.button('Zurück', on_click=stepper.previous).props(
                                 'flat')

@@ -3,9 +3,11 @@ import random
 import datetime
 import json
 
+DRIFT_ITERATIONS = 10
 
 class Simulator:
     '''Simulates sensor data.'''
+
 
     def __init__(self, sensor):
         '''Initializes the simulator.'''
@@ -123,8 +125,8 @@ class Simulator:
         if self.drifting or after_n_iterations > self.iteration:
             self.drifting = True
 
-            # Only drift every 10 iterations
-            if self.iteration % 10 != 0:
+            # Only drift every n iterations
+            if self.iteration % DRIFT_ITERATIONS != 0:
                 return {"value": value}
 
             # Calculate the drift change
