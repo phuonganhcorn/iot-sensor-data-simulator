@@ -29,7 +29,7 @@ class AnomalyCard:
                     self.pos_anomaly_upper_range_input = ui.number(
                         label='Maximal', value=20, min=0, max=100).classes('w-full')
                     self.pos_anomaly_lower_range_input = ui.number(
-                        label='Minimal', value=10, min=0, max=100).classes('w-full')
+                        label='Minimal', value=20, min=0, max=100).classes('w-full')
 
                 with ui.column().classes('gap-0'):
                     ui.label('Negativ').classes('font-medium opacity-70')

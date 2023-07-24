@@ -3,17 +3,17 @@ import random
 import datetime
 import json
 
+DRIFT_ITERATIONS = 10
 
 class Simulator:
     '''Simulates sensor data.'''
+
 
     def __init__(self, sensor):
         '''Initializes the simulator.'''
         self.iteration = 0
         self.sensor = sensor
         self.base_value = sensor.base_value
-        self.variation_range = sensor.variation_range
-        self.change_rate = sensor.change_rate
         self.previous_value = sensor.base_value
         self.last_duplicate = -1  # Used to prevent more than one duplicate in a row
         self.drifting = False
@@ -50,11 +50,11 @@ class Simulator:
         iso_format = kwargs.get("iso_format", False)
         timestamp = kwargs.get("timestamp", None)
 
-        value_change = random.uniform(-self.change_rate, self.change_rate)
+        value_change = random.uniform(-self.sensor.change_rate, self.sensor.change_rate)
         value = self.previous_value + value_change
 
-        value = max(self.base_value - self.variation_range,
-                    min(self.base_value + self.variation_range, value))
+        value = max(self.base_value - self.sensor.variation_range,
+                    min(self.base_value + self.sensor.variation_range, value))
         self.previous_value = value
 
         send_duplicate = False
@@ -125,8 +125,8 @@ class Simulator:
         if self.drifting or after_n_iterations > self.iteration:
             self.drifting = True
 
-            # Only drift every 10 iterations
-            if self.iteration % 10 != 0:
+            # Only drift every n iterations
+            if self.iteration % DRIFT_ITERATIONS != 0:
                 return {"value": value}
 
             # Calculate the drift change
