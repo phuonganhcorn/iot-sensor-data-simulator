@@ -274,7 +274,7 @@ class ContainerCard():
 
                 # Bulk data generation
                 with ui.row().classes("gap-6 items-center"):
-                    self.bulk_amount_input = ui.number(label="Werte pro Sensor", min=1, max=1000, step=1, value=10).classes('w-24')
+                    self.bulk_amount_input = ui.number(label="Werte pro Sensor", min=1, max=1000000, step=1, value=100).classes('w-24')
                     ui.button("Daten generieren", on_click=self.generate_bulk_data).props("flat")
 
                 # Visualization
@@ -300,7 +300,10 @@ class ContainerCard():
         
         self.generated_container_data = container_data
 
-        self.show_export_preview(container_data)
+        if bulk_amount <= 1000:
+            self.show_export_preview(container_data)
+        else:
+            self.chart.show_note("Vorschau nicht verfügbar (mehr als 1.000 Werte)", force=True)
         self.export_button.set_enabled(True)
 
     def save_bulk_to_file(self):
