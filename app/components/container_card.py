@@ -6,6 +6,7 @@ from components.chart import Chart
 from utils.iot_hub_helper import IoTHubHelper
 from utils.mqtt_helper import MQTTHelper
 from utils.export_helper import ExportHelper
+import asyncio
 
 
 class ContainerCard():
@@ -262,8 +263,9 @@ class ContainerCard():
             return
 
         with self.wrapper:
-            with ui.dialog(value=True) as dialog, ui.card().classes("px-6 pb-6 w-[696px] !max-w-none overflow-auto"):
+            with ui.dialog(value=True) as dialog, ui.card().classes("relative px-6 pb-6 w-[696px] !max-w-none overflow-auto") as card:
                 self.dialog = dialog
+                self.bulk_export_card = card
                 with ui.row().classes("w-full justify-between items-center"):
                     ui.label(
                         f"Massenexport - '{self.container.name}'").classes("text-xl font-semibold")
@@ -274,7 +276,7 @@ class ContainerCard():
 
                 # Bulk data generation
                 with ui.row().classes("gap-6 items-center"):
-                    self.bulk_amount_input = ui.number(label="Werte pro Sensor", min=1, max=1000, step=1, value=10).classes('w-24')
+                    self.bulk_amount_input = ui.number(label="Werte pro Sensor", min=1, max=1000000, step=1, value=100).classes('w-24')
                     ui.button("Daten generieren", on_click=self.generate_bulk_data).props("flat")
 
                 # Visualization
@@ -286,8 +288,18 @@ class ContainerCard():
                 self.export_button = ui.button("Exportieren", on_click=self.save_bulk_to_file).classes("mt-8 self-end")
                 self.export_button.set_enabled(False)
 
-    def generate_bulk_data(self):
+    async def generate_bulk_data(self):
         '''Generates bulk data for the export'''
+        bulk_export_spinner = None
+
+        with self.bulk_export_card:
+            with ui.row().classes("absolute top-0 left-0 w-full h-full bg-black opacity-20 z-10") as overlay:
+                bulk_export_spinner = overlay
+                ui.spinner(size='lg').classes("absolute top-1/2 left-1/2 transform -translate-x-full -translate-y-1/2")
+
+        self.chart.show_note("Generiere Daten...", force=True)
+        await asyncio.sleep(0.1) # Workaround to make the spinner visible
+
         container_data = {}
         bulk_amount = int(self.bulk_amount_input.value)
 
@@ -300,8 +312,14 @@ class ContainerCard():
         
         self.generated_container_data = container_data
 
-        self.show_export_preview(container_data)
+        if bulk_amount <= 1000:
+            self.show_export_preview(container_data)
+        else:
+            self.chart.show_note("Vorschau nicht verfügbar (mehr als 1.000 Werte)", force=True)
         self.export_button.set_enabled(True)
+
+        bulk_export_spinner.clear()
+        bulk_export_spinner.set_visibility(False)
 
     def save_bulk_to_file(self):
         '''Saves the generated bulk data to a file'''

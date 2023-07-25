@@ -20,10 +20,15 @@ class Chart:
             self.note_label = ui.label(
                 "Keine Daten").classes("w-full text-center -translate-y-full")
 
-    def show_note(self, text):
+    def show_note(self, text, force=False):
         '''Shows a note on the chart'''
 
-        self.note_label.set_text(text)
+        if force:
+            self.wrapper.clear()
+            with self.wrapper:
+                self.note_label = ui.label(text).classes("w-full text-center -translate-y-full")
+        else:
+            self.note_label.set_text(text)
 
     def show(self, sensor=None, time_series_data=None, data=None):
         '''Shows the chart'''
@@ -61,8 +66,6 @@ class Chart:
                     "labels": {
                         "format": "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
                     },
-                    # "min": min,
-                    # "max": max,
                     "plotBands": [ {
                             "color": 'rgba(0, 0, 255, 0.05)',
                             "from": sensor.base_value - sensor.variation_range,
