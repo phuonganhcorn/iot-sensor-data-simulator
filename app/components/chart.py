@@ -66,8 +66,6 @@ class Chart:
                     "labels": {
                         "format": "{value} " + UNITS[sensor.unit]["unit_abbreviation"]
                     },
-                    # "min": min,
-                    # "max": max,
                     "plotBands": [ {
                             "color": 'rgba(0, 0, 255, 0.05)',
                             "from": sensor.base_value - sensor.variation_range,
