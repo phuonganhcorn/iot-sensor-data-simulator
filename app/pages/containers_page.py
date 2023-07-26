@@ -196,6 +196,7 @@ class ContainersPage:
 
         new_container = Container.add(
             name, description, location, device_ids)
+        new_container.live_view_dialog = self.live_view_dialog
         self.containers.append(new_container)
         with self.cards_grid:
             new_container_card = ContainerCard(wrapper=self.cards_grid, container=new_container, start_callback=self.start_container,

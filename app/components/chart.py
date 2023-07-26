@@ -47,7 +47,10 @@ class Chart:
         # Prepare x axis
         x_values = [i * sensor.interval for i in range(len(data))]
 
-        self.wrapper.clear()
+        try:
+            self.wrapper.clear()
+        except:
+            pass
 
         # Draw chart
         with self.wrapper:
