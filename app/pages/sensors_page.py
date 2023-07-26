@@ -249,7 +249,7 @@ class SensorsPage():
     def create_sensor(self, dialog, name_input, unit_input, base_value_input, variation_range_input, change_rate_input, interval_input, device_select):
         '''Create a new sensor'''
         if len(self.sensors) == 0:
-            self.list_container.clear()
+            self.hide_note()
 
         # Read values from inputs
         name = name_input.value

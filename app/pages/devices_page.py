@@ -170,7 +170,7 @@ class DevicesPage:
         sensor_ids = sensors_input.value
 
         if len(self.devices) == 0:
-            self.list_container.clear()
+            self.hide_note()
 
         device_id = self.replace_special_characters(name)
 
