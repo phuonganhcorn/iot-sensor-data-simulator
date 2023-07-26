@@ -44,7 +44,7 @@ class DevicesPage:
 
     def setup_list(self):
         '''Sets up the list of devices'''
-        self.list_container = ui.column().classes('relative w-full min-w-[600px] overflow-x-auto gap-0 divide-y')
+        self.list_container = ui.column().classes('relative w-full min-w-[600px] gap-0 divide-y')
 
         with self.list_container:
             # Add headings row
@@ -58,6 +58,8 @@ class DevicesPage:
                     ui.label(heading['name']).classes(
                         f'font-medium {heading["classes"]}')
 
+            self.setup_note_label()
+
              # Print list items
             if len(self.devices) == 0:
                 self.show_note('Keine Geräte vorhanden')
@@ -66,8 +68,6 @@ class DevicesPage:
                     new_item = DeviceItem(device=device,
                                           delete_callback=self.delete_button_handler)
                     self.list_items.append(new_item)
-
-            self.setup_note_label()
 
     def setup_note_label(self):
         '''Sets up the note label'''
@@ -170,7 +170,7 @@ class DevicesPage:
         sensor_ids = sensors_input.value
 
         if len(self.devices) == 0:
-            self.list_container.clear()
+            self.hide_note()
 
         device_id = self.replace_special_characters(name)
 
