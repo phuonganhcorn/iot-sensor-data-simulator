@@ -66,6 +66,8 @@ class SensorsPage():
                 for heading in headings:
                     ui.label(heading['name']).classes(
                         f'font-medium {heading["classes"]}')
+                    
+            self.setup_note_label()
 
             # Print list items
             if len(self.sensors) == 0:
@@ -75,8 +77,6 @@ class SensorsPage():
                     new_item = SensorItem(sensor=sensor,
                                           delete_callback=self.delete_button_handler)
                     self.list_items.append(new_item)
-
-            self.setup_note_label()
 
     def setup_note_label(self):
         '''Setup the note label'''
