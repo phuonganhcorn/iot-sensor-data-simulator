@@ -1,73 +1,171 @@
-# IoT Sensor Data Simulator
+# Medical IoT Sensor Data Simulator
 
 ## Overview
-This repository contains the source code for an Internet of Things (IoT) sensor data simulator. The simulator was developed as part of a Bachelor's thesis project, and it aims to generate and send synthetic sensor data for testing and development purposes in IoT projects.
+This repository contains the source code for a Medical Internet of Things (IoT) sensor data simulator. The simulator generates realistic medical sensor data for healthcare applications, research, and development purposes. It supports various medical sensors including heart rate monitors, blood pressure sensors, glucose monitors, accelerometers, and more.
 
-IoT systems often involve many sensors, generating vast amounts of data that needs to be processed, analyzed, and stored efficiently. Developing and testing such systems in a real-world environment can be costly and time-consuming. This simulator provides a solution by generating synthetic sensor data, enabling developers to test their systems more efficiently.
+The simulator can use real medical data from CSV files or generate synthetic data, making it perfect for testing healthcare IoT systems, medical data pipelines, and blockchain-based healthcare applications.
 
 ## Features
-- Generates synthetic IoT sensor data that reflects typical characteristics of IoT sensor data.
-- Simulates various error states, providing a realistic environment for testing IoT systems.
-- Sends the generated data to specified endpoints, such as an Microsoft Azure IoT hub or MQTT broker.
-- Exports generated data into various file formats (CSV, XLSX, JSON).
-- Provides a graphical user interface implemented with NiceGUI.
+- **Real Medical Data Simulation**: Uses actual medical sensor data from CSV files (BVP, HR, ACC, EDA, Temperature, etc.)
+- **Synthetic Data Generation**: Generates realistic medical sensor data when CSV files are not available
+- **Medical Error States**: Simulates various medical sensor error conditions for realistic testing
+- **Multiple Output Formats**: Sends data to Azure IoT Hub, MQTT brokers, or exports to CSV, XLSX, JSON
+- **Healthcare-Focused UI**: Graphical user interface designed for medical sensor management
+- **Blockchain Pipeline Ready**: Designed to support medical data blockchain pipelines with privacy features
+
+## Medical Sensor Types Supported
+- **ACC**: Accelerometer data (X, Y, Z orientation)
+- **BVP**: Blood Volume Pulse measurements
+- **Dexcom**: Interstitial glucose concentration
+- **EDA**: Electrodermal activity
+- **TEMP**: Skin temperature
+- **IBI**: Interbeat interval
+- **HR**: Heart rate
+- **Food Log**: Nutritional intake data
+- **SpO2**: Oxygen saturation
+- **Blood Pressure**: Systolic and diastolic measurements
 
 ## Installation
 
-Before you begin, ensure that you have at least Python 3.7 installed on your system. If you don't have Python installed, you can download it from the official website [here](https://www.python.org/downloads/).
+Before you begin, ensure that you have Python 3.7+ installed on your system. You can download it from [here](https://www.python.org/downloads/).
 
-Additionally, make sure you have the package manager `pip` installed. `pip` usually comes pre-installed with Python versions 2.7.9+ or 3.4+.
+Clone the repository:
 
-Once you've verified your Python and pip installations, clone the repository to your local machine:
-
-```python
-git clone https://github.com/antonsarg/iot-sensor-data-simulator
+```bash
+git clone https://github.com/your-username/medical-iot-sensor-simulator
 ```
 
 Navigate to the project directory:
 
-```python
-cd iot-sensor-data-simulator
+```bash
+cd medical-iot-sensor-simulator
 ```
 
 Install the dependencies:
 
-```python
+```bash
 pip install -r requirements.txt
 ```
 
 ## Usage
 
-**Note:** Before running the simulator, if you plan to establish a connection to IoT Hub or MQTT, please refer to the sections 'Sending Data to Azure IoT Hub' and 'Sending Data to MQTT Broker' below.
+### Setting up Medical Data
 
-Run the simulator:
+1. **Place your CSV files** in the `medical_data/` directory:
+   - `bvp_sample.csv` - Blood volume pulse data
+   - `hr_sample.csv` - Heart rate data  
+   - `acc_sample.csv` - Accelerometer data
+   - Add other medical data files as needed
 
-```python
-python app/main.py
+2. **CSV Format Requirements**:
+   - **Single-value sensors** (BVP, HR, EDA, etc.): `Timestamp, Value`
+   - **Accelerometer**: `Timestamp, X, Y, Z`
+   - **Food Log**: `date, time_of_day, logged_food, calorie, total_carb, protein, total_fat`
+
+### Running the Simulator
+
+```bash
+python setup_medical_sensors.py  # Setup medical sensors in database
+python app/main.py               # Start the simulator
 ```
 
-You can then access the simulator's user interface in your web browser at `http://localhost:8080`.
+Access the simulator at `http://localhost:8080`
 
-### Sending Data to Azure IoT Hub
+### Quick Demo
 
-To send data to the Azure IoT Hub, an `.env` file must be created in the project root containing the following environment variables:
+Run a quick demo to see the medical data simulation in action:
 
-```python
+```bash
+python demo_medical_simulation.py
+```
+
+### Configuration for Data Transmission
+
+#### Sending Data to Azure IoT Hub
+
+To send medical data to Azure IoT Hub, create an `.env` file in the project root:
+
+```bash
 IOT_HUB_CONNECTION_STRING=YourConnectionStringHere
 IOT_HUB_PRIMARY_KEY=YourPrimaryKeyHere
 IOT_HUB_SECONDARY_KEY=YourSecondaryKeyHere
 ```
 
-You can take the values from your IoT Hub. These values are used to establish a connection to the IoT Hub and are not required for running the application without IoT Hub connectivity. Remember to restart the application if you have made any changes during the execution.
+#### Sending Data to MQTT Broker
 
-### Sending Data to MQTT Broker
+For MQTT broker connectivity, add these variables to your `.env` file:
 
-The software also supports sending data to an MQTT broker. Similarly, the `.env` file should contain the broker's address and port number:
-
-```python
+```bash
 MQTT_BROKER_ADDRESS=YourBrokerAddressHere
 MQTT_BROKER_PORT=YourBrokerPortHere
 ```
+
+## Medical Data Pipeline Architecture
+
+This simulator is designed to support a complete medical data pipeline with blockchain integration:
+
+```
+📱 Medical Devices/Sensors
+         ↓
+🔍 Edge Gateway with AI Processing
+   ├─ Medical Data Importance Classifier
+   ├─ Health Anomaly Detector  
+   ├─ Privacy/PII Protection
+   └─ Data Quality Scoring
+         ↓ (if score > threshold)
+📦 Secure Data Batching
+   ├─ Time-series aggregation
+   ├─ Merkle Tree generation
+   └─ Metadata encryption
+         ↓
+⛓️ Blockchain Smart Contract
+   ├─ Merkle root storage
+   ├─ Access control policies
+   └─ Audit trail
+         ↓
+🗄️ Off-chain Storage
+   ├─ Encrypted medical records
+   ├─ Time-series databases
+   └─ Key management system
+```
+
+## Sample Data Formats
+
+The simulator includes sample medical data files:
+
+- **BVP Data**: Blood volume pulse measurements
+- **Heart Rate**: Continuous heart rate monitoring
+- **Accelerometer**: 3-axis movement data for activity tracking
+- **EDA**: Electrodermal activity for stress monitoring
+- **Temperature**: Skin temperature measurements
+- **Glucose**: Blood glucose level tracking
+- **Food Log**: Nutritional intake tracking
+
+## API Integration
+
+The simulator provides RESTful APIs for:
+- Real-time medical data streaming
+- Historical data retrieval
+- Sensor configuration management
+- Alert and anomaly notifications
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/medical-enhancement`)
+3. Commit your changes (`git commit -am 'Add new medical sensor support'`)
+4. Push to the branch (`git push origin feature/medical-enhancement`)
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Medical data formats based on common healthcare IoT standards
+- Blockchain integration designed for healthcare privacy compliance
+- Built for research and development in digital health technologies
 
 For brokers requiring authentication, you can provide a username and password:
 

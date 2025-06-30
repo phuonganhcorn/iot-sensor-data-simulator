@@ -1,0 +1,8 @@
+flowchart TD
+    Start[Start Export] --> DetectFormat{File Format?}
+    DetectFormat -->|json| JSONStep[_save_as_json()]
+    DetectFormat -->|csv| CSVStep[_save_as_csv()]
+    DetectFormat -->|xlsx| XLSXStep[_save_as_xlsx()]
+    JSONStep --> Done[✔ File Exported]
+    CSVStep --> Done
+    XLSXStep --> Done

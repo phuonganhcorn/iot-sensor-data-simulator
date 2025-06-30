@@ -1,0 +1,8 @@
+flowchart TD
+    A[SensorData]
+    A1[Timestamp: datetime] --> A
+    A2[SensorId: int] --> A
+    A3[SensorName: string] --> A
+    A4[Value: real] --> A
+    A5[DeviceId: int] --> A
+    A6[DeviceName: string] --> A

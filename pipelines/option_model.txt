@@ -1,0 +1,18 @@
+classDiagram
+    class OptionModel {
+        - __tablename__: string
+        + session: Session
+        + id: Column
+        + name: Column
+        + value: Column
+        + __repr__(): string
+    }
+
+    class Option {
+        + set_value(name: string, value: string): Option
+        + get_value(name: string): string
+        + get_boolean(name: string): boolean
+        - _get_option(name: string): Option
+    }
+
+    Option --> OptionModel : uses

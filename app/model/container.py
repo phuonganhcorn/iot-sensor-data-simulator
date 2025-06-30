@@ -60,7 +60,7 @@ class Container(ContainerModel):
         mqtt_helper = None
 
         if interface == "iothub" and iot_hub_helper is None:
-            ui.notify("IoT Hub Helper ist nicht initialisiert!", type="negative")
+            ui.notify("IoT Hub Helper is not initialized!", type="negative")
             return
         elif interface == "mqtt":
             mqtt_helper = MQTTHelper(topic=self.name, container_id=self.id)

@@ -11,6 +11,7 @@ from model.option import Option
 from model.container import Container
 from model.device import Device
 from model.sensor import Sensor
+import os
 
 # Load environment variables
 load_dotenv()
@@ -27,6 +28,11 @@ Option.session = session
 Container.session = session
 Device.session = session
 Sensor.session = session
+
+# Initialize medical data directory
+medical_data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'medical_data')
+print(f"Looking for medical data in: {medical_data_dir}")
+Sensor.set_data_directory(medical_data_dir)
 
 
 # Create IoT Hub helper

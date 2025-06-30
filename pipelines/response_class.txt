@@ -1,0 +1,7 @@
+classDiagram
+    class Response {
+        + success: boolean
+        + message: string
+        + object: any
+        + __init__(success: boolean, message: string, object: any)
+    }

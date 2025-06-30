@@ -1,0 +1,20 @@
+classDiagram
+    class Simulator {
+        + iteration: int
+        + sensor: Sensor
+        + base_value: float
+        + error_definition: dict
+        + previous_value: float
+        + last_duplicate: int
+        + drifting: bool
+
+        + __init__(sensor: Sensor): void
+        + generate_data(**kwargs): dict
+        + generate_bulk_data(amount: int): list[dict]
+
+        - _handle_error_definition(value: dict): dict
+        - _handle_anomaly_error(value: dict): dict
+        - _handle_mcar_error(value: dict): dict
+        - _handle_duplicate_data_error(value: dict): dict
+        - _handle_drift_error(value: dict): dict
+    }

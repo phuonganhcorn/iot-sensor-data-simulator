@@ -1,0 +1,22 @@
+graph TD
+
+  %% Client side
+  subgraph Anwendung [Ứng dụng]
+    Webserver
+    SQLite[SQLite Database]
+    MQTTBroker[MQTT Broker]
+  end
+
+  %% Cloud side
+  subgraph AzureCloud [Azure Cloud]
+    IoTHub[Azure IoT Hub]
+    DataExplorer[Azure Data Explorer]
+    DB[Database]
+  end
+
+  Webserver --> IoTHub
+  SQLite --> DataExplorer
+  MQTTBroker --> DataExplorer
+
+  IoTHub --> DataExplorer
+  DataExplorer --> DB

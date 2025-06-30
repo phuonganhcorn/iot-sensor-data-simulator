@@ -1,0 +1,37 @@
+flowchart TD
+    Option[option]
+    Option --> O1[id: integer]
+    Option --> O2[name: varchar(255)]
+    Option --> O3[value: varchar(255)]
+
+    Container[container]
+    Container --> C1[id: integer]
+    Container --> C2[name: varchar(255)]
+    Container --> C3[description: varchar(255)]
+    Container --> C4[location: varchar(255)]
+    Container --> C5[is_active: boolean]
+    Container --> C6[start_time: datetime]
+
+    Device[device]
+    Device --> D1[id: integer]
+    Device --> D2[name: varchar(255)]
+    Device --> D3[generation_id: integer]
+    Device --> D4[etag: varchar(255)]
+    Device --> D5[status: varchar(255)]
+    Device --> D6[connection_string: varchar(255)]
+    Device --> D7[container_id: FK → Container.id]
+
+    Sensor[sensor]
+    Sensor --> S1[id: integer]
+    Sensor --> S2[name: varchar(255)]
+    Sensor --> S3[base_value: float]
+    Sensor --> S4[unit: integer]
+    Sensor --> S5[variation_range: float]
+    Sensor --> S6[change_rate: float]
+    Sensor --> S7[interval: float]
+    Sensor --> S8[error_definition: varchar(500)]
+    Sensor --> S9[device_id: FK → Device.id]
+
+
+container (1) --------< (N) device
+device    (1) --------< (N) sensor

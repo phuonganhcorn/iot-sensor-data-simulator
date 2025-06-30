@@ -1,0 +1,11 @@
+date,time_of_day,time_begin,time_end,logged_food,amount,unit,searched_food,calorie,total_carb,dietary_fiber,sugar,protein,total_fat
+2020-02-21,08:00:00,2020-02-21 08:00:00,2020-02-21 08:30:00,Oatmeal with banana,1,cup,Oatmeal,154,27.4,4.0,0.6,5.3,3.2
+2020-02-21,12:30:00,2020-02-21 12:30:00,2020-02-21 13:00:00,Grilled chicken salad,1,serving,Chicken salad,285,8.2,3.1,4.5,28.5,16.8
+2020-02-21,15:00:00,2020-02-21 15:00:00,2020-02-21 15:15:00,Apple,1,medium,Apple,95,25.1,4.4,18.9,0.5,0.3
+2020-02-21,19:00:00,2020-02-21 19:00:00,2020-02-21 19:45:00,Salmon with rice,1,serving,Salmon dinner,456,42.3,2.1,1.2,32.1,18.9
+2020-02-21,21:00:00,2020-02-21 21:00:00,2020-02-21 21:10:00,Greek yogurt,1,cup,Greek yogurt,130,9.0,0,6.8,23.0,0.4
+2020-02-22,08:15:00,2020-02-22 08:15:00,2020-02-22 08:45:00,Scrambled eggs with toast,2,eggs with 2 slices,Eggs and toast,298,22.1,2.8,3.2,18.7,16.4
+2020-02-22,11:00:00,2020-02-22 11:00:00,2020-02-22 11:15:00,Protein shake,1,scoop,Protein shake,120,3.0,1.0,2.0,25.0,2.5
+2020-02-22,13:30:00,2020-02-22 13:30:00,2020-02-22 14:00:00,Turkey sandwich,1,sandwich,Turkey sandwich,320,35.2,4.1,5.8,24.3,12.1
+2020-02-22,16:30:00,2020-02-22 16:30:00,2020-02-22 16:45:00,Mixed nuts,1,oz,Mixed nuts,173,6.1,3.1,1.2,5.0,15.6
+2020-02-22,20:00:00,2020-02-22 20:00:00,2020-02-22 20:30:00,Pasta with marinara,1,cup,Pasta,220,43.2,2.5,8.1,8.1,1.3

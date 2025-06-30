@@ -1,0 +1,7 @@
+flowchart TD
+    Start[Khởi tạo IoTHubHelper] --> InitDeviceClient[Tạo DeviceClient từ connection_string]
+    InitDeviceClient --> SendOrCreate{Thiết bị tồn tại?}
+    SendOrCreate -->|Không| CreateDevice[Tạo thiết bị mới]
+    SendOrCreate -->|Có| SendData[Gửi dữ liệu sensor]
+    CreateDevice --> SendData
+    SendData --> Done[✔ Hoàn tất gửi dữ liệu]

@@ -1,0 +1,6 @@
+flowchart TD
+    A[Sensor Collector] --> B[MQTTHelper.connect()]
+    B --> C[MQTTHelper.publish(topic, data)]
+    C --> D[MQTT Broker]
+    D --> E[Other Subscribers / Databases]
+    C --> F[MQTTHelper.disconnect()]

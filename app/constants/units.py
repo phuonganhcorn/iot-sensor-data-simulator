@@ -1,21 +1,25 @@
-# Description: Units for the sensor data
-# Used to encode the unit of the sensor data in the database
+# Description: Medical sensor units for healthcare IoT simulation
+# Used to encode the unit of medical sensor data in the database
 UNITS = [
-    {"id": 0, "name": "Temperatur", "unit": "Celsius", "unit_abbreviation": "°C"},
-    {"id": 1, "name": "Druck", "unit": "Pascal", "unit_abbreviation": "Pa"},
-    {"id": 2, "name": "Durchfluss", "unit": "Liter pro Minute", "unit_abbreviation": "L/min"},
-    {"id": 3, "name": "Geschwindigkeit",
-        "unit": "Meter pro Sekunde", "unit_abbreviation": "m/s"},
-    {"id": 4, "name": "Kraft", "unit": "Newton", "unit_abbreviation": "N"},
-    {"id": 5, "name": "Gewicht", "unit": "Kilogramm", "unit_abbreviation": "kg"},
-    {"id": 6, "name": "Abstand", "unit": "Meter", "unit_abbreviation": "m"},
-    {"id": 7, "name": "Zeit", "unit": "Sekunde", "unit_abbreviation": "s"},
-    {"id": 8, "name": "Feuchtigkeit", "unit": "Prozent", "unit_abbreviation": "%"},
-    {"id": 9, "name": "Spannung", "unit": "Volt", "unit_abbreviation": "V"},
-    {"id": 10, "name": "Stromstärke", "unit": "Ampere", "unit_abbreviation": "A"},
-    {"id": 11, "name": "Leistung", "unit": "Watt", "unit_abbreviation": "W"},
-    {"id": 12, "name": "Drehzahl",
-        "unit": "Umdrehungen pro Minute", "unit_abbreviation": "rpm"},
-    {"id": 13, "name": "Vibration", "unit": "G-Einheit", "unit_abbreviation": "g"},
-    {"id": 14, "name": "Helligkeit", "unit": "Lux", "unit_abbreviation": "lx"}
+    # Medical Sensor Units
+    {"id": 0, "name": "Blood Volume Pulse", "unit": "Blood Volume Pulse", "unit_abbreviation": "BVP"},
+    {"id": 1, "name": "Glucose Concentration", "unit": "mg/dL", "unit_abbreviation": "mg/dL"},
+    {"id": 2, "name": "Electrodermal Activity", "unit": "microsiemens", "unit_abbreviation": "μS"},
+    {"id": 3, "name": "Skin Temperature", "unit": "Celsius", "unit_abbreviation": "°C"},
+    {"id": 4, "name": "Interbeat Interval", "unit": "milliseconds", "unit_abbreviation": "ms"},
+    {"id": 5, "name": "Heart Rate", "unit": "beats per minute", "unit_abbreviation": "BPM"},
+    {"id": 6, "name": "Accelerometer X", "unit": "g-force", "unit_abbreviation": "g"},
+    {"id": 7, "name": "Accelerometer Y", "unit": "g-force", "unit_abbreviation": "g"},
+    {"id": 8, "name": "Accelerometer Z", "unit": "g-force", "unit_abbreviation": "g"},
+    {"id": 9, "name": "Calories", "unit": "calories", "unit_abbreviation": "cal"},
+    {"id": 10, "name": "Carbohydrates", "unit": "grams", "unit_abbreviation": "g"},
+    {"id": 11, "name": "Protein", "unit": "grams", "unit_abbreviation": "g"},
+    {"id": 12, "name": "Fat", "unit": "grams", "unit_abbreviation": "g"},
+    {"id": 13, "name": "Blood Pressure Systolic", "unit": "mmHg", "unit_abbreviation": "mmHg"},
+    {"id": 14, "name": "Blood Pressure Diastolic", "unit": "mmHg", "unit_abbreviation": "mmHg"},
+    {"id": 15, "name": "Oxygen Saturation", "unit": "percent", "unit_abbreviation": "%"},
+    {"id": 16, "name": "Respiratory Rate", "unit": "breaths per minute", "unit_abbreviation": "brpm"},
+    {"id": 17, "name": "Sleep Stage", "unit": "stage", "unit_abbreviation": "stage"},
+    {"id": 18, "name": "Steps", "unit": "steps", "unit_abbreviation": "steps"},
+    {"id": 19, "name": "Distance", "unit": "meters", "unit_abbreviation": "m"}
 ]
